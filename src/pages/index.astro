@@ -1,5 +1,8 @@
 ---
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
 
+import '../styles/global.css';
 ---
 
 <html lang="en">
@@ -11,6 +14,16 @@
 		<title>playsovereignchess.com</title>
 	</head>
 	<body>
+    <Header />
 		<h1>Play Sovereign Chess</h1>
-	</body>
+    <Footer />
+    <script>
+      const menu = document.querySelector('.menu');
+
+      menu?.addEventListener('click', () => {
+        const isExpanded = menu.getAttribute('aria-expanded') === 'true';
+        menu.setAttribute('aria-expanded', `${!isExpanded}`);
+      });
+    </script>
+  </body>
 </html>
