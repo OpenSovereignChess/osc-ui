@@ -1,5 +1,5 @@
 ---
-import Chessground from '../components/Chessground.astro';
+import Board from '../components/Board.tsx';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 
@@ -18,15 +18,11 @@ import '../styles/global.css';
     <Header />
 		<h1>Play Sovereign Chess</h1>
     <div style="margin: 2em auto">
-    <Chessground />
+    <Board client:load />
     </div>
     <Footer />
     <script>
       import "../scripts/menu.js";
-      import { Chessground } from '@lichess-org/chessground';
-
-      const config = {};
-      const ground = Chessground(document.getElementById('chessboard'), config);
     </script>
   </body>
 </html>

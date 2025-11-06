@@ -9,7 +9,9 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.15.2"
+    "@astrojs/solid-js": "^5.1.2",
+    "astro": "^5.15.2",
+    "solid-js": "^1.9.10"
   },
   "devDependencies": {
     "@lichess-org/chessground": "^9.8.4",
