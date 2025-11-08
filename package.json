@@ -6,15 +6,19 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.5",
     "@astrojs/solid-js": "^5.1.2",
     "astro": "^5.15.2",
-    "solid-js": "^1.9.10"
+    "solid-js": "^1.9.10",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@lichess-org/chessground": "^9.8.4",
+    "@unocss/preset-wind3": "^66.5.5",
     "@unocss/reset": "^66.5.4",
     "@vite-pwa/astro": "^1.1.1",
     "unocss": "^66.5.4"
