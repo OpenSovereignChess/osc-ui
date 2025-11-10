@@ -17,8 +17,8 @@ import '../styles/global.css';
 	<body>
     <Header />
 		<h1>Play Sovereign Chess</h1>
-    <div style="margin: 2em auto">
-    <Board client:load />
+    <div style="margin: 2em auto; width: 100%; height: 100%">
+      <Board client:only="solid-js" />
     </div>
     <Footer />
     <script>

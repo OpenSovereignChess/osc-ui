@@ -3,16 +3,23 @@ import Square from "./Square.tsx";
 
 export default function Board() {
   const [el, setEl] = createSignal<HTMLElement>();
+  const [size, setSize] = createSignal<number>(0);
 
-  createEffect(() => console.log("board", el()?.clientWidth, el()?.clientHeight));
+  createEffect(() => {
+    console.log("board", el()?.clientWidth, el()?.clientHeight);
+    if (el()) {
+      setSize((el()?.clientWidth || 0) / 16);
+    }
+  });
 
   return (
     <div
       ref={setEl}
+      class="board relative w-full h-full"
       style="background-color: cyan"
     >
       <For each={Array(256)}>
-        {(item) => <Square index={item}  />}
+        {(_, index) => <Square index={index()} size={size()} />}
       </For>
     </div>
   );
