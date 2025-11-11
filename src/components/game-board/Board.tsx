@@ -1,5 +1,6 @@
 import { For, createEffect, createSignal } from "solid-js";
 import Square from "./Square.tsx";
+import "./styles/board.css";
 
 export default function Board() {
   const [el, setEl] = createSignal<HTMLElement>();
@@ -19,7 +20,6 @@ export default function Board() {
       ref={setEl}
       class="board relative w-full"
       style={{
-        "background-color": "cyan",
         "height": height() + "px",
       }}
     >
