@@ -23,9 +23,6 @@ export default function Board() {
         "height": height() + "px",
       }}
     >
-      <For each={Array(256)}>
-        {(_, index) => <Square index={index()} size={size()} />}
-      </For>
     </div>
   );
 }
