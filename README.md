@@ -14,3 +14,4 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm astro -- --help` | Get help using the Astro CLI                     |
 | `pnpm check --watch`   | Run Typescript check                             |
 | `pnpm format`          | Format code using Prettier                       |
+| `pnpm lint`            | Lint code using ESLint                           |
