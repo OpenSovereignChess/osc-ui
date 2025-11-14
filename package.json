@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check",
+    "format": "pnpm exec prettier . --write"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.5",
@@ -21,6 +22,8 @@
     "@unocss/preset-wind3": "^66.5.5",
     "@unocss/reset": "^66.5.4",
     "@vite-pwa/astro": "^1.1.1",
+    "prettier": "3.6.2",
+    "prettier-plugin-astro": "0.14.1",
     "unocss": "^66.5.4"
   }
 }
