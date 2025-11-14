@@ -9,9 +9,9 @@ export default function Square(props: SquareProps) {
     <div
       class="square absolute top-0 left-0 text-xs"
       style={{
-        "height": `${props.size}px`,
-        "width": `${props.size}px`,
-        "translate": `${(props.index % 16) * props.size}px ${Math.floor(props.index / 16) * props.size}px`,
+        height: `${props.size}px`,
+        width: `${props.size}px`,
+        translate: `${(props.index % 16) * props.size}px ${Math.floor(props.index / 16) * props.size}px`,
       }}
     >
       Sq {props.index}

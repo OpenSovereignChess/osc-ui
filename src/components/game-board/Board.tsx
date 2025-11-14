@@ -20,9 +20,8 @@ export default function Board() {
       ref={setEl}
       class="board relative w-full"
       style={{
-        "height": height() + "px",
+        height: height() + "px",
       }}
-    >
-    </div>
+    ></div>
   );
 }
