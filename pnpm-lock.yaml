@@ -24,9 +24,6 @@ importers:
       '@eslint/js':
         specifier: ^9.39.1
         version: 9.39.1
-      '@lichess-org/chessground':
-        specifier: ^9.8.4
-        version: 9.8.4
       '@typescript-eslint/parser':
         specifier: ^8.46.4
         version: 8.46.4(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
@@ -1029,9 +1026,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@lichess-org/chessground@9.8.4':
-    resolution: {integrity: sha512-bVPXvR1EWXAAYsuvT7LBmAuwMgIW18RwfFCgwLFT6+g6Ou0mXIJNhq9eczQKTxKnGHTKDbj55AyzmVpIxogYXg==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -5046,8 +5040,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
-
-  '@lichess-org/chessground@9.8.4': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
