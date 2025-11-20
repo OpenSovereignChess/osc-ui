@@ -15,7 +15,7 @@ All commands are run from the root of the project, from a terminal:
 | `pnpm check --watch`   | Run Typescript check                             |
 | `pnpm format`          | Format code using Prettier                       |
 | `pnpm lint`            | Lint code using ESLint                           |
-| `pnpm test`          | Run test suite                           |
+| `pnpm test`            | Run test suite                                   |
 
 ## Project structure plan
 

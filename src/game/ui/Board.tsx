@@ -1,16 +1,15 @@
-import { For, createEffect, createSignal } from "solid-js";
-import Square from "./Square.tsx";
+import { createEffect, createSignal } from "solid-js";
 import "./styles/board.css";
 
 export default function Board() {
   const [el, setEl] = createSignal<HTMLElement>();
-  const [size, setSize] = createSignal<number>(0);
+  //const [size, setSize] = createSignal<number>(0);
   const [height, setHeight] = createSignal<number>(0);
 
   createEffect(() => {
     console.log("board", el()?.clientWidth, el()?.clientHeight);
     if (el()) {
-      setSize((el()?.clientWidth || 0) / 16);
+      //setSize((el()?.clientWidth || 0) / 16);
       setHeight(el()?.clientWidth || 0);
     }
   });
