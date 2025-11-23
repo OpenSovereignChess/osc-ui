@@ -3,12 +3,16 @@ export type Role = (typeof roles)[number];
 export type File = (typeof files)[number];
 export type Rank = (typeof ranks)[number];
 export type Key = "a0" | `${File}${Rank}`;
+export type FEN = string;
+export type Pos = [number, number];
 
 export interface Piece {
   role: Role;
   color: Color;
   promoted?: boolean;
 }
+
+export type Pieces = Map<Key, Piece>;
 
 export const colors = [
   "white",
