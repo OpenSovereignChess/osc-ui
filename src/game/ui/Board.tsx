@@ -9,7 +9,7 @@ export default function Board() {
   const [el, setEl] = createSignal<HTMLElement>();
   const [size, setSize] = createSignal<number>(0);
   const [height, setHeight] = createSignal<number>(0);
-  const [pieces, _] = createSignal<types.Pieces>(fen.read(fen.initial));
+  const [pieces] = createSignal<types.Pieces>(fen.read(fen.initial));
 
   createEffect(() => {
     console.log("board", el()?.clientWidth, el()?.clientHeight);

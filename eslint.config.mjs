@@ -7,4 +7,9 @@ export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   ...astroEslint.configs.recommended,
+  {
+    languageOptions: {
+      globals: { document: true },
+    },
+  },
 );
