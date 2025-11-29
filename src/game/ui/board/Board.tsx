@@ -1,9 +1,10 @@
 import { For, createEffect, createSignal } from "solid-js";
-import "./styles/board.css";
-import { BOARD_SIZE } from "../logic/constants.ts";
-import * as fen from "../logic/fen.ts";
-import * as types from "../logic/types.ts";
-import Piece from "./Piece";
+import { BOARD_SIZE } from "../../logic/constants.ts";
+import * as fen from "../../logic/fen.ts";
+import * as types from "../../logic/types.ts";
+import Piece from "../Piece";
+
+import "./board.css";
 
 export default function Board() {
   const [el, setEl] = createSignal<HTMLElement>();

@@ -3,6 +3,8 @@ import { BOARD_SIZE } from "../logic/constants.ts";
 import { key2pos } from "../logic/util.ts";
 import * as types from "../logic/types.ts";
 
+import "./styles/piece.css";
+
 type PieceProps = {
   key: types.Key;
   piece: types.Piece;
@@ -12,13 +14,12 @@ type PieceProps = {
 export default function Piece(props: PieceProps) {
   const pos = createMemo<types.Pos>(() => {
     const pos = key2pos(props.key);
-    console.log("===Piece", props.key, pos);
     return pos;
   });
 
   return (
     <div
-      class="square absolute top-0 left-0 text-xs"
+      class={`piece absolute top-0 left-0 text-xs ${props.piece.role} ${props.piece.color}`}
       style={{
         height: `${props.size}px`,
         width: `${props.size}px`,
