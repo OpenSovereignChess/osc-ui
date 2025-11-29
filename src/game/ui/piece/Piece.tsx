@@ -1,9 +1,9 @@
 import { createMemo } from "solid-js";
-import { BOARD_SIZE } from "../logic/constants.ts";
-import { key2pos } from "../logic/util.ts";
-import * as types from "../logic/types.ts";
+import { BOARD_SIZE } from "../../logic/constants.ts";
+import { key2pos } from "../../logic/util.ts";
+import * as types from "../../logic/types.ts";
 
-import "./styles/piece.css";
+import "./piece.css";
 
 type PieceProps = {
   key: types.Key;

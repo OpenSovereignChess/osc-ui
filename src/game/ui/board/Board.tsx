@@ -2,7 +2,7 @@ import { For, createEffect, createSignal } from "solid-js";
 import { BOARD_SIZE } from "../../logic/constants.ts";
 import * as fen from "../../logic/fen.ts";
 import * as types from "../../logic/types.ts";
-import Piece from "../Piece";
+import Piece from "../piece/Piece";
 
 import "./board.css";
 
