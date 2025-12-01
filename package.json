@@ -10,7 +10,8 @@
     "check": "astro check",
     "format": "pnpm exec prettier . --write",
     "lint": "pnpm exec eslint \"src/**/*.{js,jsx,ts,tsx,astro}\"",
-    "test": "vitest"
+    "test": "vitest",
+    "build-piece-svg-css": "node ./scripts/build-piece-svg-css.js"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.5",
