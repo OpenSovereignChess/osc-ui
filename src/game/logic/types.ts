@@ -72,3 +72,5 @@ export const ranks = [
   "15",
   "16",
 ] as const;
+
+export type SquareClasses = Map<Key, string>;
