@@ -14,6 +14,8 @@ export interface Piece {
 
 export type Pieces = Map<Key, Piece>;
 
+export type NumberPair = [number, number];
+
 export const colors = [
   "white",
   "ash",

@@ -1,27 +1,33 @@
 import { createMemo } from "solid-js";
-import { BOARD_SIZE } from "../../logic/constants.ts";
-import { key2pos } from "../../logic/util.ts";
+import { key2pos, posToTranslate } from "../../logic/util.ts";
 import * as types from "../../logic/types.ts";
+
+import "./square.css";
 
 type SquareProps = {
   key: types.Key;
-  size: number;
+  bounds?: DOMRectReadOnly;
 };
 
 export default function Square(props: SquareProps) {
-  const pos = createMemo<types.Pos>(() => {
+  const offset = createMemo<types.NumberPair | null>(() => {
+    if (!props.key || !props.bounds) {
+      return null;
+    }
     const pos = key2pos(props.key);
-    return pos;
+    const translate = posToTranslate(props.bounds);
+    const offset = translate(pos);
+    console.log("piece", props.key, offset);
+    return offset;
   });
 
-  console.log("Rendering square", props.key, pos());
   return (
     <div
-      class="square absolute top-0 left-0 text-xs bg-green-50"
+      class="square bg-green-50"
       style={{
-        height: `${props.size}px`,
-        width: `${props.size}px`,
-        translate: `${(pos()[0] % BOARD_SIZE) * props.size}px ${(BOARD_SIZE - 1 - pos()[1]) * props.size}px`,
+        transform: offset()
+          ? `translate(${offset()![0]}px, ${offset()![1]}px)`
+          : undefined,
       }}
     />
   );

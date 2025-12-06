@@ -1,29 +1,35 @@
 import { createMemo } from "solid-js";
-import { BOARD_SIZE } from "../../logic/constants.ts";
-import { key2pos } from "../../logic/util.ts";
+import { key2pos, posToTranslate } from "../../logic/util.ts";
 import * as types from "../../logic/types.ts";
 
 import "./piece.generated.css";
+import "./piece.css";
 
 type PieceProps = {
   key: types.Key;
   piece: types.Piece;
-  size: number;
+  bounds?: DOMRectReadOnly;
 };
 
 export default function Piece(props: PieceProps) {
-  const pos = createMemo<types.Pos>(() => {
+  const offset = createMemo<types.NumberPair | null>(() => {
+    if (!props.key || !props.bounds) {
+      return null;
+    }
     const pos = key2pos(props.key);
-    return pos;
+    const translate = posToTranslate(props.bounds);
+    const offset = translate(pos);
+    console.log("piece", props.key, offset);
+    return offset;
   });
 
   return (
     <div
-      class={`piece absolute top-0 left-0 text-xs ${props.piece.role} ${props.piece.color}`}
+      class={`piece text-xs ${props.piece.role} ${props.piece.color}`}
       style={{
-        height: `${props.size}px`,
-        width: `${props.size}px`,
-        translate: `${(pos()[0] % BOARD_SIZE) * props.size}px ${(BOARD_SIZE - 1 - pos()[1]) * props.size}px`,
+        transform: offset()
+          ? `translate(${offset()![0]}px, ${offset()![1]}px)`
+          : undefined,
       }}
     >
       {props.key} {props.piece.color.charAt(0)}

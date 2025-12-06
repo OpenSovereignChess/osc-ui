@@ -17,6 +17,13 @@ export const key2pos = (k: types.Key): types.Pos => [
   parseInt(k.slice(1), 10) - 1,
 ];
 
+export const posToTranslate =
+  (bounds: DOMRectReadOnly): ((pos: types.Pos) => types.NumberPair) =>
+  (pos) => [
+    (pos[0] * bounds.width) / BOARD_SIZE,
+    ((BOARD_SIZE_ZERO_INDEX - pos[1]) * bounds.height) / BOARD_SIZE,
+  ];
+
 export const event2Key = (
   e: MouseEvent,
   bounds: DOMRectReadOnly,

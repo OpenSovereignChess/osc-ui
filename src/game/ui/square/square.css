@@ -1,0 +1,8 @@
+.square {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6.25%;
+  height: 6.25%;
+  pointer-events: none;
+}
