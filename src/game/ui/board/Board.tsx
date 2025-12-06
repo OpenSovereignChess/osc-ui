@@ -1,5 +1,6 @@
 import { For, createEffect, createSignal } from "solid-js";
 import * as fen from "../../logic/fen.ts";
+import { type State } from "../../logic/state.ts";
 import * as types from "../../logic/types.ts";
 import { event2Key } from "../../logic/util.ts";
 import Piece from "../piece/Piece";
@@ -7,7 +8,11 @@ import Square from "../square/Square";
 
 import "./board.css";
 
-export default function Board() {
+type BoardProps = {
+  state: State;
+};
+
+export default function Board(props: BoardProps) {
   const [el, setEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
   const [pieces] = createSignal<types.Pieces>(fen.read(fen.initial));
