@@ -19,7 +19,6 @@ export default function Piece(props: PieceProps) {
     const pos = key2pos(props.key);
     const translate = posToTranslate(props.bounds);
     const offset = translate(pos);
-    console.log("piece", props.key, offset);
     return offset;
   });
 
@@ -31,9 +30,6 @@ export default function Piece(props: PieceProps) {
           ? `translate(${offset()![0]}px, ${offset()![1]}px)`
           : undefined,
       }}
-    >
-      {props.key} {props.piece.color.charAt(0)}
-      {props.piece.role.charAt(0)}
-    </div>
+    ></div>
   );
 }

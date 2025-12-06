@@ -1,3 +1,5 @@
+import { createContext } from "solid-js";
+import { type SetStoreFunction } from "solid-js/store";
 import * as fen from "./fen.ts";
 import * as types from "./types.ts";
 
@@ -16,3 +18,7 @@ export function defaults(): State {
     coordinates: true,
   };
 }
+export const StateContext = createContext<{
+  state: State;
+  setState: SetStoreFunction<State>;
+}>();

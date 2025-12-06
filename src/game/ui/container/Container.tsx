@@ -1,15 +1,11 @@
-import { createContext, createEffect, createSignal } from "solid-js";
-import { type SetStoreFunction, createStore } from "solid-js/store";
+import { createEffect, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { BOARD_SIZE } from "../../logic/constants.ts";
-import { type State, defaults } from "../../logic/state.ts";
+import { type State, StateContext, defaults } from "../../logic/state.ts";
 import Board from "../board/Board";
+import Coords from "../coords/Coords";
 
 import "./container.css";
-
-const StateContext = createContext<{
-  state: State;
-  setState: SetStoreFunction<State>;
-}>();
 
 export default function Container() {
   const [wrapEl, setWrapEl] = createSignal<HTMLElement>();
@@ -37,19 +33,8 @@ export default function Container() {
     <StateContext.Provider value={{ state, setState }}>
       <div class="wrap" ref={setWrapEl}>
         <div class="container" ref={setContainerEl}>
-          <Board state={state} />
-          <svg
-            class="shapes"
-            viewBox="-4 -4 8 8"
-            preserveAspectRatio="xMidYMid slice"
-          >
-            <defs>
-              <filter id="filter-blur">
-                <feGaussianBlur stdDeviation="0.013"></feGaussianBlur>
-              </filter>
-            </defs>
-            <g></g>
-          </svg>
+          <Board />
+          <Coords />
         </div>
       </div>
     </StateContext.Provider>
