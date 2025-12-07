@@ -22,3 +22,5 @@ export const StateContext = createContext<{
   state: State;
   setState: SetStoreFunction<State>;
 }>();
+
+export const whitePov = (s: State): boolean => s.orientation === "white";

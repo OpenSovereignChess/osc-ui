@@ -18,10 +18,14 @@ export const key2pos = (k: types.Key): types.Pos => [
 ];
 
 export const posToTranslate =
-  (bounds: DOMRectReadOnly): ((pos: types.Pos) => types.NumberPair) =>
-  (pos) => [
-    (pos[0] * bounds.width) / BOARD_SIZE,
-    ((BOARD_SIZE_ZERO_INDEX - pos[1]) * bounds.height) / BOARD_SIZE,
+  (
+    bounds: DOMRectReadOnly,
+  ): ((pos: types.Pos, asWhite: boolean) => types.NumberPair) =>
+  (pos, asWhite) => [
+    ((asWhite ? pos[0] : BOARD_SIZE_ZERO_INDEX - pos[0]) * bounds.width) /
+      BOARD_SIZE,
+    ((asWhite ? BOARD_SIZE_ZERO_INDEX - pos[1] : pos[1]) * bounds.height) /
+      BOARD_SIZE,
   ];
 
 export const event2Key = (

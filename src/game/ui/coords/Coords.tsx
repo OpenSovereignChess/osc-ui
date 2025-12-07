@@ -1,6 +1,6 @@
 import { For } from "solid-js";
-import useStateContext from "../hooks/useStateContext.ts";
 import * as types from "../../logic/types.ts";
+import useStateContext from "../hooks/useStateContext.ts";
 
 import "./coords.css";
 
