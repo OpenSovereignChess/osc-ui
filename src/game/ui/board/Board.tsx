@@ -1,40 +1,28 @@
-import { For, createEffect, createSignal } from "solid-js";
+import { For, createSignal } from "solid-js";
 import * as fen from "../../logic/fen.ts";
 import * as types from "../../logic/types.ts";
-import { event2Key } from "../../logic/util.ts";
 import Piece from "../piece/Piece";
 import Square from "../square/Square";
 
 import "./board.css";
 
-export default function Board() {
-  const [el, setEl] = createSignal<HTMLElement>();
-  const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
+type BoardProps = {
+  bounds?: DOMRectReadOnly;
+};
+
+export default function Board(props: BoardProps) {
   const [pieces] = createSignal<types.Pieces>(fen.read(fen.initial));
-  const [selectedSquare, setSelectedSquare] = createSignal<types.Key>();
-
-  createEffect(() => {
-    //console.log("board", el()?.clientWidth, el()?.clientHeight);
-    if (el()) {
-      const bounds = el()!.getBoundingClientRect();
-      setBounds(bounds);
-    }
-  });
-
-  const handleClick = (e: MouseEvent) => {
-    if (!el()) {
-      return;
-    }
-    const key = event2Key(e, bounds()!);
-    //console.log("Clicked key", key);
-    setSelectedSquare(key);
-  };
+  const [selectedSquare] = createSignal<types.Key>();
 
   return (
-    <div ref={setEl} class="board" onClick={handleClick}>
-      {selectedSquare() && <Square key={selectedSquare()!} bounds={bounds()} />}
+    <div class="board">
+      {selectedSquare() && (
+        <Square key={selectedSquare()!} bounds={props.bounds} />
+      )}
       <For each={[...pieces()]} fallback={<div>Loading...</div>}>
-        {([key, piece]) => <Piece key={key} piece={piece} bounds={bounds()} />}
+        {([key, piece]) => (
+          <Piece key={key} piece={piece} bounds={props.bounds} />
+        )}
       </For>
     </div>
   );
