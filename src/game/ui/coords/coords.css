@@ -8,7 +8,7 @@
 }
 
 .coords.ranks {
-  right: 4px;
+  right: 0%;
   flex-flow: column-reverse;
   height: 100%;
   width: 12px;
@@ -20,7 +20,7 @@
 
 .coords.files {
   bottom: -4px;
-  left: 24px;
+  left: -2%;
   flex-flow: row;
   width: 100%;
   height: 16px;
