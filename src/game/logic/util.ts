@@ -40,3 +40,12 @@ export const event2Key = (
   const row = BOARD_SIZE_ZERO_INDEX - invRow;
   return pos2key([col, row]);
 };
+
+const isFireMac = () =>
+  !("ontouchstart" in window) &&
+  ["macintosh", "firefox"].every((x) =>
+    navigator.userAgent.toLowerCase().includes(x),
+  );
+
+export const isRightButton = (e: types.MouchEvent): boolean =>
+  e.button === 2 && !(e.ctrlKey && isFireMac());

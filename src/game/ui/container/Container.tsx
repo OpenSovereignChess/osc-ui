@@ -1,6 +1,7 @@
 import { createEffect, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { BOARD_SIZE } from "../../logic/constants.ts";
+import * as events from "../../logic/events.ts";
 import { type State, StateContext, defaults } from "../../logic/state.ts";
 import Board from "../board/Board";
 import Coords from "../coords/Coords";
@@ -25,8 +26,10 @@ function updateBounds(
 export default function Container() {
   const [wrapEl, setWrapEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
+  const [boardEl, setBoardEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
   const [state, setState] = createStore<State>(defaults());
+  const [eventsBound, setEventsBound] = createSignal<boolean>(false);
 
   createEffect(() => {
     if (!wrapEl() || !containerEl()) {
@@ -55,11 +58,32 @@ export default function Container() {
     }
   });
 
+  createEffect(() => {
+    if (eventsBound() || !wrapEl() || !containerEl() || !boardEl()) {
+      return;
+    }
+
+    const dom = {
+      dom: {
+        elements: {
+          board: boardEl()!,
+          container: containerEl()!,
+          wrap: wrapEl()!,
+        },
+        bounds: bounds()!,
+      },
+    };
+
+    events.bindBoard({ ...state, ...dom });
+    setState(dom);
+    setEventsBound(true);
+  });
+
   return (
     <StateContext.Provider value={{ state, setState }}>
       <div class="wrap" ref={setWrapEl}>
         <div class="container" ref={setContainerEl}>
-          <Board bounds={bounds()} />
+          <Board ref={setBoardEl} bounds={bounds()} />
           <Coords />
         </div>
       </div>

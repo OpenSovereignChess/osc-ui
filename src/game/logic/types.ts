@@ -16,6 +16,17 @@ export type Pieces = Map<Key, Piece>;
 
 export type NumberPair = [number, number];
 
+export interface Elements {
+  board: HTMLElement;
+  wrap: HTMLElement;
+  container: HTMLElement;
+}
+
+export interface Dom {
+  elements: Elements;
+  bounds: DOMRectReadOnly;
+}
+
 export const colors = [
   "white",
   "ash",
@@ -74,5 +85,7 @@ export const ranks = [
   "15",
   "16",
 ] as const;
+
+export type MouchEvent = Event & Partial<MouseEvent & TouchEvent>;
 
 export type SquareClasses = Map<Key, string>;
