@@ -17,6 +17,18 @@ export const key2pos = (k: types.Key): types.Pos => [
   parseInt(k.slice(1), 10) - 1,
 ];
 
+export function memo<A>(f: () => A): types.Memo<A> {
+  let v: A | undefined;
+  const ret = (): A => {
+    if (v === undefined) v = f();
+    return v;
+  };
+  ret.clear = () => {
+    v = undefined;
+  };
+  return ret;
+}
+
 export const posToTranslate =
   (
     bounds: DOMRectReadOnly,
@@ -39,6 +51,18 @@ export const event2Key = (
   const col = Math.floor(offset.x / size);
   const row = BOARD_SIZE_ZERO_INDEX - invRow;
   return pos2key([col, row]);
+};
+
+export const eventPosition = (
+  e: types.MouchEvent,
+): types.NumberPair | undefined => {
+  if (e.clientX || e.clientX === 0) {
+    return [e.clientX, e.clientY!];
+  }
+  if (e.targetTouches?.[0]) {
+    return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
+  }
+  return;
 };
 
 const isFireMac = () =>

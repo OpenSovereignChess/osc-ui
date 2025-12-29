@@ -1,3 +1,4 @@
+import * as drag from "./drag.ts";
 import { isRightButton } from "./util.ts";
 import { type State } from "./state.ts";
 import * as types from "./types.ts";
@@ -25,18 +26,24 @@ const startDragOrDraw =
   (e) => {
     console.log("startDragOrDraw", e);
     if (s.draggable.current) {
+      console.log("draggable.current exists; cancel drag");
       //drag.cancel(s);
     } else if (s.drawable.current) {
+      console.log("drawable.current exists; cancel draw");
       //draw.cancel(s);
     } else if (e.shiftKey || isRightButton(e)) {
+      console.log("right click or shiftKey");
       if (s.drawable.enabled) {
+        console.log("start drawing");
         //draw.start(s, e);
       }
     } else if (!s.viewOnly) {
       if (s.dropmode.active) {
+        console.log("in dropmode; drop piece");
         //drop(s, e);
       } else {
-        //drag.start(s, e);
+        console.log("start dragging");
+        drag.start(s, e);
       }
     }
   };

@@ -3,6 +3,8 @@ import { createStore } from "solid-js/store";
 import { BOARD_SIZE } from "../../logic/constants.ts";
 import * as events from "../../logic/events.ts";
 import { type State, StateContext, defaults } from "../../logic/state.ts";
+import * as types from "../../logic/types.ts";
+import * as util from "../../logic/util.ts";
 import Board from "../board/Board";
 import Coords from "../coords/Coords";
 
@@ -12,11 +14,12 @@ function updateBounds(
   bounds: DOMRectReadOnly,
   containerEl: HTMLElement,
 ): DOMRectReadOnly {
-  let width =
-    (Math.floor((bounds.width * window.devicePixelRatio) / BOARD_SIZE) *
+  const edgeSize = Math.min(bounds.width, bounds.height);
+  console.log("Updating container bounds size:", edgeSize);
+  const width =
+    (Math.floor((edgeSize * window.devicePixelRatio) / BOARD_SIZE) *
       BOARD_SIZE) /
     window.devicePixelRatio;
-  width = Math.min(width, 1000);
   const height = width;
   containerEl.style.width = `${width}px`;
   containerEl.style.height = `${height}px`;
@@ -36,18 +39,27 @@ export default function Container() {
       return;
     }
 
-    // Set bounds for Board and children components
-    setBounds(containerEl()!.getBoundingClientRect());
-
     // Set board element size
     const bounds = wrapEl()!.getBoundingClientRect();
+    console.log(
+      "Initial container bounds:",
+      containerEl()!.getBoundingClientRect(),
+    );
     updateBounds(bounds, containerEl()!);
+
+    console.log(
+      "Resulting container bounds:",
+      containerEl()!.getBoundingClientRect(),
+    );
+    // Set bounds for Board and children components
+    setBounds(containerEl()!.getBoundingClientRect());
 
     // Bind resize event handler
     if ("ResizeObserver" in window) {
       new ResizeObserver((entries) => {
         if (entries.length > 0) {
           const newBounds = entries[0].contentRect;
+          console.log("ResizeObserver detected size change: ", newBounds);
           const updatedContainerBounds = updateBounds(
             newBounds,
             containerEl()!,
@@ -63,26 +75,28 @@ export default function Container() {
       return;
     }
 
-    const dom = {
-      dom: {
-        elements: {
-          board: boardEl()!,
-          container: containerEl()!,
-          wrap: wrapEl()!,
-        },
-        bounds: bounds()!,
+    const dom: types.Dom = {
+      elements: {
+        board: boardEl()!,
+        container: containerEl()!,
+        wrap: wrapEl()!,
       },
+      bounds: util.memo(() => bounds()!),
     };
 
-    events.bindBoard({ ...state, ...dom });
-    setState(dom);
+    events.bindBoard({
+      ...state,
+      dom,
+    });
+
+    setState({ dom });
     setEventsBound(true);
   });
 
   return (
     <StateContext.Provider value={{ state, setState }}>
-      <div class="wrap" ref={setWrapEl}>
-        <div class="container" ref={setContainerEl}>
+      <div class="wrap w-full h-full" ref={setWrapEl}>
+        <div class="sc-container" ref={setContainerEl}>
           <Board ref={setBoardEl} bounds={bounds()} />
           <Coords />
         </div>

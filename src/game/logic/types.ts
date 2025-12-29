@@ -24,7 +24,7 @@ export interface Elements {
 
 export interface Dom {
   elements: Elements;
-  bounds: DOMRectReadOnly;
+  bounds: Memo<DOMRectReadOnly>;
 }
 
 export const colors = [
@@ -87,5 +87,10 @@ export const ranks = [
 ] as const;
 
 export type MouchEvent = Event & Partial<MouseEvent & TouchEvent>;
+
+export interface Memo<A> {
+  (): A;
+  clear: () => void;
+}
 
 export type SquareClasses = Map<Key, string>;

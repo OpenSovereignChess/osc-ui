@@ -5,8 +5,14 @@ import Container from "../game/ui/container/Container.tsx";
 ---
 
 <Layout title="playsovereignchess.com">
-  <h1 class="text-2xl my-4">Play Sovereign Chess</h1>
-  <div class="m-4">
+  <div
+    class=""
+    style={{
+      margin: "8px",
+      width: "calc(100vw - 16px)",
+      height: "calc(100vh - 16px)",
+    }}
+  >
     <Container client:only="solid-js" />
   </div>
 </Layout>
