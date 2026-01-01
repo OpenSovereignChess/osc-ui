@@ -29,6 +29,29 @@ export function memo<A>(f: () => A): types.Memo<A> {
   return ret;
 }
 
+export const timer = (): types.Timer => {
+  let startAt: number | undefined;
+  return {
+    start() {
+      startAt = performance.now();
+    },
+    cancel() {
+      startAt = undefined;
+    },
+    stop() {
+      if (!startAt) {
+        return 0;
+      }
+      const time = performance.now() - startAt;
+      startAt = undefined;
+      return time;
+    },
+  };
+};
+
+export const opposite = (c: types.Color): types.Color =>
+  c === "white" ? "black" : "white";
+
 export const posToTranslate =
   (
     bounds: DOMRectReadOnly,

@@ -16,6 +16,8 @@ export type Pieces = Map<Key, Piece>;
 
 export type NumberPair = [number, number];
 
+export type Dests = Map<Key, Key[]>;
+
 export interface Elements {
   board: HTMLElement;
   wrap: HTMLElement;
@@ -25,6 +27,12 @@ export interface Elements {
 export interface Dom {
   elements: Elements;
   bounds: Memo<DOMRectReadOnly>;
+}
+
+export interface MoveMetadata {
+  ctrlKey?: boolean;
+  holdTime?: number;
+  captured?: Piece;
 }
 
 export const colors = [
@@ -91,6 +99,12 @@ export type MouchEvent = Event & Partial<MouseEvent & TouchEvent>;
 export interface Memo<A> {
   (): A;
   clear: () => void;
+}
+
+export interface Timer {
+  start: () => void;
+  cancel: () => void;
+  stop: () => number;
 }
 
 export type SquareClasses = Map<Key, string>;
