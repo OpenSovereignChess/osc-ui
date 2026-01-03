@@ -1,5 +1,3 @@
-import { createContext } from "solid-js";
-import { type SetStoreFunction } from "solid-js/store";
 import { type AnimCurrent } from "./anim.ts";
 import { type DragCurrent } from "./drag.ts";
 import { type Drawable } from "./draw.ts";
@@ -85,10 +83,3 @@ export function defaults(): State {
     hold: timer(),
   };
 }
-
-export const StateContext = createContext<{
-  state: State;
-  setState: SetStoreFunction<State>;
-}>();
-
-export const whitePov = (s: State): boolean => s.orientation === "white";

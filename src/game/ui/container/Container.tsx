@@ -1,12 +1,11 @@
 import { createEffect, createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { useGameContext } from "../../logic/provider/useGameContext.ts";
 import { BOARD_SIZE } from "../../logic/constants.ts";
-import * as events from "../../logic/events.ts";
-import { type State, StateContext, defaults } from "../../logic/state.ts";
 import * as types from "../../logic/types.ts";
 import * as util from "../../logic/util.ts";
-import Board from "../board/Board";
-import Coords from "../coords/Coords";
+import Board from "../board/Board.tsx";
+import Coords from "../coords/Coords.tsx";
+import Events from "../events/Events.tsx";
 
 import "./container.css";
 
@@ -31,9 +30,10 @@ export default function Container() {
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [boardEl, setBoardEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
-  const [state, setState] = createStore<State>(defaults());
   const [eventsBound, setEventsBound] = createSignal<boolean>(false);
+  const { state: gameState, setDom } = useGameContext();
 
+  // TODO: We need to update bounds on state.dom.bounds when we call updateBounds
   createEffect(() => {
     if (!wrapEl() || !containerEl()) {
       return;
@@ -84,23 +84,23 @@ export default function Container() {
       bounds: util.memo(() => bounds()!),
     };
 
-    events.bindBoard({
-      ...state,
-      dom,
-    });
-
-    setState({ dom });
+    setDom(dom);
     setEventsBound(true);
   });
 
+  createEffect(() => {
+    console.log("Dom updated:", gameState.dom, gameState.dom?.elements.board);
+  });
+
   return (
-    <StateContext.Provider value={{ state, setState }}>
+    <>
+      <Events boardEl={boardEl()} />
       <div class="wrap w-full h-full" ref={setWrapEl}>
         <div class="sc-container" ref={setContainerEl}>
           <Board ref={setBoardEl} bounds={bounds()} />
           <Coords />
         </div>
       </div>
-    </StateContext.Provider>
+    </>
   );
 }

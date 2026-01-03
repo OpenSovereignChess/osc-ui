@@ -1,8 +1,8 @@
 import { createMemo } from "solid-js";
-import { whitePov } from "../../logic/state.ts";
+import { whitePov } from "../../logic/board.ts";
+import { useGameContext } from "../../logic/provider/useGameContext.ts";
 import * as types from "../../logic/types.ts";
 import { key2pos, posToTranslate } from "../../logic/util.ts";
-import useStateContext from "../hooks/useStateContext.ts";
 
 import "./piece.generated.css";
 import "./piece.css";
@@ -14,7 +14,7 @@ type PieceProps = {
 };
 
 export default function Piece(props: PieceProps) {
-  const { state } = useStateContext();
+  const { state } = useGameContext();
   const offset = createMemo<types.NumberPair | null>(() => {
     if (!props.key || !props.bounds) {
       return null;

@@ -1,3 +1,4 @@
+import { type BoardActions } from "./provider/GameProvider.tsx";
 import * as board from "./board.ts";
 import { type State } from "./state.ts";
 import * as util from "./util.ts";
@@ -7,7 +8,11 @@ export interface DragCurrent {
   orig: types.Key; // Origin key of dragging piece
 }
 
-export function start(s: State, e: types.MouchEvent): void {
+export function start(
+  s: State,
+  e: types.MouchEvent,
+  actions: { board: BoardActions },
+): void {
   // Check for human input
   if (!e.isTrusted) {
     return;
@@ -43,6 +48,6 @@ export function start(s: State, e: types.MouchEvent): void {
   } else if (e.touches) {
     return; // Handle only corresponding mouse event
   }
-  board.selectSquare(s, orig);
+  actions.board.setSelected(orig);
   console.log("selected square", s.selected);
 }

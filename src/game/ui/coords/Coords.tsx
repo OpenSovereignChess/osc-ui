@@ -1,11 +1,11 @@
 import { For } from "solid-js";
 import * as types from "../../logic/types.ts";
-import useStateContext from "../hooks/useStateContext.ts";
+import { useGameContext } from "../../logic/provider/useGameContext.ts";
 
 import "./coords.css";
 
 export default function Coords() {
-  const { state } = useStateContext();
+  const { state } = useGameContext();
 
   if (!state.coordinates) {
     return null;

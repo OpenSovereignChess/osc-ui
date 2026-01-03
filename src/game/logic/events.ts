@@ -1,4 +1,5 @@
-import * as drag from "./drag.ts";
+// TODO: Delete?
+//import * as drag from "./drag.ts";
 import { isRightButton } from "./util.ts";
 import { type State } from "./state.ts";
 import * as types from "./types.ts";
@@ -43,7 +44,7 @@ const startDragOrDraw =
         //drop(s, e);
       } else {
         console.log("start dragging");
-        drag.start(s, e);
+        //drag.start(s, e);
       }
     }
   };

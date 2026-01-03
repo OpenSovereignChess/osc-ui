@@ -1,7 +1,7 @@
 ---
 import Layout from "./_Layout.astro";
 
-import Container from "../game/ui/container/Container.tsx";
+import Main from "../game/ui/Main.tsx";
 ---
 
 <Layout title="playsovereignchess.com">
@@ -13,6 +13,6 @@ import Container from "../game/ui/container/Container.tsx";
       height: "calc(100vh - 16px)",
     }}
   >
-    <Container client:only="solid-js" />
+    <Main client:only="solid-js" />
   </div>
 </Layout>
