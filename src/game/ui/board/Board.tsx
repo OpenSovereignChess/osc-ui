@@ -1,5 +1,5 @@
-import { For, type Setter, createSignal } from "solid-js";
-import * as fen from "../../logic/fen.ts";
+import { For, type Setter, createMemo } from "solid-js";
+import { useGameContext } from "../../logic/provider/useGameContext.ts";
 import * as types from "../../logic/types.ts";
 import Piece from "../piece/Piece";
 import { SelectedSquare } from "../square/Square";
@@ -12,7 +12,8 @@ type BoardProps = {
 };
 
 export default function Board(props: BoardProps) {
-  const [pieces] = createSignal<types.Pieces>(fen.read(fen.initial));
+  const { state } = useGameContext();
+  const pieces = createMemo<types.Pieces>(() => state.pieces);
 
   return (
     <div class="board" ref={props.ref}>

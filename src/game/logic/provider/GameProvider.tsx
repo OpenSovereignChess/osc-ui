@@ -3,6 +3,7 @@ import { type SetStoreFunction, createStore } from "solid-js/store";
 import { type State, defaults } from "../state.ts";
 import * as types from "../types.ts";
 import { GameContext } from "./context.ts";
+import { createBoardActions } from "../board.ts";
 
 export type BoardActions = ReturnType<typeof createBoardActions>;
 
@@ -34,14 +35,6 @@ function createDomActions(setState: StateSetter) {
   return {
     setDom: (dom: types.Dom) => {
       setState({ dom });
-    },
-  };
-}
-
-function createBoardActions(setState: StateSetter) {
-  return {
-    setSelected: (key: types.Key) => {
-      setState({ selected: key });
     },
   };
 }

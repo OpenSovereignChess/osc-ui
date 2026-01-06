@@ -48,6 +48,12 @@ export function start(
   } else if (e.touches) {
     return; // Handle only corresponding mouse event
   }
-  actions.board.setSelected(orig);
+
+  if (s.selected && actions.board.canMove(s, s.selected, orig)) {
+    // Move piece if a piece is already selected and can move to the origin square
+    actions.board.selectSquare(s, orig);
+  } else {
+    actions.board.selectSquare(s, orig);
+  }
   console.log("selected square", s.selected);
 }

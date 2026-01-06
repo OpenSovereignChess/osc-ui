@@ -1,3 +1,4 @@
+import { type SetStoreFunction } from "solid-js/store";
 import { BOARD_SIZE, BOARD_SIZE_ZERO_INDEX } from "./constants.ts";
 import { type State } from "./state.ts";
 import * as types from "./types.ts";
@@ -27,10 +28,6 @@ export function whitePov(s: State): boolean {
   return s.orientation === "white";
 }
 
-export function unselect(state: State): void {
-  state.selected = undefined;
-}
-
 function isMovable(state: State, orig: types.Key): boolean {
   const piece = state.pieces.get(orig);
   return (
@@ -40,99 +37,122 @@ function isMovable(state: State, orig: types.Key): boolean {
   );
 }
 
-export const canMove = (
-  state: State,
-  orig: types.Key,
-  dest: types.Key,
-): boolean =>
-  orig !== dest &&
-  isMovable(state, orig) &&
-  (state.movable.free || !!state.movable.dests?.get(orig)?.includes(dest));
-
-export function baseMove(
-  state: State,
-  orig: types.Key,
-  dest: types.Key,
-): types.Piece | boolean {
-  const origPiece = state.pieces.get(orig);
-  const destPiece = state.pieces.get(dest);
-  if (orig === dest || !origPiece) {
-    return false;
-  }
-  // TODO: Convet to SC rules
-  const captured =
-    destPiece && destPiece.color !== origPiece.color ? destPiece : undefined;
-  if (dest === state.selected) {
-    unselect(state);
-  }
-  state.lastMove = [orig, dest];
-  state.check = undefined;
-  return captured || true;
-}
-
-export function baseUserMove(
-  state: State,
-  orig: types.Key,
-  dest: types.Key,
-): types.Piece | boolean {
-  const result = baseMove(state, orig, dest);
-  if (result) {
-    state.movable.dests = undefined;
-    state.turnColor = util.opposite(state.turnColor);
-    state.animation.current = undefined;
-  }
-  return result;
-}
-
-export function userMove(
-  state: State,
-  orig: types.Key,
-  dest: types.Key,
-): boolean {
-  if (canMove(state, orig, dest)) {
-    const result = baseUserMove(state, orig, dest);
-    if (result) {
-      const holdTime = state.hold.stop();
-      unselect(state);
-      const metadata: types.MoveMetadata = {
-        ctrlKey: state.stats.ctrlKey,
-        holdTime,
-      };
-      if (result !== true) {
-        metadata.captured = result;
-        return true;
-      }
-    }
-  }
-  unselect(state);
+function tryAutoCastle(): boolean {
+  // TODO: Implement
   return false;
 }
 
-export function setSelected(state: State, key: types.Key): void {
-  state.selected = key;
-}
+export function createBoardActions(setState: SetStoreFunction<State>) {
+  function setSelected(state: State, key: types.Key): void {
+    console.log("board.setSelected", { key, state });
+    setState({ selected: key });
+  }
 
-export function selectSquare(
-  state: State,
-  key: types.Key,
-  force?: boolean,
-): void {
-  if (state.selected) {
-    if (state.selected === key && !state.draggable.enabled) {
-      unselect(state);
-      return;
-    } else if ((state.selectable.enabled || force) && state.selected !== key) {
-      if (userMove(state, state.selected, key)) {
-        state.stats.dragged = false;
-        return;
+  function unselect(): void {
+    console.log("board.unselect");
+    setState({ selected: undefined });
+  }
+
+  const canMove = (state: State, orig: types.Key, dest: types.Key): boolean =>
+    orig !== dest &&
+    isMovable(state, orig) &&
+    (state.movable.free || !!state.movable.dests?.get(orig)?.includes(dest));
+
+  function baseMove(
+    state: State,
+    orig: types.Key,
+    dest: types.Key,
+  ): types.Piece | boolean {
+    const origPiece = state.pieces.get(orig);
+    const destPiece = state.pieces.get(dest);
+    if (orig === dest || !origPiece) {
+      return false;
+    }
+    // TODO: Convet to SC rules
+    const captured =
+      destPiece && destPiece.color !== origPiece.color ? destPiece : undefined;
+    if (dest === state.selected) {
+      unselect();
+    }
+    if (!tryAutoCastle()) {
+      setState("pieces", (pieces) => {
+        const newPieces = new Map(pieces);
+        newPieces.set(dest, origPiece);
+        newPieces.delete(orig);
+        return newPieces;
+      });
+    }
+    setState({
+      lastMove: [orig, dest],
+      check: undefined,
+    });
+    return captured || true;
+  }
+
+  function baseUserMove(
+    state: State,
+    orig: types.Key,
+    dest: types.Key,
+  ): types.Piece | boolean {
+    const result = baseMove(state, orig, dest);
+    if (result) {
+      setState("movable", { dests: undefined });
+      setState("turnColor", util.opposite(state.turnColor));
+      setState("animation", { current: undefined });
+    }
+    return result;
+  }
+
+  function userMove(state: State, orig: types.Key, dest: types.Key): boolean {
+    if (canMove(state, orig, dest)) {
+      const result = baseUserMove(state, orig, dest);
+      if (result) {
+        unselect();
+        return true;
       }
     }
+    unselect();
+    return false;
   }
-  if (
-    (state.selectable.enabled || state.draggable.enabled) &&
-    isMovable(state, key)
-  ) {
-    setSelected(state, key);
-    state.hold.start();
+
+  function selectSquare(state: State, key: types.Key, force?: boolean): void {
+    console.log("board.selectSquare", { key, state });
+    if (state.selected) {
+      console.log("state selected");
+      if (state.selected === key && !state.draggable.enabled) {
+        console.log("state.selected === key");
+        unselect();
+        return;
+      } else if (
+        (state.selectable.enabled || force) &&
+        state.selected !== key
+      ) {
+        console.log("state.selected !== key");
+        if (userMove(state, state.selected, key)) {
+          console.log("userMove true");
+          setState("stats", { dragged: false });
+          return;
+        }
+      }
+    }
+    console.log(
+      "isMovable",
+      state.selectable.enabled,
+      state.draggable.enabled,
+      isMovable(state, key),
+    );
+    if (
+      (state.selectable.enabled || state.draggable.enabled) &&
+      isMovable(state, key)
+    ) {
+      console.log("set selected to key", key);
+      setSelected(state, key);
+      state.hold.start();
+    }
   }
+
+  return {
+    canMove,
+    selectSquare,
+  };
 }
