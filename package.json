@@ -1,39 +1,14 @@
 {
-  "name": "",
-  "type": "module",
+  "name": "opensovereignchess",
+  "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "check": "astro check",
-    "format": "pnpm exec prettier . --write",
-    "lint": "pnpm exec eslint \"src/**/*.{js,jsx,ts,tsx,astro}\"",
-    "test": "vitest",
-    "build-piece-svg-css": "node ./scripts/build-piece-svg-css.js"
-  },
-  "dependencies": {
-    "@astrojs/check": "^0.9.5",
-    "@astrojs/solid-js": "^5.1.2",
-    "astro": "^5.15.2",
-    "solid-js": "^1.9.10"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "@typescript-eslint/parser": "^8.46.4",
-    "@unocss/preset-wind3": "^66.5.5",
-    "@unocss/reset": "^66.5.4",
-    "@vite-pwa/astro": "^1.1.1",
-    "baseline-browser-mapping": "^2.9.11",
-    "eslint": "^9.39.1",
-    "eslint-plugin-astro": "^1.5.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "prettier": "3.6.2",
-    "prettier-plugin-astro": "0.14.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
-    "unocss": "^66.5.4",
-    "vitest": "^4.0.10"
+    "dev": "pnpm --dir apps/web dev",
+    "build": "pnpm --dir apps/web build",
+    "preview": "pnpm --dir apps/web preview",
+    "check": "pnpm --dir apps/web check",
+    "lint": "pnpm --dir apps/web lint",
+    "test": "pnpm --dir apps/web test -- --run",
+    "format": "pnpm --dir apps/web format"
   }
 }

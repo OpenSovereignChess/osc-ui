@@ -1,10 +1,14 @@
 # build output
 dist/
+apps/*/dist/
 # generated types
 .astro/
+apps/*/.astro/
 
 # dependencies
 node_modules/
+apps/*/node_modules/
+packages/*/node_modules/
 
 # logs
 npm-debug.log*
@@ -23,3 +27,6 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 .aider*
+
+# codex
+.codex
