@@ -1,8 +1,8 @@
 import { createEffect } from "solid-js";
 import { useGameSession } from "../../session/useGameSession.ts";
-import { isRightButton } from "../../logic/util.ts";
-import * as drag from "../../logic/drag.ts";
-import * as types from "../../logic/types.ts";
+import { isRightButton } from "../../rules/util.ts";
+import * as drag from "../../input/drag.ts";
+import * as types from "../../rules/types.ts";
 
 type EventsProps = {
   boardEl?: HTMLElement;

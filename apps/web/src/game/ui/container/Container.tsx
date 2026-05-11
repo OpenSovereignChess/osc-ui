@@ -1,8 +1,8 @@
 import { createEffect, createSignal } from "solid-js";
 import { useGameSession } from "../../session/useGameSession.ts";
-import { BOARD_SIZE } from "../../logic/constants.ts";
-import * as types from "../../logic/types.ts";
-import * as util from "../../logic/util.ts";
+import { BOARD_SIZE } from "../../rules/constants.ts";
+import * as types from "../../rules/types.ts";
+import * as util from "../../rules/util.ts";
 import Board from "../board/Board.tsx";
 import Coords from "../coords/Coords.tsx";
 import Events from "../events/Events.tsx";

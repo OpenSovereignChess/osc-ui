@@ -1,8 +1,8 @@
 import type { BoardActions } from "./board.ts";
 import * as board from "./board.ts";
-import { type State } from "./state.ts";
-import * as util from "./util.ts";
-import * as types from "./types.ts";
+import { type State } from "../state/state.ts";
+import * as util from "../rules/util.ts";
+import * as types from "../rules/types.ts";
 
 export interface DragCurrent {
   orig: types.Key; // Origin key of dragging piece

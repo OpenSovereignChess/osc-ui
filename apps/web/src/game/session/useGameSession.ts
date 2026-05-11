@@ -1,5 +1,5 @@
 import { useContext } from "solid-js";
-import { GameContext } from "../logic/provider/context.ts";
+import { GameContext } from "../provider/context.ts";
 import type { LocalGameSession } from "./types.ts";
 
 export function useGameSession(): LocalGameSession {

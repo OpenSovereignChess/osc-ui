@@ -1,7 +1,7 @@
 import type { Accessor } from "solid-js";
-import type { BoardActions } from "../logic/board.ts";
-import type { State } from "../logic/state.ts";
-import type * as types from "../logic/types.ts";
+import type { BoardActions } from "../input/board.ts";
+import type { State } from "../state/state.ts";
+import type * as types from "../rules/types.ts";
 
 type Orientation = Extract<types.Color, "white" | "black">;
 

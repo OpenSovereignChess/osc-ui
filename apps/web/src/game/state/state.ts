@@ -1,9 +1,9 @@
-import { type AnimCurrent } from "./anim.ts";
-import { type DragCurrent } from "./drag.ts";
-import { type Drawable } from "./draw.ts";
-import * as fen from "./fen.ts";
-import * as types from "./types.ts";
-import { timer } from "./util.ts";
+import { type AnimCurrent } from "../input/anim.ts";
+import { type DragCurrent } from "../input/drag.ts";
+import { type Drawable } from "../input/draw.ts";
+import * as fen from "../rules/fen.ts";
+import * as types from "../rules/types.ts";
+import { timer } from "../rules/util.ts";
 
 type Orientation = Extract<types.Color, "white" | "black">;
 

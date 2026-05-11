@@ -1,8 +1,8 @@
 import { type SetStoreFunction } from "solid-js/store";
-import { BOARD_SIZE, BOARD_SIZE_ZERO_INDEX } from "./constants.ts";
-import { type State } from "./state.ts";
-import * as types from "./types.ts";
-import * as util from "./util.ts";
+import { BOARD_SIZE, BOARD_SIZE_ZERO_INDEX } from "../rules/constants.ts";
+import { type State } from "../state/state.ts";
+import * as types from "../rules/types.ts";
+import * as util from "../rules/util.ts";
 
 export function getKeyAtDomPos(
   pos: types.NumberPair,

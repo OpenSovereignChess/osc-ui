@@ -1,4 +1,4 @@
-import * as types from "./types.ts";
+import * as types from "../rules/types.ts";
 
 export interface Drawable {
   enabled: boolean; // can draw

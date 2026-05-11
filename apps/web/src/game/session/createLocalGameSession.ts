@@ -1,8 +1,8 @@
 import { createMemo } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-import { createBoardActions } from "../logic/board.ts";
-import type { State } from "../logic/state.ts";
-import type * as types from "../logic/types.ts";
+import { createBoardActions } from "../input/board.ts";
+import type { State } from "../state/state.ts";
+import type * as types from "../rules/types.ts";
 import type {
   GameSnapshot,
   InteractionSnapshot,
