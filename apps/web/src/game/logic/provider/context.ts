@@ -1,4 +1,4 @@
 import { createContext } from "solid-js";
-import { type GameProviderType } from "./GameProvider.tsx";
+import type { LocalGameSession } from "../../session/types.ts";
 
-export const GameContext = createContext<GameProviderType>();
+export const GameContext = createContext<LocalGameSession>();
