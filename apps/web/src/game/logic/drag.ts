@@ -1,4 +1,4 @@
-import { type BoardActions } from "./provider/GameProvider.tsx";
+import type { BoardActions } from "./board.ts";
 import * as board from "./board.ts";
 import { type State } from "./state.ts";
 import * as util from "./util.ts";

@@ -156,3 +156,5 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     selectSquare,
   };
 }
+
+export type BoardActions = ReturnType<typeof createBoardActions>;

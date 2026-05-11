@@ -2,14 +2,13 @@ import { type ParentComponent } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 import { type State, defaults } from "../state.ts";
 import * as types from "../types.ts";
+import { createLocalGameSession } from "../../session/createLocalGameSession.ts";
+import type { LocalGameSession } from "../../session/types.ts";
 import { GameContext } from "./context.ts";
-import { createBoardActions } from "../board.ts";
-
-export type BoardActions = ReturnType<typeof createBoardActions>;
 
 export type GameProviderType = {
+  session: LocalGameSession;
   state: State;
-  board: BoardActions;
 } & ReturnType<typeof createDomActions>;
 
 type StateSetter = SetStoreFunction<State>;
@@ -17,12 +16,12 @@ type StateSetter = SetStoreFunction<State>;
 export const GameProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(defaults());
 
+  const session = createLocalGameSession(state, setState);
   const domActions = createDomActions(setState);
-  const boardActions = createBoardActions(setState);
 
   const value = {
+    session,
     state,
-    board: boardActions,
     ...domActions,
   };
 

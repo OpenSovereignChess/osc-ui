@@ -1,10 +1,15 @@
 import { BoardCoords } from "@osc/board-solid";
-import { useGameContext } from "../../logic/provider/useGameContext.ts";
+import { createMemo } from "solid-js";
+import { useGameSession } from "../../session/useGameSession.ts";
 
 export default function Coords() {
-  const { state } = useGameContext();
+  const session = useGameSession();
+  const snapshot = createMemo(() => session.getSnapshot());
 
   return (
-    <BoardCoords orientation={state.orientation} show={state.coordinates} />
+    <BoardCoords
+      orientation={snapshot().orientation}
+      show={snapshot().coordinates}
+    />
   );
 }

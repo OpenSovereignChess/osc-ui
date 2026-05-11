@@ -1,5 +1,5 @@
 import { createEffect, createSignal } from "solid-js";
-import { useGameContext } from "../../logic/provider/useGameContext.ts";
+import { useGameSession } from "../../session/useGameSession.ts";
 import { BOARD_SIZE } from "../../logic/constants.ts";
 import * as types from "../../logic/types.ts";
 import * as util from "../../logic/util.ts";
@@ -31,7 +31,7 @@ export default function Container() {
   const [boardEl, setBoardEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
   const [eventsBound, setEventsBound] = createSignal<boolean>(false);
-  const { state: gameState, setDom } = useGameContext();
+  const session = useGameSession();
 
   // TODO: We need to update bounds on state.dom.bounds when we call updateBounds
   createEffect(() => {
@@ -84,11 +84,12 @@ export default function Container() {
       bounds: util.memo(() => bounds()!),
     };
 
-    setDom(dom);
+    session.setDom(dom);
     setEventsBound(true);
   });
 
   createEffect(() => {
+    const gameState = session.getState();
     console.log("Dom updated:", gameState.dom, gameState.dom?.elements.board);
   });
 

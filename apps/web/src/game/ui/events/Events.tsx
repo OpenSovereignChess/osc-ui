@@ -1,5 +1,5 @@
 import { createEffect } from "solid-js";
-import { useGameContext } from "../../logic/provider/useGameContext.ts";
+import { useGameSession } from "../../session/useGameSession.ts";
 import { isRightButton } from "../../logic/util.ts";
 import * as drag from "../../logic/drag.ts";
 import * as types from "../../logic/types.ts";
@@ -9,35 +9,38 @@ type EventsProps = {
 };
 
 export default function Events(props: EventsProps) {
-  const { state, board } = useGameContext();
+  const session = useGameSession();
 
   const onStart = (e: types.MouchEvent) => {
+    const interaction = session.getInteraction();
+    const state = session.getState();
+
     console.log("startDragOrDraw", e);
-    if (state.draggable.current) {
+    if (interaction.draggableCurrent) {
       console.log("draggable.current exists; cancel drag");
       //drag.cancel(state);
-    } else if (state.drawable.current) {
+    } else if (interaction.drawableCurrent) {
       console.log("drawable.current exists; cancel draw");
       //draw.cancel(state);
     } else if (e.shiftKey || isRightButton(e)) {
       console.log("right click or shiftKey");
-      if (state.drawable.enabled) {
+      if (interaction.drawableEnabled) {
         console.log("start drawing");
         //draw.start(state, e);
       }
-    } else if (!state.viewOnly) {
-      if (state.dropmode.active) {
+    } else if (!interaction.viewOnly) {
+      if (interaction.dropmodeActive) {
         console.log("in dropmode; drop piece");
         //drop(state, e);
       } else {
         console.log("start dragging");
-        drag.start(state, e, { board });
+        drag.start(state, e, { board: session.board });
       }
     }
   };
 
   createEffect(() => {
-    if (state.viewOnly || !props.boardEl) {
+    if (session.getInteraction().viewOnly || !props.boardEl) {
       return;
     }
     props.boardEl.addEventListener("touchstart", onStart as EventListener, {
