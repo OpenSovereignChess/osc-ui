@@ -1,10 +1,7 @@
-import { For, type Setter, createMemo } from "solid-js";
+import { type Setter, createMemo } from "solid-js";
+import { BoardView } from "@osc/board-solid";
 import { useGameContext } from "../../logic/provider/useGameContext.ts";
 import * as types from "../../logic/types.ts";
-import Piece from "../piece/Piece";
-import { SelectedSquare } from "../square/Square";
-
-import "./board.css";
 
 type BoardProps = {
   bounds?: DOMRectReadOnly;
@@ -16,13 +13,13 @@ export default function Board(props: BoardProps) {
   const pieces = createMemo<types.Pieces>(() => state.pieces);
 
   return (
-    <div class="board" ref={props.ref}>
-      <For each={[...pieces()]} fallback={<div>Loading...</div>}>
-        {([key, piece]) => (
-          <Piece key={key} piece={piece} bounds={props.bounds} />
-        )}
-      </For>
-      <SelectedSquare />
-    </div>
+    <BoardView
+      boardRef={props.ref}
+      bounds={props.bounds}
+      fallback={<div>Loading...</div>}
+      orientation={state.orientation}
+      pieces={pieces()}
+      selectedKey={state.selected}
+    />
   );
 }

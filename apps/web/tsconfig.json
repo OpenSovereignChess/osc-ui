@@ -3,7 +3,11 @@
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"],
   "compilerOptions": {
+    "baseUrl": ".",
     "jsx": "preserve",
-    "jsxImportSource": "solid-js"
+    "jsxImportSource": "solid-js",
+    "paths": {
+      "@osc/board-solid": ["../../packages/board-solid/src/index.ts"]
+    }
   }
 }

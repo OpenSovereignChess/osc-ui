@@ -6,15 +6,15 @@ Astro + Solid frontend for Open Sovereign Chess.
 
 Run these from the repo root:
 
-| Command        | Action |
-| :------------- | :----- |
+| Command        | Action                                |
+| :------------- | :------------------------------------ |
 | `pnpm dev`     | Start the web app at `localhost:4321` |
-| `pnpm build`   | Build the web app |
-| `pnpm preview` | Preview the production build |
-| `pnpm check`   | Run `astro check` |
-| `pnpm lint`    | Run ESLint |
-| `pnpm test`    | Run Vitest once |
-| `pnpm format`  | Format the app with Prettier |
+| `pnpm build`   | Build the web app                     |
+| `pnpm preview` | Preview the production build          |
+| `pnpm check`   | Run `astro check`                     |
+| `pnpm lint`    | Run ESLint                            |
+| `pnpm test`    | Run Vitest once                       |
+| `pnpm format`  | Format the app with Prettier          |
 
 ## Current Focus
 
