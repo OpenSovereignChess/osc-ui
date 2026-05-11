@@ -7,9 +7,9 @@ import * as types from "./types.ts";
 type MouchBind = (e: types.MouchEvent) => void;
 
 export function bindBoard(s: State): void {
-  const boardEl = s.dom?.elements.board;
+  const boardEl = s.layout.dom?.elements.board;
 
-  if (s.viewOnly || !boardEl) {
+  if (s.interaction.viewOnly || !boardEl) {
     return;
   }
 
@@ -26,20 +26,20 @@ const startDragOrDraw =
   (s: State): MouchBind =>
   (e) => {
     console.log("startDragOrDraw", e);
-    if (s.draggable.current) {
+    if (s.interaction.draggable.current) {
       console.log("draggable.current exists; cancel drag");
       //drag.cancel(s);
-    } else if (s.drawable.current) {
+    } else if (s.interaction.drawable.current) {
       console.log("drawable.current exists; cancel draw");
       //draw.cancel(s);
     } else if (e.shiftKey || isRightButton(e)) {
       console.log("right click or shiftKey");
-      if (s.drawable.enabled) {
+      if (s.interaction.drawable.enabled) {
         console.log("start drawing");
         //draw.start(s, e);
       }
-    } else if (!s.viewOnly) {
-      if (s.dropmode.active) {
+    } else if (!s.interaction.viewOnly) {
+      if (s.interaction.dropmode.active) {
         console.log("in dropmode; drop piece");
         //drop(s, e);
       } else {

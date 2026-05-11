@@ -25,10 +25,10 @@ export function start(
   if (e.touches && e.touches.length > 1) {
     return;
   }
-  if (!s.dom) {
+  if (!s.layout.dom) {
     return;
   }
-  const bounds = s.dom.bounds();
+  const bounds = s.layout.dom.bounds();
   const position = util.eventPosition(e)!;
   const orig = board.getKeyAtDomPos(position, board.whitePov(s), bounds);
   console.log("drag.start", { position, orig });
@@ -36,8 +36,8 @@ export function start(
     return;
   }
 
-  const piece = s.pieces.get(orig);
-  const previouslySelected = s.selected;
+  const piece = s.position.pieces.get(orig);
+  const previouslySelected = s.interaction.selected;
   //if (!previouslySelected && s.drawable.enabled && (!piece || piece.color !== s.turnColor)) {
   //  drawClear(s);
   //}
@@ -49,11 +49,14 @@ export function start(
     return; // Handle only corresponding mouse event
   }
 
-  if (s.selected && actions.board.canMove(s, s.selected, orig)) {
+  if (
+    s.interaction.selected &&
+    actions.board.canMove(s, s.interaction.selected, orig)
+  ) {
     // Move piece if a piece is already selected and can move to the origin square
     actions.board.selectSquare(s, orig);
   } else {
     actions.board.selectSquare(s, orig);
   }
-  console.log("selected square", s.selected);
+  console.log("selected square", s.interaction.selected);
 }

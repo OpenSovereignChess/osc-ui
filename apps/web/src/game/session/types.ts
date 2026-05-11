@@ -13,9 +13,9 @@ export interface GameSnapshot {
 }
 
 export interface InteractionSnapshot {
-  drawableCurrent?: State["drawable"]["current"];
+  drawableCurrent?: State["interaction"]["drawable"]["current"];
   drawableEnabled: boolean;
-  draggableCurrent?: State["draggable"]["current"];
+  draggableCurrent?: State["interaction"]["draggable"]["current"];
   dropmodeActive: boolean;
   viewOnly: boolean;
 }

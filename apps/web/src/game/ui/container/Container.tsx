@@ -90,7 +90,11 @@ export default function Container() {
 
   createEffect(() => {
     const gameState = session.getState();
-    console.log("Dom updated:", gameState.dom, gameState.dom?.elements.board);
+    console.log(
+      "Dom updated:",
+      gameState.layout.dom,
+      gameState.layout.dom?.elements.board,
+    );
   });
 
   return (

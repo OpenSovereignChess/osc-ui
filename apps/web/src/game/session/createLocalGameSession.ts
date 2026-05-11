@@ -16,18 +16,18 @@ export function createLocalGameSession(
   const board = createBoardActions(setState);
 
   const getSnapshot = createMemo<GameSnapshot>(() => ({
-    coordinates: state.coordinates,
-    orientation: state.orientation,
-    pieces: state.pieces,
-    selected: state.selected,
+    coordinates: state.interaction.coordinates,
+    orientation: state.position.orientation,
+    pieces: state.position.pieces,
+    selected: state.interaction.selected,
   }));
 
   const getInteraction = createMemo<InteractionSnapshot>(() => ({
-    drawableCurrent: state.drawable.current,
-    drawableEnabled: state.drawable.enabled,
-    draggableCurrent: state.draggable.current,
-    dropmodeActive: state.dropmode.active,
-    viewOnly: state.viewOnly,
+    drawableCurrent: state.interaction.drawable.current,
+    drawableEnabled: state.interaction.drawable.enabled,
+    draggableCurrent: state.interaction.draggable.current,
+    dropmodeActive: state.interaction.dropmode.active,
+    viewOnly: state.interaction.viewOnly,
   }));
 
   return {
@@ -36,7 +36,7 @@ export function createLocalGameSession(
     getSnapshot,
     getState: () => state,
     setDom: (dom: types.Dom) => {
-      setState({ dom });
+      setState("layout", { dom });
     },
   };
 }

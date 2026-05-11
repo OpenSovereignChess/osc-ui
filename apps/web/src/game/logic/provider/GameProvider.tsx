@@ -33,7 +33,7 @@ export const GameProvider: ParentComponent = (props) => {
 function createDomActions(setState: StateSetter) {
   return {
     setDom: (dom: types.Dom) => {
-      setState({ dom });
+      setState("layout", { dom });
     },
   };
 }

@@ -40,8 +40,8 @@ export function SelectedSquare() {
   const { state } = useGameContext();
 
   const offset = createMemo<types.NumberPair | null>(() => {
-    const key = state.selected;
-    const bounds = state.dom?.bounds();
+    const key = state.interaction.selected;
+    const bounds = state.layout.dom?.bounds();
     if (!key || !bounds) {
       return null;
     }
@@ -52,7 +52,7 @@ export function SelectedSquare() {
   });
 
   return (
-    <Show when={state.selected}>
+    <Show when={state.interaction.selected}>
       <div
         class="square bg-red"
         style={{
