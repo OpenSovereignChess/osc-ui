@@ -1,4 +1,7 @@
 ---
+import Footer from "../app/components/Footer.astro";
+import Header from "../app/components/Header.astro";
+
 interface Props {
   title: string;
 }
@@ -15,6 +18,191 @@ const { title } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
-    <slot />
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
   </body>
 </html>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+    --bg: #f7f5ef;
+    --surface: #fffdfa;
+    --surface-strong: #ffffff;
+    --ink: #1f2520;
+    --muted: #687066;
+    --line: #ded8ca;
+    --primary: #2f6f55;
+    --primary-strong: #204d3d;
+    --accent: #b7791f;
+    --danger: #9f4238;
+    --shadow: 0 18px 45px rgba(42, 37, 25, 0.1);
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  body {
+    min-width: 320px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  main {
+    min-height: calc(100vh - 156px);
+  }
+
+  .site-section {
+    padding: 40px clamp(16px, 4vw, 56px);
+  }
+
+  .site-inner {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    margin: 0 0 10px;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0 16px;
+    background: var(--surface-strong);
+    color: var(--ink);
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  .button.primary {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: white;
+  }
+
+  .button.disabled {
+    color: var(--muted);
+    cursor: not-allowed;
+  }
+
+  .page-header {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .page-header h1 {
+    max-width: 760px;
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .page-header p {
+    max-width: 720px;
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  .tool-shell {
+    display: grid;
+    min-height: calc(100vh - 156px);
+    grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+    border-top: 1px solid var(--line);
+  }
+
+  .tool-panel {
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    padding: 24px;
+  }
+
+  .tool-panel h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .tool-panel p {
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .tool-stage {
+    min-width: 0;
+    padding: clamp(16px, 4vw, 40px);
+  }
+
+  .stub-board {
+    display: grid;
+    width: min(520px, 100%);
+    aspect-ratio: 1;
+    grid-template-columns: repeat(8, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .stub-board span:nth-child(odd) {
+    background: #e6d8b8;
+  }
+
+  .stub-board span:nth-child(even) {
+    background: #6c8a73;
+  }
+
+  @media (max-width: 760px) {
+    .site-section {
+      padding-block: 28px;
+    }
+
+    .tool-shell {
+      grid-template-columns: 1fr;
+    }
+
+    .tool-panel {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+  }
+</style>

@@ -1,5 +1,45 @@
-<footer>
-  Learn more about Sovereign Chess <a
-    href="https://www.infinitepigames.com/sovereign-chess">here</a
-  >.
+<footer class="site-footer">
+  <div>
+    <span>Open Sovereign Chess</span>
+    <a href="https://www.infinitepigames.com/sovereign-chess"
+      >Official game site</a
+    >
+  </div>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+  }
+
+  .site-footer div {
+    display: flex;
+    width: min(1180px, calc(100% - 32px));
+    min-height: 88px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 auto;
+  }
+
+  .site-footer span {
+    color: var(--ink);
+    font-weight: 800;
+  }
+
+  .site-footer a {
+    color: var(--primary);
+    font-weight: 750;
+    text-decoration: none;
+  }
+
+  @media (max-width: 640px) {
+    .site-footer div {
+      align-items: flex-start;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+</style>

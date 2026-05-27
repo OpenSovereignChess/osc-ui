@@ -1,0 +1,61 @@
+---
+import Layout from "./_Layout.astro";
+
+const boardSquares = Array.from({ length: 64 });
+---
+
+<Layout title="Play | Open Sovereign Chess">
+  <section class="tool-shell">
+    <aside class="tool-panel">
+      <p class="eyebrow">Coming soon</p>
+      <h1>Play online</h1>
+      <p>
+        This page will become the live-game lobby with time controls, seeks,
+        active games, and account-aware pairing.
+      </p>
+      <div class="button-row">
+        <a class="button primary disabled" aria-disabled="true">Create game</a>
+        <a class="button disabled" aria-disabled="true">Join lobby</a>
+      </div>
+    </aside>
+    <div class="tool-stage stub-stage">
+      <div class="stub-board" aria-hidden="true">
+        {boardSquares.map(() => <span />)}
+      </div>
+      <div class="stub-copy">
+        <h2>Live play placeholder</h2>
+        <p>
+          The first implementation can start with local or invite-only games
+          before a public seek graph is added.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .stub-stage {
+    display: grid;
+    align-items: center;
+    gap: 28px;
+    grid-template-columns: minmax(260px, 420px) minmax(220px, 1fr);
+  }
+
+  .stub-copy h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 1.05;
+  }
+
+  .stub-copy p {
+    max-width: 520px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 860px) {
+    .stub-stage {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

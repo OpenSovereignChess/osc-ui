@@ -1,11 +1,64 @@
 ---
-import Menu from "./Menu.astro";
 import Navigation from "./Navigation.astro";
 ---
 
-<header>
-  <nav>
-    <Menu />
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-brand" href="/" aria-label="Open Sovereign Chess home">
+      <span class="site-brand__mark"></span>
+      <span>Open Sovereign Chess</span>
+    </a>
     <Navigation />
-  </nav>
+  </div>
 </header>
+
+<style>
+  .site-header {
+    position: sticky;
+    z-index: 10;
+    top: 0;
+    border-bottom: 1px solid var(--line);
+    background: rgba(247, 245, 239, 0.94);
+    backdrop-filter: blur(12px);
+  }
+
+  .site-header__inner {
+    display: flex;
+    width: min(1180px, calc(100% - 32px));
+    min-height: 68px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 auto;
+  }
+
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    font-weight: 850;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .site-brand__mark {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background:
+      linear-gradient(90deg, transparent 50%, #6c8a73 50%) 0 0 / 14px 14px,
+      linear-gradient(90deg, #e6d8b8 50%, transparent 50%) 0 14px / 14px 14px;
+  }
+
+  @media (max-width: 760px) {
+    .site-header__inner {
+      min-height: 60px;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 0;
+    }
+  }
+</style>

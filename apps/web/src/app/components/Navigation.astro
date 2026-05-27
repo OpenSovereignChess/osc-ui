@@ -2,7 +2,42 @@
 
 ---
 
-<div id="main-menu" class="nav-links">
+<nav class="nav-links" aria-label="Primary navigation">
   <a href="/">Home</a>
-  <a href="/about/">About</a>
-</div>
+  <a href="/play/">Play</a>
+  <a href="/analysis/">Analysis</a>
+  <a href="/editor/">Board editor</a>
+  <a href="/rules/">Rules</a>
+</nav>
+
+<style>
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .nav-links a {
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--muted);
+    font-size: 0.94rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    background: var(--surface-strong);
+    color: var(--ink);
+    outline: none;
+  }
+
+  @media (max-width: 760px) {
+    .nav-links {
+      justify-content: flex-start;
+    }
+  }
+</style>

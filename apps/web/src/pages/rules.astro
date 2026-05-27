@@ -1,0 +1,103 @@
+---
+import Layout from "./_Layout.astro";
+---
+
+<Layout title="Rules | Open Sovereign Chess">
+  <section class="page-header site-section">
+    <div class="site-inner">
+      <p class="eyebrow">Game introduction</p>
+      <h1>Rules and learning path</h1>
+      <p>
+        This page can grow into a structured guide for Sovereign Chess. For now
+        it points players to the official game material and gives the site a
+        stable place for onboarding.
+      </p>
+      <div class="button-row">
+        <a
+          class="button primary"
+          href="https://www.infinitepigames.com/sovereign-chess"
+        >
+          Official game site
+        </a>
+        <a class="button" href="/editor/">Try the board</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="site-section">
+    <div class="site-inner rules-grid">
+      <article>
+        <span>1</span>
+        <h2>Start with normal chess instincts</h2>
+        <p>
+          Players still benefit from familiar chess concepts: king safety,
+          development, material, and board control.
+        </p>
+      </article>
+      <article>
+        <span>2</span>
+        <h2>Learn what makes ownership different</h2>
+        <p>
+          The variant introduces additional colors and control ideas, so new
+          players need concise examples before they can evaluate positions.
+        </p>
+      </article>
+      <article>
+        <span>3</span>
+        <h2>Practice with editable positions</h2>
+        <p>
+          The editor gives the site a practical way to teach rules through
+          curated setups, puzzles, and examples later.
+        </p>
+      </article>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .page-header .button-row {
+    margin-top: 24px;
+  }
+
+  .rules-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  article {
+    min-height: 260px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 22px;
+    background: var(--surface-strong);
+  }
+
+  article span {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-weight: 850;
+  }
+
+  article h2 {
+    margin: 44px 0 10px;
+    font-size: 1.35rem;
+  }
+
+  article p {
+    color: var(--muted);
+    line-height: 1.58;
+  }
+
+  @media (max-width: 860px) {
+    .rules-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

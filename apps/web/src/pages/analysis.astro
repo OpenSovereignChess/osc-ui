@@ -1,0 +1,84 @@
+---
+import Layout from "./_Layout.astro";
+
+const boardSquares = Array.from({ length: 64 });
+---
+
+<Layout title="Analysis | Open Sovereign Chess">
+  <section class="tool-shell">
+    <aside class="tool-panel">
+      <p class="eyebrow">Coming soon</p>
+      <h1>Analysis board</h1>
+      <p>
+        This area will support move exploration, variation trees, position
+        loading, and links from completed games or editor setups.
+      </p>
+      <div class="button-row">
+        <a class="button" href="/editor/">Set up board</a>
+        <a class="button disabled" aria-disabled="true">Import PGN</a>
+      </div>
+    </aside>
+    <div class="tool-stage analysis-grid">
+      <div class="stub-board" aria-hidden="true">
+        {boardSquares.map(() => <span />)}
+      </div>
+      <section class="move-list" aria-label="Analysis placeholder">
+        <div>
+          <strong>1.</strong>
+          <span>Open a position</span>
+        </div>
+        <div>
+          <strong>2.</strong>
+          <span>Try candidate moves</span>
+        </div>
+        <div>
+          <strong>3.</strong>
+          <span>Save a line</span>
+        </div>
+      </section>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .analysis-grid {
+    display: grid;
+    align-items: start;
+    gap: 24px;
+    grid-template-columns: minmax(280px, 520px) minmax(220px, 320px);
+  }
+
+  .move-list {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-strong);
+  }
+
+  .move-list div {
+    display: flex;
+    gap: 12px;
+    min-height: 54px;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding: 0 16px;
+  }
+
+  .move-list div:last-child {
+    border-bottom: 0;
+  }
+
+  .move-list strong {
+    color: var(--primary);
+  }
+
+  .move-list span {
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    .analysis-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
