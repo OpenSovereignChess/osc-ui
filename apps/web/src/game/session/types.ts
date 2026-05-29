@@ -7,6 +7,7 @@ type Orientation = Extract<types.Color, "white" | "black">;
 
 export interface GameSnapshot {
   coordinates: boolean;
+  draggableCurrent?: State["interaction"]["draggable"]["current"];
   orientation: Orientation;
   pieces: types.Pieces;
   selected?: types.Key;

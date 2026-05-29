@@ -3,6 +3,7 @@ import { BOARD_SIZE, BOARD_SIZE_ZERO_INDEX } from "../rules/constants.ts";
 import { type State } from "../state/state.ts";
 import * as types from "../rules/types.ts";
 import * as util from "../rules/util.ts";
+import type { DragCurrent } from "./drag.ts";
 
 export function getKeyAtDomPos(
   pos: types.NumberPair,
@@ -121,6 +122,46 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     return false;
   }
 
+  function startDrag(state: State, current: DragCurrent): void {
+    if (!isMovable(state, current.orig)) {
+      return;
+    }
+
+    setState("interaction", "draggable", "current", current);
+  }
+
+  function updateDrag(state: State, pos: types.NumberPair): void {
+    const current = state.interaction.draggable.current;
+    if (!current) {
+      return;
+    }
+    const bounds = state.layout.dom?.bounds();
+    const dest = bounds
+      ? getKeyAtDomPos(pos, whitePov(state), bounds)
+      : undefined;
+
+    setState("interaction", "draggable", "current", (current) =>
+      current
+        ? {
+            ...current,
+            keyHasChanged: current.keyHasChanged || current.orig !== dest,
+            pos,
+          }
+        : current,
+    );
+  }
+
+  function cancelDrag(): void {
+    setState("interaction", "draggable", "current", null);
+  }
+
+  function dragMove(state: State, orig: types.Key, dest: types.Key): boolean {
+    const moved = userMove(state, orig, dest);
+    setState("interaction", "draggable", "current", null);
+    setState("interaction", "stats", { dragged: moved });
+    return moved;
+  }
+
   function selectSquare(state: State, key: types.Key, force?: boolean): void {
     console.log("board.selectSquare", { key, state });
     if (state.interaction.selected) {
@@ -163,7 +204,12 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
 
   return {
     canMove,
+    canSelect: isMovable,
+    cancelDrag,
+    dragMove,
     selectSquare,
+    startDrag,
+    updateDrag,
   };
 }
 

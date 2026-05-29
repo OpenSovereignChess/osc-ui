@@ -31,7 +31,7 @@ export interface InteractionState {
   };
   draggable: {
     enabled: boolean; // Allow drag'n drop to move pieces
-    current?: DragCurrent;
+    current?: DragCurrent | null;
   };
   dropmode: {
     active: boolean; // In drop mode (pieces are dropped from a side panel)

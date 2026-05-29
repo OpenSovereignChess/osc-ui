@@ -9,3 +9,8 @@
   will-change: transform;
   pointer-events: none;
 }
+
+.piece.dragging {
+  z-index: 4;
+  cursor: grabbing;
+}

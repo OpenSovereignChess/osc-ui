@@ -1,4 +1,4 @@
-import { createEffect } from "solid-js";
+import { createEffect, onCleanup } from "solid-js";
 import { useGameSession } from "../../session/useGameSession.ts";
 import { isRightButton } from "../../rules/util.ts";
 import * as drag from "../../input/drag.ts";
@@ -18,7 +18,7 @@ export default function Events(props: EventsProps) {
     console.log("startDragOrDraw", e);
     if (interaction.draggableCurrent) {
       console.log("draggable.current exists; cancel drag");
-      //drag.cancel(state);
+      session.board.cancelDrag();
     } else if (interaction.drawableCurrent) {
       console.log("drawable.current exists; cancel draw");
       //draw.cancel(state);
@@ -48,6 +48,14 @@ export default function Events(props: EventsProps) {
     });
     props.boardEl.addEventListener("mousedown", onStart as EventListener, {
       passive: false,
+    });
+
+    onCleanup(() => {
+      props.boardEl?.removeEventListener(
+        "touchstart",
+        onStart as EventListener,
+      );
+      props.boardEl?.removeEventListener("mousedown", onStart as EventListener);
     });
   });
 

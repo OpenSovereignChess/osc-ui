@@ -31,3 +31,8 @@ export interface BoardPiece {
 }
 
 export type NumberPair = [number, number];
+
+export interface DraggingPiece {
+  key: BoardKey;
+  pos: NumberPair;
+}

@@ -10,11 +10,21 @@ type BoardProps = {
 export default function Board(props: BoardProps) {
   const session = useGameSession();
   const snapshot = createMemo(() => session.getSnapshot());
+  const draggingPiece = createMemo(() => {
+    const current = snapshot().draggableCurrent;
+    return current
+      ? {
+          key: current.orig,
+          pos: current.pos,
+        }
+      : undefined;
+  });
 
   return (
     <BoardView
       boardRef={props.ref}
       bounds={props.bounds}
+      draggingPiece={draggingPiece()}
       fallback={<div>Loading...</div>}
       orientation={snapshot().orientation}
       pieces={snapshot().pieces}
