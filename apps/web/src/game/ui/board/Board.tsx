@@ -1,6 +1,7 @@
 import { type Setter, createMemo } from "solid-js";
 import { BoardView } from "@osc/board-solid";
 import { useGameSession } from "../../session/useGameSession.ts";
+import type * as types from "../../rules/types.ts";
 
 type BoardProps = {
   bounds?: DOMRectReadOnly;
@@ -10,25 +11,37 @@ type BoardProps = {
 export default function Board(props: BoardProps) {
   const session = useGameSession();
   const snapshot = createMemo(() => session.getSnapshot());
-  const draggingPiece = createMemo(() => {
-    const current = snapshot().draggableCurrent;
-    return current
-      ? {
-          key: current.orig,
-          pos: current.pos,
-        }
-      : undefined;
-  });
 
   return (
     <BoardView
       boardRef={props.ref}
       bounds={props.bounds}
-      draggingPiece={draggingPiece()}
+      canDragPiece={(key) =>
+        session.getState().interaction.draggable.enabled &&
+        session.board.canSelect(session.getState(), key as types.Key)
+      }
+      canMove={(orig, dest) =>
+        session.board.canMove(
+          session.getState(),
+          orig as types.Key,
+          dest as types.Key,
+        )
+      }
       fallback={<div>Loading...</div>}
+      onMovePiece={(orig, dest) => {
+        session.board.movePiece(
+          session.getState(),
+          orig as types.Key,
+          dest as types.Key,
+        );
+      }}
+      onSelectSquare={(key) => {
+        session.board.selectSquare(session.getState(), key as types.Key);
+      }}
       orientation={snapshot().orientation}
       pieces={snapshot().pieces}
       selectedKey={snapshot().selected}
+      viewOnly={session.getInteraction().viewOnly}
     />
   );
 }

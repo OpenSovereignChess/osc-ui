@@ -1,5 +1,4 @@
 import { type AnimCurrent } from "../input/anim.ts";
-import { type DragCurrent } from "../input/drag.ts";
 import { type Drawable } from "../input/draw.ts";
 import * as fen from "../rules/fen.ts";
 import * as types from "../rules/types.ts";
@@ -31,7 +30,6 @@ export interface InteractionState {
   };
   draggable: {
     enabled: boolean; // Allow drag'n drop to move pieces
-    current?: DragCurrent | null;
   };
   dropmode: {
     active: boolean; // In drop mode (pieces are dropped from a side panel)

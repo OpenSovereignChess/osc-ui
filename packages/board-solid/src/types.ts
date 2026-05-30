@@ -36,3 +36,5 @@ export interface DraggingPiece {
   key: BoardKey;
   pos: NumberPair;
 }
+
+export type BoardPointerEvent = Event & Partial<MouseEvent & TouchEvent>;

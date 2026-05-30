@@ -17,7 +17,6 @@ export function createLocalGameSession(
 
   const getSnapshot = createMemo<GameSnapshot>(() => ({
     coordinates: state.interaction.coordinates,
-    draggableCurrent: state.interaction.draggable.current,
     orientation: state.position.orientation,
     pieces: state.position.pieces,
     selected: state.interaction.selected,
@@ -26,7 +25,6 @@ export function createLocalGameSession(
   const getInteraction = createMemo<InteractionSnapshot>(() => ({
     drawableCurrent: state.interaction.drawable.current,
     drawableEnabled: state.interaction.drawable.enabled,
-    draggableCurrent: state.interaction.draggable.current,
     dropmodeActive: state.interaction.dropmode.active,
     viewOnly: state.interaction.viewOnly,
   }));

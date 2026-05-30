@@ -1,33 +1,7 @@
 import { type SetStoreFunction } from "solid-js/store";
-import { BOARD_SIZE, BOARD_SIZE_ZERO_INDEX } from "../rules/constants.ts";
 import { type State } from "../state/state.ts";
 import * as types from "../rules/types.ts";
 import * as util from "../rules/util.ts";
-import type { DragCurrent } from "./drag.ts";
-
-export function getKeyAtDomPos(
-  pos: types.NumberPair,
-  asWhite: boolean,
-  bounds: DOMRectReadOnly,
-): types.Key | undefined {
-  let file = Math.floor((BOARD_SIZE * (pos[0] - bounds.left)) / bounds.width);
-  if (!asWhite) {
-    file = BOARD_SIZE_ZERO_INDEX - file;
-  }
-  let rank =
-    BOARD_SIZE_ZERO_INDEX -
-    Math.floor((BOARD_SIZE * (pos[1] - bounds.top)) / bounds.height);
-  if (!asWhite) {
-    rank = BOARD_SIZE_ZERO_INDEX - rank;
-  }
-  return file >= 0 && file < BOARD_SIZE && rank >= 0 && rank < BOARD_SIZE
-    ? util.pos2key([file, rank])
-    : undefined;
-}
-
-export function whitePov(s: State): boolean {
-  return s.position.orientation === "white";
-}
 
 function isMovable(state: State, orig: types.Key): boolean {
   const piece = state.position.pieces.get(orig);
@@ -122,42 +96,8 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     return false;
   }
 
-  function startDrag(state: State, current: DragCurrent): void {
-    if (!isMovable(state, current.orig)) {
-      return;
-    }
-
-    setState("interaction", "draggable", "current", current);
-  }
-
-  function updateDrag(state: State, pos: types.NumberPair): void {
-    const current = state.interaction.draggable.current;
-    if (!current) {
-      return;
-    }
-    const bounds = state.layout.dom?.bounds();
-    const dest = bounds
-      ? getKeyAtDomPos(pos, whitePov(state), bounds)
-      : undefined;
-
-    setState("interaction", "draggable", "current", (current) =>
-      current
-        ? {
-            ...current,
-            keyHasChanged: current.keyHasChanged || current.orig !== dest,
-            pos,
-          }
-        : current,
-    );
-  }
-
-  function cancelDrag(): void {
-    setState("interaction", "draggable", "current", null);
-  }
-
-  function dragMove(state: State, orig: types.Key, dest: types.Key): boolean {
+  function movePiece(state: State, orig: types.Key, dest: types.Key): boolean {
     const moved = userMove(state, orig, dest);
-    setState("interaction", "draggable", "current", null);
     setState("interaction", "stats", { dragged: moved });
     return moved;
   }
@@ -205,11 +145,8 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
   return {
     canMove,
     canSelect: isMovable,
-    cancelDrag,
-    dragMove,
+    movePiece,
     selectSquare,
-    startDrag,
-    updateDrag,
   };
 }
 

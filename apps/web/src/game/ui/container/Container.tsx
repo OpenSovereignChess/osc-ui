@@ -5,7 +5,6 @@ import * as types from "../../rules/types.ts";
 import * as util from "../../rules/util.ts";
 import Board from "../board/Board.tsx";
 import Coords from "../coords/Coords.tsx";
-import Events from "../events/Events.tsx";
 
 import "./container.css";
 
@@ -30,7 +29,7 @@ export default function Container() {
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [boardEl, setBoardEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
-  const [eventsBound, setEventsBound] = createSignal<boolean>(false);
+  const [domRegistered, setDomRegistered] = createSignal<boolean>(false);
   const session = useGameSession();
 
   // TODO: We need to update bounds on state.dom.bounds when we call updateBounds
@@ -71,7 +70,7 @@ export default function Container() {
   });
 
   createEffect(() => {
-    if (eventsBound() || !wrapEl() || !containerEl() || !boardEl()) {
+    if (domRegistered() || !wrapEl() || !containerEl() || !boardEl()) {
       return;
     }
 
@@ -85,7 +84,7 @@ export default function Container() {
     };
 
     session.setDom(dom);
-    setEventsBound(true);
+    setDomRegistered(true);
   });
 
   createEffect(() => {
@@ -99,7 +98,6 @@ export default function Container() {
 
   return (
     <>
-      <Events boardEl={boardEl()} />
       <div class="wrap w-full h-full" ref={setWrapEl}>
         <div class="sc-container" ref={setContainerEl}>
           <Board ref={setBoardEl} bounds={bounds()} />

@@ -51,13 +51,33 @@ export function key2pos(key: BoardKey): [number, number] {
 
 export function posToTranslate(bounds: DOMRectReadOnly) {
   return (pos: [number, number], orientation: BoardOrientation): NumberPair => [
-    (
-      (whitePov(orientation) ? pos[0] : BOARD_SIZE_ZERO_INDEX - pos[0]) *
-      bounds.width
-    ) / BOARD_SIZE,
-    (
-      (whitePov(orientation) ? BOARD_SIZE_ZERO_INDEX - pos[1] : pos[1]) *
-      bounds.height
-    ) / BOARD_SIZE,
+    ((whitePov(orientation) ? pos[0] : BOARD_SIZE_ZERO_INDEX - pos[0]) *
+      bounds.width) /
+      BOARD_SIZE,
+    ((whitePov(orientation) ? BOARD_SIZE_ZERO_INDEX - pos[1] : pos[1]) *
+      bounds.height) /
+      BOARD_SIZE,
   ];
+}
+
+export function getKeyAtDomPos(
+  pos: NumberPair,
+  orientation: BoardOrientation,
+  bounds: DOMRectReadOnly,
+): BoardKey | undefined {
+  let file = Math.floor((BOARD_SIZE * (pos[0] - bounds.left)) / bounds.width);
+  if (!whitePov(orientation)) {
+    file = BOARD_SIZE_ZERO_INDEX - file;
+  }
+
+  let rank =
+    BOARD_SIZE_ZERO_INDEX -
+    Math.floor((BOARD_SIZE * (pos[1] - bounds.top)) / bounds.height);
+  if (!whitePov(orientation)) {
+    rank = BOARD_SIZE_ZERO_INDEX - rank;
+  }
+
+  return file >= 0 && file < BOARD_SIZE && rank >= 0 && rank < BOARD_SIZE
+    ? `${files[file]}${ranks[rank]}`
+    : undefined;
 }
