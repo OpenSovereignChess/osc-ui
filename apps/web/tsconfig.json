@@ -7,6 +7,7 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "paths": {
+      "@osc/board-core": ["../../packages/board-core/src/index.ts"],
       "@osc/board-solid": ["../../packages/board-solid/src/index.ts"]
     }
   }

@@ -1,11 +1,11 @@
 import { createMemo } from "solid-js";
-import { key2pos, posToTranslate } from "./render.ts";
+import { key2pos, posToTranslate } from "@osc/board-core";
 import type {
   BoardKey,
   BoardOrientation,
   BoardPiece,
   NumberPair,
-} from "./types.ts";
+} from "@osc/board-core";
 
 import "./styles/piece.generated.css";
 import "./styles/piece.css";

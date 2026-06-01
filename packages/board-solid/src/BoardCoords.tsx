@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js";
-import { files, ranks } from "./render.ts";
-import type { BoardOrientation } from "./types.ts";
+import { files, ranks } from "@osc/board-core";
+import type { BoardOrientation } from "@osc/board-core";
 
 import "./styles/coords.css";
 

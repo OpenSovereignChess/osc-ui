@@ -11,6 +11,9 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
+        "@osc/board-core": fileURLToPath(
+          new URL("../../packages/board-core/src/index.ts", import.meta.url),
+        ),
         "@osc/board-solid": fileURLToPath(
           new URL("../../packages/board-solid/src/index.ts", import.meta.url),
         ),

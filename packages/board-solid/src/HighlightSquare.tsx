@@ -1,6 +1,6 @@
 import { Show, createMemo } from "solid-js";
-import { key2pos, posToTranslate } from "./render.ts";
-import type { BoardKey, BoardOrientation, NumberPair } from "./types.ts";
+import { key2pos, posToTranslate } from "@osc/board-core";
+import type { BoardKey, BoardOrientation, NumberPair } from "@osc/board-core";
 
 import "./styles/square.css";
 

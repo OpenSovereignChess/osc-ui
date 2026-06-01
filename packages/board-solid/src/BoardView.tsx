@@ -9,19 +9,19 @@ import {
 } from "solid-js";
 import PieceSprite from "./PieceSprite.tsx";
 import HighlightSquare from "./HighlightSquare.tsx";
-import { getKeyAtDomPos } from "./render.ts";
 import {
   changedTouchPosition,
   eventPosition,
+  getKeyAtDomPos,
   isRightButton,
-} from "./pointer.ts";
+} from "@osc/board-core";
 import type {
   BoardKey,
   BoardOrientation,
   BoardPointerEvent,
   BoardPiece,
   DraggingPiece,
-} from "./types.ts";
+} from "@osc/board-core";
 
 import "./styles/board.css";
 
