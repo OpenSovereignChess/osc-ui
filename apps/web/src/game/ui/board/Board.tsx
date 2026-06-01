@@ -28,6 +28,9 @@ export default function Board(props: BoardProps) {
         )
       }
       fallback={<div>Loading...</div>}
+      onCancelDrag={() => {
+        session.board.cancelDrag();
+      }}
       onMovePiece={(orig, dest) => {
         session.board.movePiece(
           session.getState(),

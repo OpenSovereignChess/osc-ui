@@ -102,6 +102,11 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     return moved;
   }
 
+  function cancelDrag(): void {
+    unselect();
+    setState("interaction", "stats", { dragged: false });
+  }
+
   function selectSquare(state: State, key: types.Key, force?: boolean): void {
     console.log("board.selectSquare", { key, state });
     if (state.interaction.selected) {
@@ -143,6 +148,7 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
   }
 
   return {
+    cancelDrag,
     canMove,
     canSelect: isMovable,
     movePiece,

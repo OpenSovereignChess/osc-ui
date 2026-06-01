@@ -10,10 +10,13 @@ import {
 import PieceSprite from "./PieceSprite.tsx";
 import HighlightSquare from "./HighlightSquare.tsx";
 import {
+  DRAG_INTENT_DISTANCE_SQUARED,
   changedTouchPosition,
   eventPosition,
   getKeyAtDomPos,
+  hasDragIntent as detectDragIntent,
   isRightButton,
+  shouldCancelSameSquareDrop,
 } from "@osc/board-core";
 import type {
   BoardKey,
@@ -21,6 +24,7 @@ import type {
   BoardPointerEvent,
   BoardPiece,
   DraggingPiece,
+  NumberPair,
 } from "@osc/board-core";
 
 import "./styles/board.css";
@@ -31,6 +35,7 @@ type BoardViewProps = {
   canDragPiece?: (key: BoardKey, piece: BoardPiece) => boolean;
   canMove?: (orig: BoardKey, dest: BoardKey) => boolean;
   fallback?: JSX.Element;
+  onCancelDrag?: (key: BoardKey) => void;
   onMovePiece?: (orig: BoardKey, dest: BoardKey) => void;
   onSelectSquare?: (key: BoardKey) => void;
   orientation: BoardOrientation;
@@ -42,6 +47,9 @@ type BoardViewProps = {
 export default function BoardView(props: BoardViewProps) {
   let boardEl: HTMLElement | undefined;
   const [draggingPiece, setDraggingPiece] = createSignal<DraggingPiece>();
+  const [dragStartPosition, setDragStartPosition] = createSignal<NumberPair>();
+  const [hasDragIntent, setHasDragIntent] = createSignal(false);
+  const [dropTargetKey, setDropTargetKey] = createSignal<BoardKey>();
   const pieces = createMemo(() => new Map([...props.pieces]));
 
   const setBoardRef = (el: HTMLElement) => {
@@ -55,13 +63,32 @@ export default function BoardView(props: BoardViewProps) {
   const beginDrag = (
     key: BoardKey,
     piece: BoardPiece,
-    pos: [number, number],
+    pos: NumberPair,
   ) => {
     if (!canDrag(key, piece)) {
       return;
     }
     setDraggingPiece({ key, pos });
+    setDragStartPosition(pos);
+    setHasDragIntent(false);
+    setDropTargetFromPosition(pos);
     bindDocument();
+  };
+
+  const setDropTargetFromPosition = (pos: NumberPair) => {
+    if (!props.bounds) {
+      setDropTargetKey(undefined);
+      return;
+    }
+
+    setDropTargetKey(getKeyAtDomPos(pos, props.orientation, props.bounds));
+  };
+
+  const clearDragState = () => {
+    setDropTargetKey(undefined);
+    setDraggingPiece(undefined);
+    setDragStartPosition(undefined);
+    setHasDragIntent(false);
   };
 
   const onStart = (e: BoardPointerEvent) => {
@@ -119,6 +146,13 @@ export default function BoardView(props: BoardViewProps) {
       if (e.cancelable !== false) {
         e.preventDefault();
       }
+      const startPosition = dragStartPosition();
+      if (startPosition) {
+        if (detectDragIntent(startPosition, pos, DRAG_INTENT_DISTANCE_SQUARED)) {
+          setHasDragIntent(true);
+        }
+      }
+      setDropTargetFromPosition(pos);
       setDraggingPiece((current) => (current ? { ...current, pos } : current));
     };
 
@@ -127,20 +161,24 @@ export default function BoardView(props: BoardViewProps) {
       const current = draggingPiece();
       const pos = eventPosition(e) ?? changedTouchPosition(e) ?? current?.pos;
       if (!current || !pos || !props.bounds) {
-        setDraggingPiece(undefined);
+        clearDragState();
         return;
       }
 
       const dest = getKeyAtDomPos(pos, props.orientation, props.bounds);
       if (dest && dest !== current.key) {
         props.onMovePiece?.(current.key, dest);
+      } else if (
+        shouldCancelSameSquareDrop(current.key, dest, hasDragIntent())
+      ) {
+        props.onCancelDrag?.(current.key);
       }
-      setDraggingPiece(undefined);
+      clearDragState();
     };
 
     const onCancel = () => {
       cleanup();
-      setDraggingPiece(undefined);
+      clearDragState();
     };
 
     const cleanup = () => {
@@ -197,8 +235,16 @@ export default function BoardView(props: BoardViewProps) {
       </For>
       <HighlightSquare
         bounds={props.bounds}
-        colorClass="bg-red"
+        colorClass="selected"
         key={props.selectedKey}
+        orientation={props.orientation}
+      />
+      <HighlightSquare
+        bounds={props.bounds}
+        colorClass={`drop-target${
+          dropTargetKey() && pieces().has(dropTargetKey()!) ? " occupied" : ""
+        }`}
+        key={dropTargetKey()}
         orientation={props.orientation}
       />
     </div>

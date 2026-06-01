@@ -6,3 +6,25 @@
   height: 6.25%;
   pointer-events: none;
 }
+
+.square.selected {
+  background-color: rgba(0, 0, 0, 0.24);
+  z-index: 1;
+}
+
+.square.drop-target {
+  background: radial-gradient(
+    rgba(20, 85, 30, 0.3) 0%,
+    rgba(20, 85, 30, 0.3) 80%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  z-index: 1;
+}
+
+.square.drop-target.occupied {
+  background: radial-gradient(
+    transparent 0%,
+    transparent 80%,
+    rgba(20, 85, 0, 0.3) 80%
+  );
+}
