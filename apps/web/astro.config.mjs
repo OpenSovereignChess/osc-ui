@@ -17,6 +17,9 @@ export default defineConfig({
         "@osc/board-solid": fileURLToPath(
           new URL("../../packages/board-solid/src/index.ts", import.meta.url),
         ),
+        "@osc/rules": fileURLToPath(
+          new URL("../../packages/rules/src/index.ts", import.meta.url),
+        ),
       },
     },
   },

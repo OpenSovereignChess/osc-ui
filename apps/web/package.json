@@ -16,6 +16,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/solid-js": "^5.1.3",
+    "@osc/rules": "workspace:*",
     "astro": "^5.18.2",
     "solid-js": "^1.9.13"
   },
