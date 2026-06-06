@@ -16,6 +16,7 @@ import {
   getKeyAtDomPos,
   hasDragIntent as detectDragIntent,
   isRightButton,
+  shouldApplyDragDrop,
   shouldCancelSameSquareDrop,
 } from "@osc/board-core";
 import type {
@@ -35,6 +36,7 @@ type BoardViewProps = {
   canDragPiece?: (key: BoardKey, piece: BoardPiece) => boolean;
   canMove?: (orig: BoardKey, dest: BoardKey) => boolean;
   fallback?: JSX.Element;
+  moveHintKeys?: Iterable<BoardKey>;
   onCancelDrag?: (key: BoardKey) => void;
   onMovePiece?: (orig: BoardKey, dest: BoardKey) => void;
   onSelectSquare?: (key: BoardKey) => void;
@@ -51,6 +53,7 @@ export default function BoardView(props: BoardViewProps) {
   const [hasDragIntent, setHasDragIntent] = createSignal(false);
   const [dropTargetKey, setDropTargetKey] = createSignal<BoardKey>();
   const pieces = createMemo(() => new Map([...props.pieces]));
+  const moveHintKeys = createMemo(() => [...(props.moveHintKeys ?? [])]);
 
   const setBoardRef = (el: HTMLElement) => {
     boardEl = el;
@@ -166,8 +169,16 @@ export default function BoardView(props: BoardViewProps) {
       }
 
       const dest = getKeyAtDomPos(pos, props.orientation, props.bounds);
-      if (dest && dest !== current.key) {
-        props.onMovePiece?.(current.key, dest);
+      if (
+        shouldApplyDragDrop(
+          current.key,
+          dest,
+          dest ? (props.canMove?.(current.key, dest) ?? true) : false,
+        )
+      ) {
+        props.onMovePiece?.(current.key, dest!);
+      } else if (dest && dest !== current.key) {
+        props.onCancelDrag?.(current.key);
       } else if (
         shouldCancelSameSquareDrop(current.key, dest, hasDragIntent())
       ) {
@@ -239,6 +250,16 @@ export default function BoardView(props: BoardViewProps) {
         key={props.selectedKey}
         orientation={props.orientation}
       />
+      <For each={moveHintKeys()}>
+        {(key) => (
+          <HighlightSquare
+            bounds={props.bounds}
+            colorClass={`move-hint${pieces().has(key) ? " occupied" : ""}`}
+            key={key}
+            orientation={props.orientation}
+          />
+        )}
+      </For>
       <HighlightSquare
         bounds={props.bounds}
         colorClass={`drop-target${

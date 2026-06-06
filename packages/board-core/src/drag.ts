@@ -20,3 +20,11 @@ export function shouldCancelSameSquareDrop(
 ): boolean {
   return dest === orig && hasIntent;
 }
+
+export function shouldApplyDragDrop(
+  orig: string,
+  dest: string | undefined,
+  canMove: boolean,
+): boolean {
+  return dest !== undefined && dest !== orig && canMove;
+}

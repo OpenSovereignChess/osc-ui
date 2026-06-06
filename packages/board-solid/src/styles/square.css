@@ -28,3 +28,13 @@
     rgba(20, 85, 0, 0.3) 80%
   );
 }
+
+.square.move-hint {
+  background: radial-gradient(
+    circle at center,
+    rgba(20, 85, 30, 0.42) 0%,
+    rgba(20, 85, 30, 0.42) 18%,
+    transparent 19%
+  );
+  z-index: 3;
+}
