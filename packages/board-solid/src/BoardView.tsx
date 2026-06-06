@@ -35,6 +35,7 @@ type BoardViewProps = {
   bounds?: DOMRectReadOnly;
   canDragPiece?: (key: BoardKey, piece: BoardPiece) => boolean;
   canMove?: (orig: BoardKey, dest: BoardKey) => boolean;
+  children?: JSX.Element;
   fallback?: JSX.Element;
   moveHintKeys?: Iterable<BoardKey>;
   onCancelDrag?: (key: BoardKey) => void;
@@ -268,6 +269,7 @@ export default function BoardView(props: BoardViewProps) {
         key={dropTargetKey()}
         orientation={props.orientation}
       />
+      {props.children}
     </div>
   );
 }

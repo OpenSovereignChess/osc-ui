@@ -1,4 +1,4 @@
-import { BoardView } from "@osc/board-solid";
+import { BoardView, key2pos, posToTranslate } from "@osc/board-solid";
 import {
   moveNotation,
   Setup,
@@ -9,10 +9,19 @@ import {
   squareName,
   type Piece,
   type Position,
+  type Role,
 } from "@osc/rules";
-import { For, createEffect, createMemo, createSignal, onCleanup } from "solid-js";
+import {
+  For,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 import { BOARD_SIZE } from "../rules/constants.ts";
 import type * as types from "../rules/types.ts";
+import { promotionRolesForMove, type PromotionRequest } from "./promotion.ts";
 
 import "../ui/container/container.css";
 import "./analysis-board.css";
@@ -58,15 +67,22 @@ interface HistoryTurn {
 }
 
 export default function AnalysisBoard() {
+  let promotionPickerEl: HTMLDivElement | undefined;
   const [stageEl, setStageEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
-  const [positions, setPositions] = createSignal<Position[]>([initialPosition()]);
+  const [positions, setPositions] = createSignal<Position[]>([
+    initialPosition(),
+  ]);
   const [moves, setMoves] = createSignal<HistoryMove[]>([]);
   const [currentIndex, setCurrentIndex] = createSignal(0);
   const [selectedKey, setSelectedKey] = createSignal<types.Key>();
+  const [pendingPromotion, setPendingPromotion] =
+    createSignal<PromotionRequest>();
 
-  const position = createMemo(() => positions()[currentIndex()] ?? positions()[0]);
+  const position = createMemo(
+    () => positions()[currentIndex()] ?? positions()[0],
+  );
   const pieces = createMemo(() => piecesFromPosition(position()));
   const isLatest = createMemo(() => currentIndex() === positions().length - 1);
   const historyTurns = createMemo<HistoryTurn[]>(() => {
@@ -99,26 +115,63 @@ export default function AnalysisBoard() {
     position().legalMovesOf(squareFromName(key)).isNotEmpty;
 
   const canMove = (orig: types.Key, dest: types.Key): boolean =>
-    isLatest() &&
-    legalDestinations().includes(dest) && selectedKey() === orig;
+    isLatest() && legalDestinations().includes(dest) && selectedKey() === orig;
 
-  const movePiece = (orig: types.Key, dest: types.Key): void => {
-    if (!canMove(orig, dest)) {
-      setSelectedKey(undefined);
-      return;
-    }
-
-    const move = normalMove(orig, dest);
+  const playMove = (
+    orig: types.Key,
+    dest: types.Key,
+    promotion?: Role,
+  ): void => {
+    const move = normalMove(orig, dest, promotion);
     const current = position();
     const next = current.play(move);
     setPositions((history) => [...history, next]);
     setMoves((history) => [...history, { san: moveNotation(current, move) }]);
     setCurrentIndex((index) => index + 1);
     setSelectedKey(undefined);
+    setPendingPromotion(undefined);
+  };
+
+  const movePiece = (orig: types.Key, dest: types.Key): void => {
+    if (!canMove(orig, dest)) {
+      setSelectedKey(undefined);
+      setPendingPromotion(undefined);
+      return;
+    }
+
+    const roles = promotionRolesForMove(position(), orig, dest);
+    if (roles.length > 0) {
+      const piece = pieces().get(orig);
+      if (piece) {
+        setPendingPromotion({ orig, dest, piece, roles });
+        setSelectedKey(undefined);
+        return;
+      }
+    }
+
+    playMove(orig, dest);
+  };
+
+  const promote = (role: Role): void => {
+    const pending = pendingPromotion();
+    if (!pending || !pending.roles.includes(role)) {
+      setPendingPromotion(undefined);
+      return;
+    }
+
+    playMove(pending.orig, pending.dest, role);
+  };
+
+  const cancelPromotion = (): void => {
+    setPendingPromotion(undefined);
+    setSelectedKey(undefined);
   };
 
   const selectSquare = (key: types.Key): void => {
     const selected = selectedKey();
+    if (pendingPromotion()) {
+      setPendingPromotion(undefined);
+    }
     if (selected && selected !== key && canMove(selected, key)) {
       movePiece(selected, key);
       return;
@@ -131,6 +184,60 @@ export default function AnalysisBoard() {
   createEffect(() => {
     currentIndex();
     setSelectedKey(undefined);
+    setPendingPromotion(undefined);
+  });
+
+  createEffect(() => {
+    if (!pendingPromotion()) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        cancelPromotion();
+      }
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (
+        promotionPickerEl &&
+        event.target instanceof Node &&
+        promotionPickerEl.contains(event.target)
+      ) {
+        return;
+      }
+      cancelPromotion();
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    onCleanup(() => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+    });
+  });
+
+  const promotionPickerStyle = createMemo(() => {
+    const pending = pendingPromotion();
+    const boardBounds = bounds();
+    if (!pending || !boardBounds) {
+      return undefined;
+    }
+
+    const squareSize = boardBounds.width / BOARD_SIZE;
+    const [x, y] = posToTranslate(boardBounds)(key2pos(pending.dest), "white");
+    const width = pending.roles.length * squareSize;
+    const left = Math.min(
+      Math.max(0, x - (width - squareSize) / 2),
+      boardBounds.width - width,
+    );
+    const top = Math.min(Math.max(0, y), boardBounds.height - squareSize);
+
+    return {
+      "--promotion-square-size": `${squareSize}px`,
+      left: `${left}px`,
+      top: `${top}px`,
+    };
   });
 
   createEffect(() => {
@@ -188,7 +295,45 @@ export default function AnalysisBoard() {
               orientation="white"
               pieces={pieces()}
               selectedKey={selectedKey()}
-            />
+            >
+              <Show when={pendingPromotion() && promotionPickerStyle()}>
+                {(style) => (
+                  <div
+                    aria-label="Choose promotion piece"
+                    class="analysis-promotion-picker"
+                    onClick={(event) => event.stopPropagation()}
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onPointerDown={(event) => event.stopPropagation()}
+                    onTouchStart={(event) => event.stopPropagation()}
+                    ref={promotionPickerEl}
+                    role="dialog"
+                    style={style()}
+                  >
+                    <For each={pendingPromotion()!.roles}>
+                      {(role) => (
+                        <button
+                          aria-label={`Promote to ${role}`}
+                          onClick={(event) => event.stopPropagation()}
+                          onPointerDown={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            promote(role);
+                          }}
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class={`analysis-promotion-piece piece ${role} ${
+                              pendingPromotion()!.piece.color
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </For>
+                  </div>
+                )}
+              </Show>
+            </BoardView>
           </div>
         </div>
 
