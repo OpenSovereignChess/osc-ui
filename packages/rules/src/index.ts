@@ -9,3 +9,4 @@ export * from "./setup.ts";
 export * from "./castles.ts";
 export * from "./position.ts";
 export * from "./utils.ts";
+export * from "./notation.ts";
