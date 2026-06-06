@@ -94,52 +94,42 @@
   margin-top: 4px;
 }
 
-.analysis-history-list li button {
+.analysis-history-list li {
   display: grid;
-  width: 100%;
   min-height: 38px;
-  grid-template-columns: 36px minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
   align-items: center;
-  padding: 0 10px;
-  text-align: left;
 }
 
-.analysis-history-list li.active button {
+.analysis-history-list li button {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 30px;
+  overflow: hidden;
+  padding: 0 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysis-history-list li button.active {
   border-color: var(--primary);
   background: var(--primary);
   color: white;
 }
 
-.analysis-history-list li.future button {
+.analysis-history-list li button.future {
   color: var(--muted);
 }
 
-.analysis-history-ply,
-.analysis-history-coords {
+.analysis-history-turn {
+  color: var(--muted);
   font-size: 0.78rem;
-}
-
-.analysis-history-ply {
-  color: inherit;
   font-weight: 850;
-}
-
-.analysis-history-san {
-  overflow: hidden;
-  font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.analysis-history-coords {
-  overflow: hidden;
-  max-width: 86px;
-  color: inherit;
-  font-weight: 650;
-  opacity: 0.72;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: right;
 }
 
 .analysis-history-empty {

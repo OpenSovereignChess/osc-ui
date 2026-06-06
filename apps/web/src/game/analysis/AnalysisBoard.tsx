@@ -1,6 +1,6 @@
 import { BoardView } from "@osc/board-solid";
 import {
-  moveSan,
+  moveNotation,
   Setup,
   SovereignChess,
   initialFEN,
@@ -49,8 +49,12 @@ function updateBounds(
 
 interface HistoryMove {
   readonly san: string;
-  readonly from: types.Key;
-  readonly to: types.Key;
+}
+
+interface HistoryTurn {
+  readonly number: number;
+  readonly first?: HistoryMove;
+  readonly second?: HistoryMove;
 }
 
 export default function AnalysisBoard() {
@@ -65,6 +69,18 @@ export default function AnalysisBoard() {
   const position = createMemo(() => positions()[currentIndex()] ?? positions()[0]);
   const pieces = createMemo(() => piecesFromPosition(position()));
   const isLatest = createMemo(() => currentIndex() === positions().length - 1);
+  const historyTurns = createMemo<HistoryTurn[]>(() => {
+    const entries = moves();
+    const turns: HistoryTurn[] = [];
+    for (let index = 0; index < entries.length; index += 2) {
+      turns.push({
+        number: index / 2 + 1,
+        first: entries[index],
+        second: entries[index + 1],
+      });
+    }
+    return turns;
+  });
 
   const legalDestinations = createMemo<types.Key[]>(() => {
     const selected = selectedKey();
@@ -96,10 +112,7 @@ export default function AnalysisBoard() {
     const current = position();
     const next = current.play(move);
     setPositions((history) => [...history, next]);
-    setMoves((history) => [
-      ...history,
-      { san: moveSan(current, move), from: orig, to: dest },
-    ]);
+    setMoves((history) => [...history, { san: moveNotation(current, move) }]);
     setCurrentIndex((index) => index + 1);
     setSelectedKey(undefined);
   };
@@ -221,24 +234,34 @@ export default function AnalysisBoard() {
           </div>
 
           <ol class="analysis-history-list">
-            <For each={moves()}>
-              {(move, index) => (
-                <li
-                  classList={{
-                    active: currentIndex() === index() + 1,
-                    future: currentIndex() < index() + 1,
-                  }}
-                >
-                  <button
-                    onClick={() => setCurrentIndex(index() + 1)}
-                    type="button"
-                  >
-                    <span class="analysis-history-ply">{index() + 1}.</span>
-                    <span class="analysis-history-san">{move.san}</span>
-                    <span class="analysis-history-coords">
-                      {move.from}-{move.to}
-                    </span>
-                  </button>
+            <For each={historyTurns()}>
+              {(turn) => (
+                <li>
+                  <span class="analysis-history-turn">{turn.number}.</span>
+                  {turn.first && (
+                    <button
+                      classList={{
+                        active: currentIndex() === turn.number * 2 - 1,
+                        future: currentIndex() < turn.number * 2 - 1,
+                      }}
+                      onClick={() => setCurrentIndex(turn.number * 2 - 1)}
+                      type="button"
+                    >
+                      {turn.first.san}
+                    </button>
+                  )}
+                  {turn.second && (
+                    <button
+                      classList={{
+                        active: currentIndex() === turn.number * 2,
+                        future: currentIndex() < turn.number * 2,
+                      }}
+                      onClick={() => setCurrentIndex(turn.number * 2)}
+                      type="button"
+                    >
+                      {turn.second.san}
+                    </button>
+                  )}
                 </li>
               )}
             </For>

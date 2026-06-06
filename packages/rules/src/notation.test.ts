@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { normalMove } from "./models.ts";
-import { moveSan, castleSan, defectionSan } from "./notation.ts";
+import { moveNotation, castleSan, defectionSan } from "./notation.ts";
 import { SovereignChess } from "./position.ts";
 import { Setup } from "./setup.ts";
 
@@ -9,36 +9,36 @@ describe("notation", () => {
     const pos = SovereignChess.fromSetup(
       Setup.parseFen("16/16/16/16/16/16/16/16/16/16/16/16/16/16/8wp7/8wk7 1 w b -"),
     );
-    expect(moveSan(pos, normalMove("i2", "i3"))).toBe("wPi3");
+    expect(moveNotation(pos, normalMove("i2", "i3"))).toBe("wPi2-i3");
   });
 
   test("capture", () => {
     const pos = SovereignChess.fromSetup(
       Setup.parseFen("8bk7/16/16/16/16/16/16/16/16/16/16/16/16/16/8bp7/8wk7 1 w b -"),
     );
-    expect(moveSan(pos, normalMove("i1", "i2"))).toBe("wKxi2");
+    expect(moveNotation(pos, normalMove("i1", "i2"))).toBe("wKi1xi2");
   });
 
-  test("disambiguation", () => {
+  test("starting square removes ambiguity", () => {
     const pos = SovereignChess.fromSetup(
       Setup.parseFen("8bk7/16/16/16/16/16/16/16/16/16/16/16/16/7wn1wn6/16/8wk7 1 w b -"),
     );
-    expect(moveSan(pos, normalMove("h3", "i5"))).toBe("wNhi5");
-    expect(moveSan(pos, normalMove("j3", "i5"))).toBe("wNji5");
+    expect(moveNotation(pos, normalMove("h3", "i5"))).toBe("wNh3-i5");
+    expect(moveNotation(pos, normalMove("j3", "i5"))).toBe("wNj3-i5");
   });
 
   test("promotion", () => {
     const pos = SovereignChess.fromSetup(
       Setup.parseFen("8bk7/16/16/16/16/16/16/16/16/16/7wp8/16/16/16/16/8wk7 1 w b -"),
     );
-    expect(moveSan(pos, normalMove("h6", "h7", "king"))).toBe("wPh7=K");
+    expect(moveNotation(pos, normalMove("h6", "h7", "king"))).toBe("wPh6-h7=K");
   });
 
   test("check suffix", () => {
     const pos = SovereignChess.fromSetup(
       Setup.parseFen("bk15/16/16/16/16/16/16/16/16/16/16/16/16/16/bq15/8wk7 2 w b -"),
     );
-    expect(moveSan(pos, normalMove("a2", "i2"))).toBe("bQi2+");
+    expect(moveNotation(pos, normalMove("a2", "i2"))).toBe("bQa2-i2+");
   });
 
   test("castling includes side and destination", () => {
