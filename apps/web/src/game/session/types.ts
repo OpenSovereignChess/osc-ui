@@ -1,5 +1,6 @@
 import type { Accessor } from "solid-js";
 import type { BoardActions } from "../input/board.ts";
+import type { EditorActions } from "../input/editor.ts";
 import type { State } from "../state/state.ts";
 import type * as types from "../rules/types.ts";
 
@@ -16,11 +17,13 @@ export interface InteractionSnapshot {
   drawableCurrent?: State["interaction"]["drawable"]["current"];
   drawableEnabled: boolean;
   dropmodeActive: boolean;
+  dropmodePiece?: types.Piece;
   viewOnly: boolean;
 }
 
 export interface LocalGameSession {
   board: BoardActions;
+  editor: EditorActions;
   getInteraction: Accessor<InteractionSnapshot>;
   getSnapshot: Accessor<GameSnapshot>;
   getState: Accessor<State>;

@@ -1,43 +1,8 @@
 ---
 import Layout from "./_Layout.astro";
-import Main from "../game/ui/Main.tsx";
+import EditorMain from "../game/editor/EditorMain.tsx";
 ---
 
 <Layout title="Board editor | Open Sovereign Chess">
-  <section class="tool-shell">
-    <aside class="tool-panel">
-      <p class="eyebrow">Position setup</p>
-      <h1>Board editor</h1>
-      <p>
-        The current board implementation lives here now. Editor controls for
-        placing pieces, loading FEN, and exporting positions can be added around
-        this surface.
-      </p>
-      <div class="button-row">
-        <a class="button" href="/analysis/">Analyze position</a>
-        <a class="button disabled" aria-disabled="true">Export FEN</a>
-      </div>
-    </aside>
-    <div class="tool-stage">
-      <div class="editor-board">
-        <Main client:only="solid-js" />
-      </div>
-    </div>
-  </section>
+  <EditorMain client:only="solid-js" />
 </Layout>
-
-<style>
-  .editor-board {
-    width: min(100%, calc(100vh - 220px));
-    min-width: 280px;
-    min-height: 280px;
-    aspect-ratio: 1;
-    margin: 0 auto;
-  }
-
-  @media (max-width: 760px) {
-    .editor-board {
-      width: min(100%, calc(100vh - 260px));
-    }
-  }
-</style>

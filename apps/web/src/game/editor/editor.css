@@ -1,0 +1,240 @@
+.editor-shell {
+  --editor-panel: #f4ecdc;
+  --editor-panel-border: #9b7c4f;
+  --editor-panel-shadow: #3b2a171f;
+  --editor-ink: #1f1a13;
+  --editor-muted: #665845;
+  --editor-stage: linear-gradient(145deg, #f8f2e7 0%, #ead7b3 100%);
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.editor-panel {
+  background: linear-gradient(180deg, #fbf6ec 0%, var(--editor-panel) 100%);
+  border: 1px solid var(--editor-panel-border);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px -28px var(--editor-panel-shadow);
+  color: var(--editor-ink);
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.editor-eyebrow {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7b5c30;
+}
+
+.editor-panel h1 {
+  margin: 0;
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  line-height: 0.95;
+}
+
+.editor-copy,
+.editor-hint {
+  margin: 0;
+  color: var(--editor-muted);
+  line-height: 1.5;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.editor-tool {
+  border: 1px solid #7b5c30;
+  border-radius: 999px;
+  background: #fff9ef;
+  color: var(--editor-ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+}
+
+.editor-tool.active {
+  background: #7b5c30;
+  color: #fffaf2;
+}
+
+.editor-color-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.editor-color-swatch {
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px #0000001a;
+  cursor: pointer;
+}
+
+.editor-color-swatch.active {
+  border-color: #3b2a17;
+  box-shadow:
+    inset 0 0 0 1px #fff,
+    0 0 0 3px #c9ab76;
+}
+
+.editor-color-swatch[data-color="white"] {
+  background: #ffffff;
+}
+
+.editor-color-swatch[data-color="ash"] {
+  background: #c7c9c8;
+}
+
+.editor-color-swatch[data-color="slate"] {
+  background: #586e75;
+}
+
+.editor-color-swatch[data-color="black"] {
+  background: #121212;
+}
+
+.editor-color-swatch[data-color="pink"] {
+  background: #ffafd2;
+}
+
+.editor-color-swatch[data-color="red"] {
+  background: #dc050c;
+}
+
+.editor-color-swatch[data-color="orange"] {
+  background: #f4a736;
+}
+
+.editor-color-swatch[data-color="yellow"] {
+  background: #f7f056;
+}
+
+.editor-color-swatch[data-color="green"] {
+  background: #4eb265;
+}
+
+.editor-color-swatch[data-color="cyan"] {
+  background: #7bafde;
+}
+
+.editor-color-swatch[data-color="navy"] {
+  background: #1965b0;
+}
+
+.editor-color-swatch[data-color="violet"] {
+  background: #882e72;
+}
+
+.editor-piece-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.editor-piece-card {
+  border: 1px solid #b9955d;
+  border-radius: 18px;
+  background: #fffaf1;
+  color: var(--editor-ink);
+  cursor: grab;
+  display: grid;
+  gap: 0.55rem;
+  justify-items: center;
+  padding: 0.85rem;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.editor-piece-card:hover,
+.editor-piece-card:focus-visible {
+  border-color: #7b5c30;
+  box-shadow: 0 14px 26px -22px #3b2a17cc;
+  transform: translateY(-1px);
+}
+
+.editor-piece-card.active {
+  border-color: #7b5c30;
+  box-shadow: inset 0 0 0 1px #7b5c30;
+}
+
+.editor-piece-preview {
+  width: 56px;
+  height: 56px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  display: block;
+}
+
+.editor-piece-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.editor-stage {
+  background: var(--editor-stage);
+  border-radius: 28px;
+  min-height: 640px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.editor-stage::before {
+  content: "";
+  position: absolute;
+  inset: auto auto -90px -90px;
+  width: 220px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle, #ffffffa6 0%, #ffffff00 70%);
+}
+
+.editor-board-frame {
+  width: min(100%, calc(100vh - 220px));
+  min-width: 280px;
+  min-height: 280px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  position: relative;
+}
+
+.editor-piece-ghost {
+  width: 56px;
+  height: 56px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 30;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 10px 18px #00000030);
+}
+
+@media (max-width: 960px) {
+  .editor-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-stage {
+    min-height: unset;
+  }
+
+  .editor-board-frame {
+    width: min(100%, calc(100vh - 320px));
+  }
+}

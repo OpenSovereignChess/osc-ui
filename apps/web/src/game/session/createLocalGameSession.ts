@@ -1,6 +1,7 @@
 import { createMemo } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import { createBoardActions } from "../input/board.ts";
+import { createEditorActions } from "../input/editor.ts";
 import type { State } from "../state/state.ts";
 import type * as types from "../rules/types.ts";
 import type {
@@ -14,6 +15,7 @@ export function createLocalGameSession(
   setState: SetStoreFunction<State>,
 ): LocalGameSession {
   const board = createBoardActions(setState);
+  const editor = createEditorActions(state, setState);
 
   const getSnapshot = createMemo<GameSnapshot>(() => ({
     coordinates: state.interaction.coordinates,
@@ -26,11 +28,13 @@ export function createLocalGameSession(
     drawableCurrent: state.interaction.drawable.current,
     drawableEnabled: state.interaction.drawable.enabled,
     dropmodeActive: state.interaction.dropmode.active,
+    dropmodePiece: state.interaction.dropmode.piece,
     viewOnly: state.interaction.viewOnly,
   }));
 
   return {
     board,
+    editor,
     getInteraction,
     getSnapshot,
     getState: () => state,

@@ -11,16 +11,19 @@ type BoardProps = {
 export default function Board(props: BoardProps) {
   const session = useGameSession();
   const snapshot = createMemo(() => session.getSnapshot());
+  const interaction = createMemo(() => session.getInteraction());
 
   return (
     <BoardView
       boardRef={props.ref}
       bounds={props.bounds}
       canDragPiece={(key) =>
+        !interaction().dropmodeActive &&
         session.getState().interaction.draggable.enabled &&
         session.board.canSelect(session.getState(), key as types.Key)
       }
       canMove={(orig, dest) =>
+        !interaction().dropmodeActive &&
         session.board.canMove(
           session.getState(),
           orig as types.Key,
@@ -39,6 +42,10 @@ export default function Board(props: BoardProps) {
         );
       }}
       onSelectSquare={(key) => {
+        if (interaction().dropmodeActive) {
+          session.editor.applyDrop(key as types.Key);
+          return;
+        }
         session.board.selectSquare(session.getState(), key as types.Key);
       }}
       orientation={snapshot().orientation}
