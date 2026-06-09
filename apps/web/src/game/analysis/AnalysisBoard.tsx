@@ -1,7 +1,6 @@
 import { BoardView, key2pos, posToTranslate } from "@osc/board-solid";
 import {
   moveNotation,
-  Setup,
   SovereignChess,
   initialFEN,
   normalMove,
@@ -20,6 +19,7 @@ import {
   onCleanup,
 } from "solid-js";
 import { BOARD_SIZE } from "../rules/constants.ts";
+import { readSetup } from "../rules/fen.ts";
 import type * as types from "../rules/types.ts";
 import { promotionRolesForMove, type PromotionRequest } from "./promotion.ts";
 
@@ -27,7 +27,47 @@ import "../ui/container/container.css";
 import "./analysis-board.css";
 
 function initialPosition(): Position {
-  return SovereignChess.fromSetup(Setup.parseFen(initialFEN));
+  return positionFromFen(initialFEN);
+}
+
+function positionFromFen(fen: string): Position {
+  return SovereignChess.fromSetup(readSetup(fen));
+}
+
+function fenFromUrl(): string | undefined {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+  return new URL(window.location.href).searchParams.get("fen") ?? undefined;
+}
+
+function initialPositionFromUrl(): Position {
+  const fen = fenFromUrl();
+  if (!fen) {
+    return initialPosition();
+  }
+
+  try {
+    return positionFromFen(fen);
+  } catch {
+    return initialPosition();
+  }
+}
+
+function positionUrl(pathname: string, fen: string): string {
+  const params = new URLSearchParams({ fen });
+  return `${pathname}?${params.toString()}`;
+}
+
+function replaceFenUrl(fen: string): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  window.history.replaceState(
+    null,
+    "",
+    positionUrl(window.location.pathname, fen),
+  );
 }
 
 function piecesFromPosition(position: Position): types.Pieces {
@@ -68,15 +108,18 @@ interface HistoryTurn {
 
 export default function AnalysisBoard() {
   let promotionPickerEl: HTMLDivElement | undefined;
+  let fenOutputEl: HTMLTextAreaElement | undefined;
   const [stageEl, setStageEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
-  const [positions, setPositions] = createSignal<Position[]>([
-    initialPosition(),
-  ]);
+  const rootPosition = initialPositionFromUrl();
+  const [positions, setPositions] = createSignal<Position[]>([rootPosition]);
   const [moves, setMoves] = createSignal<HistoryMove[]>([]);
   const [currentIndex, setCurrentIndex] = createSignal(0);
   const [selectedKey, setSelectedKey] = createSignal<types.Key>();
+  const [fenInput, setFenInput] = createSignal(rootPosition.fen);
+  const [fenError, setFenError] = createSignal<string>();
+  const [fenStatus, setFenStatus] = createSignal<string>();
   const [pendingPromotion, setPendingPromotion] =
     createSignal<PromotionRequest>();
 
@@ -84,6 +127,10 @@ export default function AnalysisBoard() {
     () => positions()[currentIndex()] ?? positions()[0],
   );
   const pieces = createMemo(() => piecesFromPosition(position()));
+  const currentFen = createMemo(() => position().fen);
+  const editPositionHref = createMemo(() =>
+    positionUrl("/editor/", currentFen()),
+  );
   const isLatest = createMemo(() => currentIndex() === positions().length - 1);
   const historyTurns = createMemo<HistoryTurn[]>(() => {
     const entries = moves();
@@ -273,6 +320,42 @@ export default function AnalysisBoard() {
     setCurrentIndex((index) => Math.min(positions().length - 1, index + 1));
   const goToLast = () => setCurrentIndex(positions().length - 1);
 
+  const loadFen = (): void => {
+    try {
+      const next = positionFromFen(fenInput());
+      setPositions([next]);
+      setMoves([]);
+      setCurrentIndex(0);
+      setSelectedKey(undefined);
+      setPendingPromotion(undefined);
+      setFenInput(next.fen);
+      setFenError(undefined);
+      setFenStatus("Position loaded.");
+      replaceFenUrl(next.fen);
+    } catch {
+      setFenStatus(undefined);
+      setFenError("Enter a valid Sovereign Chess FEN.");
+    }
+  };
+
+  const copyFen = async (): Promise<void> => {
+    const fen = currentFen();
+    try {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(fen);
+        setFenStatus("FEN copied.");
+      } else {
+        fenOutputEl?.select();
+        setFenStatus("FEN selected for manual copy.");
+      }
+      setFenError(undefined);
+    } catch {
+      fenOutputEl?.select();
+      setFenStatus(undefined);
+      setFenError("Copy failed. The FEN is selected for manual copy.");
+    }
+  };
+
   return (
     <div class="analysis-board-shell wrap">
       <div class="analysis-board-wrap">
@@ -341,6 +424,45 @@ export default function AnalysisBoard() {
           <div class="analysis-history-header">
             <h2>Move history</h2>
             <span>{moves().length} moves</span>
+          </div>
+
+          <div class="analysis-fen-panel" aria-label="Position FEN">
+            <label for="analysis-current-fen">Current FEN</label>
+            <textarea
+              id="analysis-current-fen"
+              readOnly
+              ref={fenOutputEl}
+              rows="3"
+              value={currentFen()}
+            />
+            <div class="analysis-fen-actions">
+              <button onClick={copyFen} type="button">
+                Copy FEN
+              </button>
+              <a href={editPositionHref()}>Edit position</a>
+            </div>
+            <label for="analysis-load-fen">Load FEN</label>
+            <textarea
+              id="analysis-load-fen"
+              onInput={(event) => {
+                setFenInput(event.currentTarget.value);
+                setFenError(undefined);
+                setFenStatus(undefined);
+              }}
+              rows="3"
+              value={fenInput()}
+            />
+            <button onClick={loadFen} type="button">
+              Load FEN
+            </button>
+            <Show when={fenError()}>
+              {(message) => (
+                <p class="analysis-fen-message error">{message()}</p>
+              )}
+            </Show>
+            <Show when={fenStatus()}>
+              {(message) => <p class="analysis-fen-message">{message()}</p>}
+            </Show>
           </div>
 
           <div class="analysis-history-controls">

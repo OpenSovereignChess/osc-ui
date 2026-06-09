@@ -1,4 +1,10 @@
-import { Board, initialBoardFEN, squareFromName, squareName } from "@osc/rules";
+import {
+  Board,
+  Setup,
+  initialBoardFEN,
+  squareFromName,
+  squareName,
+} from "@osc/rules";
 import * as types from "./types.ts";
 
 export const initial: types.FEN = initialBoardFEN;
@@ -19,4 +25,12 @@ export function write(pieces: types.Pieces): types.FEN {
     board = board.setPieceAt(squareFromName(key), piece);
   }
   return board.fen;
+}
+
+export function readSetup(input: types.FEN): Setup {
+  return Setup.parseFen(input);
+}
+
+export function writeSetup(pieces: types.Pieces): types.FEN {
+  return Setup.parseFen(`${write(pieces)} 1 w b - 0`).fen;
 }

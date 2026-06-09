@@ -111,10 +111,26 @@ export function createEditorActions(
     });
   }
 
+  function replacePieces(pieces: types.Pieces): void {
+    setState("position", {
+      pieces,
+      check: undefined,
+      lastMove: undefined,
+    });
+    setState("interaction", {
+      dropmode: {
+        active: false,
+        piece: undefined,
+      },
+      selected: undefined,
+    });
+  }
+
   return {
     applyDrop,
     clearSquare,
     placePiece,
+    replacePieces,
     setDropPiece,
     stopDropMode,
     toggleDropPiece,

@@ -66,6 +66,70 @@
   color: #fffaf2;
 }
 
+.editor-fen-panel {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.editor-fen-panel label {
+  color: var(--editor-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.editor-fen-panel textarea {
+  width: 100%;
+  min-width: 0;
+  resize: vertical;
+  border: 1px solid #b9955d;
+  border-radius: 8px;
+  background: #fffaf1;
+  color: var(--editor-ink);
+  font:
+    0.78rem/1.35 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  padding: 0.65rem;
+}
+
+.editor-fen-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.editor-fen-actions a,
+.editor-fen-actions button,
+.editor-fen-panel > button {
+  display: inline-grid;
+  min-height: 38px;
+  place-items: center;
+  border: 1px solid #7b5c30;
+  border-radius: 8px;
+  background: #fff9ef;
+  color: var(--editor-ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.editor-fen-message {
+  margin: 0;
+  color: var(--editor-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.editor-fen-message.error {
+  color: #a32727;
+}
+
 .editor-color-strip {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
