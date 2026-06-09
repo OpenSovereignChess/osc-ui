@@ -426,45 +426,6 @@ export default function AnalysisBoard() {
             <span>{moves().length} moves</span>
           </div>
 
-          <div class="analysis-fen-panel" aria-label="Position FEN">
-            <label for="analysis-current-fen">Current FEN</label>
-            <textarea
-              id="analysis-current-fen"
-              readOnly
-              ref={fenOutputEl}
-              rows="3"
-              value={currentFen()}
-            />
-            <div class="analysis-fen-actions">
-              <button onClick={copyFen} type="button">
-                Copy FEN
-              </button>
-              <a href={editPositionHref()}>Edit position</a>
-            </div>
-            <label for="analysis-load-fen">Load FEN</label>
-            <textarea
-              id="analysis-load-fen"
-              onInput={(event) => {
-                setFenInput(event.currentTarget.value);
-                setFenError(undefined);
-                setFenStatus(undefined);
-              }}
-              rows="3"
-              value={fenInput()}
-            />
-            <button onClick={loadFen} type="button">
-              Load FEN
-            </button>
-            <Show when={fenError()}>
-              {(message) => (
-                <p class="analysis-fen-message error">{message()}</p>
-              )}
-            </Show>
-            <Show when={fenStatus()}>
-              {(message) => <p class="analysis-fen-message">{message()}</p>}
-            </Show>
-          </div>
-
           <div class="analysis-history-controls">
             <button
               aria-label="Go to first move"
@@ -537,6 +498,45 @@ export default function AnalysisBoard() {
           {moves().length === 0 && (
             <p class="analysis-history-empty">No moves yet.</p>
           )}
+
+          <div class="analysis-fen-panel" aria-label="Position FEN">
+            <label for="analysis-current-fen">Current FEN</label>
+            <textarea
+              id="analysis-current-fen"
+              readOnly
+              ref={fenOutputEl}
+              rows="3"
+              value={currentFen()}
+            />
+            <div class="analysis-fen-actions">
+              <button onClick={copyFen} type="button">
+                Copy FEN
+              </button>
+              <a href={editPositionHref()}>Edit position</a>
+            </div>
+            <label for="analysis-load-fen">Load FEN</label>
+            <textarea
+              id="analysis-load-fen"
+              onInput={(event) => {
+                setFenInput(event.currentTarget.value);
+                setFenError(undefined);
+                setFenStatus(undefined);
+              }}
+              rows="3"
+              value={fenInput()}
+            />
+            <button onClick={loadFen} type="button">
+              Load FEN
+            </button>
+            <Show when={fenError()}>
+              {(message) => (
+                <p class="analysis-fen-message error">{message()}</p>
+              )}
+            </Show>
+            <Show when={fenStatus()}>
+              {(message) => <p class="analysis-fen-message">{message()}</p>}
+            </Show>
+          </div>
         </aside>
       </div>
     </div>

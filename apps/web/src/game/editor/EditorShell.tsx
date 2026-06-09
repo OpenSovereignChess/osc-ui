@@ -279,42 +279,6 @@ export default function EditorShell() {
             Stop placing
           </button>
         </div>
-        <div class="editor-fen-panel" aria-label="Position FEN">
-          <label for="editor-current-fen">Current FEN</label>
-          <textarea
-            id="editor-current-fen"
-            readOnly
-            ref={fenOutputEl}
-            rows="3"
-            value={currentFen()}
-          />
-          <div class="editor-fen-actions">
-            <button onClick={copyFen} type="button">
-              Copy FEN
-            </button>
-            <a href={analysisPositionHref()}>Analyze position</a>
-          </div>
-          <label for="editor-load-fen">Load FEN</label>
-          <textarea
-            id="editor-load-fen"
-            onInput={(event) => {
-              setFenInput(event.currentTarget.value);
-              setFenError(undefined);
-              setFenStatus(undefined);
-            }}
-            rows="3"
-            value={fenInput()}
-          />
-          <button onClick={loadFen} type="button">
-            Load FEN
-          </button>
-          <Show when={fenError()}>
-            {(message) => <p class="editor-fen-message error">{message()}</p>}
-          </Show>
-          <Show when={fenStatus()}>
-            {(message) => <p class="editor-fen-message">{message()}</p>}
-          </Show>
-        </div>
         <div
           class="editor-color-strip"
           aria-label="Choose piece color"
@@ -362,6 +326,42 @@ export default function EditorShell() {
           </For>
         </div>
         <p class="editor-hint">Active tool: {activeToolLabel()}</p>
+        <div class="editor-fen-panel" aria-label="Position FEN">
+          <label for="editor-current-fen">Current FEN</label>
+          <textarea
+            id="editor-current-fen"
+            readOnly
+            ref={fenOutputEl}
+            rows="3"
+            value={currentFen()}
+          />
+          <div class="editor-fen-actions">
+            <button onClick={copyFen} type="button">
+              Copy FEN
+            </button>
+            <a href={analysisPositionHref()}>Analyze position</a>
+          </div>
+          <label for="editor-load-fen">Load FEN</label>
+          <textarea
+            id="editor-load-fen"
+            onInput={(event) => {
+              setFenInput(event.currentTarget.value);
+              setFenError(undefined);
+              setFenStatus(undefined);
+            }}
+            rows="3"
+            value={fenInput()}
+          />
+          <button onClick={loadFen} type="button">
+            Load FEN
+          </button>
+          <Show when={fenError()}>
+            {(message) => <p class="editor-fen-message error">{message()}</p>}
+          </Show>
+          <Show when={fenStatus()}>
+            {(message) => <p class="editor-fen-message">{message()}</p>}
+          </Show>
+        </div>
       </aside>
       <div class="editor-stage">
         <div class="editor-board-frame">
