@@ -109,6 +109,7 @@ interface HistoryTurn {
 export default function AnalysisBoard() {
   let promotionPickerEl: HTMLDivElement | undefined;
   let fenOutputEl: HTMLTextAreaElement | undefined;
+  let historyListEl: HTMLOListElement | undefined;
   const [stageEl, setStageEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
@@ -232,6 +233,30 @@ export default function AnalysisBoard() {
     currentIndex();
     setSelectedKey(undefined);
     setPendingPromotion(undefined);
+  });
+
+  createEffect(() => {
+    const index = currentIndex();
+    const moveCount = moves().length;
+
+    if (!historyListEl || index === 0 || index > moveCount) {
+      return;
+    }
+
+    const activeMove = historyListEl.querySelector<HTMLElement>(
+      `[data-history-index="${index}"]`,
+    );
+    if (!activeMove) {
+      return;
+    }
+
+    const listRect = historyListEl.getBoundingClientRect();
+    const activeRect = activeMove.getBoundingClientRect();
+    if (activeRect.top < listRect.top) {
+      historyListEl.scrollTop -= listRect.top - activeRect.top;
+    } else if (activeRect.bottom > listRect.bottom) {
+      historyListEl.scrollTop += activeRect.bottom - listRect.bottom;
+    }
   });
 
   createEffect(() => {
@@ -461,7 +486,7 @@ export default function AnalysisBoard() {
             </button>
           </div>
 
-          <ol class="analysis-history-list">
+          <ol class="analysis-history-list" ref={historyListEl}>
             <For each={historyTurns()}>
               {(turn) => (
                 <li>
@@ -473,6 +498,7 @@ export default function AnalysisBoard() {
                         future: currentIndex() < turn.number * 2 - 1,
                       }}
                       onClick={() => setCurrentIndex(turn.number * 2 - 1)}
+                      data-history-index={turn.number * 2 - 1}
                       type="button"
                     >
                       {turn.first.san}
@@ -485,6 +511,7 @@ export default function AnalysisBoard() {
                         future: currentIndex() < turn.number * 2,
                       }}
                       onClick={() => setCurrentIndex(turn.number * 2)}
+                      data-history-index={turn.number * 2}
                       type="button"
                     >
                       {turn.second.san}
