@@ -5,6 +5,7 @@ import * as types from "../../rules/types.ts";
 import * as util from "../../rules/util.ts";
 import Board from "../board/Board.tsx";
 import Coords from "../coords/Coords.tsx";
+import BoardPlayControls from "../play-controls/BoardPlayControls.tsx";
 
 import "./container.css";
 
@@ -98,11 +99,16 @@ export default function Container() {
 
   return (
     <>
-      <div class="wrap w-full h-full" ref={setWrapEl}>
-        <div class="sc-container" ref={setContainerEl}>
-          <Board ref={setBoardEl} bounds={bounds()} />
-          <Coords />
+      <div class="game-board-shell">
+        <div class="wrap w-full h-full" ref={setWrapEl}>
+          <div class="sc-container" ref={setContainerEl}>
+            <Board ref={setBoardEl} bounds={bounds()} />
+            <Coords />
+          </div>
         </div>
+        <aside class="game-board-controls">
+          <BoardPlayControls castleActions={[]} defectActions={[]} />
+        </aside>
       </div>
     </>
   );

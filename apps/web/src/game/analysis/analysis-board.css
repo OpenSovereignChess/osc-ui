@@ -247,6 +247,11 @@
   font-size: 0.92rem;
 }
 
+.analysis-play-controls-panel {
+  border-top: 1px solid var(--line);
+  padding: 10px;
+}
+
 @media (max-width: 980px) {
   .analysis-board-wrap {
     grid-template-columns: 1fr;

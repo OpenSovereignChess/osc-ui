@@ -1,0 +1,55 @@
+.board-play-controls {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+}
+
+.board-play-control-group {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.board-play-control-group h2 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.board-play-control-actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.board-play-control-actions button {
+  min-width: 82px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 10px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.board-play-control-actions button:hover:not(:disabled),
+.board-play-control-actions button:focus-visible:not(:disabled) {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.board-play-control-actions button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.55;
+}

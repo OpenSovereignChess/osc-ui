@@ -1,5 +1,7 @@
 import { BoardView, key2pos, posToTranslate } from "@osc/board-solid";
 import {
+  castleSan,
+  defectionSan,
   moveNotation,
   SovereignChess,
   initialFEN,
@@ -7,8 +9,10 @@ import {
   squareFromName,
   squareName,
   type Piece,
+  type PieceColor,
   type Position,
   type Role,
+  type Square,
 } from "@osc/rules";
 import {
   For,
@@ -21,6 +25,9 @@ import {
 import { BOARD_SIZE } from "../rules/constants.ts";
 import { readSetup } from "../rules/fen.ts";
 import type * as types from "../rules/types.ts";
+import BoardPlayControls, {
+  type PlayControlAction,
+} from "../ui/play-controls/BoardPlayControls.tsx";
 import { promotionRolesForMove, type PromotionRequest } from "./promotion.ts";
 
 import "../ui/container/container.css";
@@ -145,6 +152,35 @@ export default function AnalysisBoard() {
     }
     return turns;
   });
+  const castleActions = createMemo<PlayControlAction[]>(() => {
+    if (!isLatest()) {
+      return [];
+    }
+
+    const current = position();
+    const actions: PlayControlAction[] = [];
+    for (const [from, destinations] of current.legalCastlingMoves) {
+      for (const to of destinations.squares()) {
+        const move = normalMove(squareName(from), squareName(to));
+        actions.push({
+          label: castleSan(current, move),
+          onClick: () => playCastle(from, to),
+        });
+      }
+    }
+    return actions;
+  });
+  const defectActions = createMemo<PlayControlAction[]>(() => {
+    if (!isLatest()) {
+      return [];
+    }
+
+    const current = position();
+    return [...current.controlledColors].map((color) => ({
+      label: color,
+      onClick: () => playDefection(color),
+    }));
+  });
 
   const legalDestinations = createMemo<types.Key[]>(() => {
     const selected = selectedKey();
@@ -178,6 +214,25 @@ export default function AnalysisBoard() {
     setCurrentIndex((index) => index + 1);
     setSelectedKey(undefined);
     setPendingPromotion(undefined);
+  };
+
+  const appendPosition = (next: Position, san: string): void => {
+    setPositions((history) => [...history, next]);
+    setMoves((history) => [...history, { san }]);
+    setCurrentIndex((index) => index + 1);
+    setSelectedKey(undefined);
+    setPendingPromotion(undefined);
+  };
+
+  const playCastle = (from: Square, to: Square): void => {
+    const current = position();
+    const move = normalMove(squareName(from), squareName(to));
+    appendPosition(current.playCastle(move), castleSan(current, move));
+  };
+
+  const playDefection = (color: PieceColor): void => {
+    const current = position();
+    appendPosition(current.defect(color), defectionSan(current, color));
   };
 
   const movePiece = (orig: types.Key, dest: types.Key): void => {
@@ -525,6 +580,13 @@ export default function AnalysisBoard() {
           {moves().length === 0 && (
             <p class="analysis-history-empty">No moves yet.</p>
           )}
+
+          <div class="analysis-play-controls-panel">
+            <BoardPlayControls
+              castleActions={castleActions()}
+              defectActions={defectActions()}
+            />
+          </div>
 
           <div class="analysis-fen-panel" aria-label="Position FEN">
             <label for="analysis-current-fen">Current FEN</label>
