@@ -126,8 +126,13 @@ export function createEditorActions(
     });
   }
 
+  function clearBoard(): void {
+    replacePieces(new Map());
+  }
+
   return {
     applyDrop,
+    clearBoard,
     clearSquare,
     placePiece,
     replacePieces,

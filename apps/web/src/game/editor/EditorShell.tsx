@@ -180,6 +180,15 @@ export default function EditorShell() {
     }
   };
 
+  const clearBoard = (): void => {
+    session.editor.clearBoard();
+    const emptyFen = writeSetup(new Map());
+    setFenInput(emptyFen);
+    setFenError(undefined);
+    setFenStatus("Board cleared.");
+    replaceFenUrl(emptyFen);
+  };
+
   const applyDropAtClientPosition = (clientX: number, clientY: number) => {
     const dom = session.getState().layout.dom;
     if (!dom) {
@@ -277,6 +286,9 @@ export default function EditorShell() {
             onClick={() => session.editor.stopDropMode()}
           >
             Stop placing
+          </button>
+          <button class="editor-tool" type="button" onClick={clearBoard}>
+            Clear board
           </button>
         </div>
         <div
