@@ -3,13 +3,14 @@
 ## Current state
 
 The original single Astro app now lives in `apps/web`. The repo has started
-extracting reusable game and board code into packages while keeping the Dart
-server scaffold and shared contract directories in the same workspace.
+extracting reusable game and board code into packages while keeping the Go
+server and shared contract directories in the same workspace.
 
 ## Why this shape
 
 - one repo keeps solo-dev overhead low
-- Dart server support makes shared runtime code less realistic
+- Go keeps the realtime server small, compiled, resource-friendly, and easy to
+  colocate with SQLite on one instance
 - shared protocol and shared fixtures are the stable cross-language contracts
 - browser-specific board rendering can move independently from pure rules
 
@@ -33,16 +34,22 @@ package boundary instead of importing app files from packages.
 
 ### `apps/server`
 
-Dart realtime server scaffold.
+Go realtime server.
 
 Expected to own:
 
-- matchmaking, rooms, player presence, clocks, and authoritative game sessions
-- server-side validation once the Dart rule implementation exists
+- invite-only rooms, player presence, websocket transport, and process-local
+  live game sessions
+- SQLite persistence boundaries for rooms, move logs, completed matches, and
+  reconnect support once needed
+- server-side validation once the Go rule implementation exists
 - transport endpoints that speak the schemas in `packages/protocol`
 
-The server should consume protocol schemas/examples and rule fixtures, but it
-should not depend on TypeScript browser packages.
+The first online milestone is casual/untrusted play: the TypeScript client uses
+`@osc/rules`, while the Go server validates room membership, turn/sequence
+shape, and broadcasts accepted events. The server should consume protocol
+schemas/examples and rule fixtures, but it should not depend on TypeScript
+browser packages.
 
 ### `packages/rules`
 
@@ -59,7 +66,7 @@ Does not own:
 
 - UI state, DOM geometry, pointer/drag events, Solid/Astro components
 - websocket envelopes, matchmaking, rooms, clocks, persistence, or server IO
-- fixture file formats intended to be shared with Dart
+- fixture file formats intended to be shared with Go
 
 This package should stay deterministic and side-effect light. Prefer plain data
 inputs/outputs so both `apps/web` and future tooling can call it directly.
@@ -114,7 +121,7 @@ Owns:
 
 - JSON-oriented websocket schemas
 - message examples
-- notes that can be consumed by the Astro/Solid client and Dart server
+- notes that can be consumed by the Astro/Solid client and Go server
 
 Does not own TypeScript-only runtime code, client session state, or server
 business logic. Generated bindings can be added later, but the source of truth
@@ -133,7 +140,7 @@ Owns:
 - full game scenarios
 
 Does not own executable engine code. Fixtures should be stable, explicit, and
-usable by both TypeScript and Dart tests.
+usable by both TypeScript and Go tests.
 
 ## Dependency direction
 
@@ -161,7 +168,7 @@ Avoid:
    - editor/analysis session
    - future online session
 3. Define the websocket message envelope in `packages/protocol`.
-4. Add fixture-driven tests that both TypeScript and Dart implementations can
+4. Add fixture-driven tests that both TypeScript and Go implementations can
    consume.
 5. Add direct workspace dependencies for board packages in `apps/web` once the
    aliases are no longer only source-level development wiring.

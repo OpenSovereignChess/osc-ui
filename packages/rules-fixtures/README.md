@@ -13,7 +13,7 @@ Use this package for:
 Owns stable, language-neutral data only. It should not contain executable engine
 code or TypeScript-specific helper APIs as the source of truth.
 
-Fixtures are the contract between `packages/rules` and the future Dart rule
+Fixtures are the contract between `packages/rules` and the future Go rule
 implementation in `apps/server`. Add package-local tests in `packages/rules`
 when the behavior is implementation-specific; add fixtures here when the same
 scenario must pass in both runtimes.

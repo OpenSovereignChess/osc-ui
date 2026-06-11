@@ -1,9 +1,0 @@
-name: osc_server
-description: Realtime Dart server for Open Sovereign Chess.
-publish_to: none
-version: 0.0.1
-
-environment:
-  sdk: ^3.0.0
-
-dependencies:

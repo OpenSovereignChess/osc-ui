@@ -1,6 +1,6 @@
 # Protocol
 
-Shared transport contract between the Astro/Solid client and the Dart server.
+Shared transport contract between the Astro/Solid client and the Go server.
 
 Keep this package language-neutral. It should contain JSON-oriented schemas, examples, and notes rather than TypeScript-only runtime code.
 

@@ -14,6 +14,6 @@ Keep this package independent of UI, DOM events, Solid/Astro components, websock
 sessions, matchmaking, clocks, persistence, and server transport. Callers should
 pass plain rule inputs in and receive plain rule outputs back.
 
-Tests that describe behavior shared with the future Dart implementation should be
+Tests that describe behavior shared with the future Go implementation should be
 mirrored in `packages/rules-fixtures` when they become stable cross-language
 cases. Package-local tests can cover TypeScript implementation details.
