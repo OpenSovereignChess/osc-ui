@@ -74,6 +74,7 @@ export default function PlayMain() {
   });
   const createDisabled = () => isCreateDisabled(status(), roomInfo());
   const joinDisabled = () => isJoinDisabled(roomInfo());
+  const boardVisible = () => isBoardVisible(roomInfo());
 
   const updateUrl = (code: string) => {
     const url = playRoomUrl(code);
@@ -151,40 +152,49 @@ export default function PlayMain() {
         setSocket={setSocket}
         setStatus={setStatus}
       />
-      <section class="tool-shell">
+      <section
+        class="tool-shell play-shell"
+        classList={{ "play-shell-lobby": !boardVisible() }}
+      >
         <aside class="tool-panel play-room-panel">
-          <p class="eyebrow">Online play</p>
-          <h1>Play online</h1>
-          <div class="play-room-actions">
-            <button
-              class="button primary"
-              disabled={createDisabled()}
-              onClick={createRoom}
-              type="button"
-            >
-              Create game
-            </button>
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                connect(entryCode());
-              }}
-            >
-              <label for="room-code">Room code</label>
-              <div class="play-room-code-row">
-                <input
-                  id="room-code"
-                  autocomplete="off"
-                  inputmode="text"
-                  onInput={(event) => setEntryCode(event.currentTarget.value)}
-                  value={entryCode()}
-                />
-                <button class="button" disabled={joinDisabled()} type="submit">
-                  Join
-                </button>
-              </div>
-            </form>
-          </div>
+          <Show when={!roomInfo().code}>
+            <p class="eyebrow">Online play</p>
+            <h1>Play online</h1>
+            <div class="play-room-actions">
+              <button
+                class="button primary"
+                disabled={createDisabled()}
+                onClick={createRoom}
+                type="button"
+              >
+                Create game
+              </button>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  connect(entryCode());
+                }}
+              >
+                <label for="room-code">Room code</label>
+                <div class="play-room-code-row">
+                  <input
+                    id="room-code"
+                    autocomplete="off"
+                    inputmode="text"
+                    onInput={(event) => setEntryCode(event.currentTarget.value)}
+                    value={entryCode()}
+                  />
+                  <button
+                    class="button"
+                    disabled={joinDisabled()}
+                    type="submit"
+                  >
+                    Join
+                  </button>
+                </div>
+              </form>
+            </div>
+          </Show>
 
           <div class="play-room-status" aria-live="polite">
             <strong>{statusLabel(status(), roomInfo())}</strong>
@@ -199,9 +209,11 @@ export default function PlayMain() {
             {(message) => <p class="play-room-error">{message()}</p>}
           </Show>
         </aside>
-        <div class="tool-stage play-stage">
-          <Container />
-        </div>
+        <Show when={boardVisible()}>
+          <div class="tool-stage play-stage">
+            <Container />
+          </div>
+        </Show>
       </section>
     </GameProvider>
   );
@@ -418,6 +430,10 @@ export function isCreateDisabled(
 
 export function isJoinDisabled(info: RoomInfo): boolean {
   return info.role !== undefined;
+}
+
+export function isBoardVisible(info: RoomInfo): boolean {
+  return info.code !== "";
 }
 
 function seatLabel(seat?: Seat): string {

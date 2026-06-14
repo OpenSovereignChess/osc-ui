@@ -1,3 +1,12 @@
+.play-shell.play-shell-lobby {
+  grid-template-columns: minmax(280px, 520px);
+  justify-content: center;
+}
+
+.play-shell.play-shell-lobby .play-room-panel {
+  border-right: 1px solid var(--line);
+}
+
 .play-stage {
   min-height: min(900px, calc(100vh - 220px));
 }

@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import {
   handleServerMessage,
+  isBoardVisible,
   isCreateDisabled,
   isJoinDisabled,
   statusLabel,
@@ -178,4 +179,23 @@ test("room action disabled state follows membership", () => {
   expect(isCreateDisabled("connected", createdRoom)).toBe(true);
   expect(isJoinDisabled(createdRoom)).toBe(false);
   expect(isJoinDisabled(joinedRoom)).toBe(true);
+});
+
+test("board is hidden until a room exists", () => {
+  expect(
+    isBoardVisible({
+      code: "",
+      seq: 0,
+      turn: "player1",
+      players: 0,
+    }),
+  ).toBe(false);
+  expect(
+    isBoardVisible({
+      code: "ABCD1234",
+      seq: 0,
+      turn: "player1",
+      players: 1,
+    }),
+  ).toBe(true);
 });
