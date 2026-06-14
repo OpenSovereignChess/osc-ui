@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { GameProvider } from "../provider/GameProvider.tsx";
 import { useGameSession } from "../session/useGameSession.ts";
-import type { SessionMove } from "../session/types.ts";
+import type { SessionAction } from "../session/types.ts";
 import Container from "../ui/container/Container.tsx";
 import {
   createRoomEndpoint,
@@ -17,7 +17,7 @@ import {
   playRoomUrl,
   roomCodeFromLocation,
   roomWebsocketUrl,
-  type Move,
+  type RoomMove,
   type RoomState,
   type Seat,
   type ServerMessage,
@@ -123,7 +123,7 @@ export default function PlayMain() {
     }
   };
 
-  const sendLocalMove = (move: SessionMove) => {
+  const sendLocalMove = (move: SessionAction) => {
     const ws = socket();
     const info = roomInfo();
     if (!ws || ws.readyState !== WebSocket.OPEN || !info.role) {
@@ -134,9 +134,8 @@ export default function PlayMain() {
     }
     ws.send(
       makeMoveMessage({
+        ...move,
         seq: info.seq + 1,
-        orig: move.orig,
-        dest: move.dest,
       }),
     );
   };
@@ -340,8 +339,8 @@ function RoomDetails(props: { info: RoomInfo }) {
 export function handleServerMessage(
   message: ServerMessage,
   handlers: {
-    applyMove: (move: Move) => boolean;
-    applyMoves: (moves: readonly Move[]) => void;
+    applyMove: (move: RoomMove) => boolean;
+    applyMoves: (moves: readonly RoomMove[]) => void;
     setError: (message: string | undefined) => unknown;
     setInfo: ValueSetter<RoomInfo>;
     setSeat: (seat: Seat) => void;
@@ -383,7 +382,7 @@ export function handleServerMessage(
 function applyRoomState(
   state: RoomState,
   handlers: {
-    applyMoves: (moves: readonly Move[]) => void;
+    applyMoves: (moves: readonly RoomMove[]) => void;
     setInfo: ValueSetter<RoomInfo>;
     setSeat: (seat: Seat) => void;
   },

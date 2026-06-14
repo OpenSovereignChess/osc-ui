@@ -9,7 +9,7 @@ import {
   statusSummary,
   type RoomInfo,
 } from "./PlayMain.tsx";
-import type { Move, Seat } from "../online/protocol.ts";
+import type { RoomMove, Seat } from "../online/protocol.ts";
 
 function harness() {
   let info: RoomInfo = {
@@ -20,8 +20,8 @@ function harness() {
   };
   let error: string | undefined;
   let seat: Seat | undefined;
-  const applied: Move[] = [];
-  const replayed: Move[][] = [];
+  const applied: RoomMove[] = [];
+  const replayed: RoomMove[][] = [];
 
   return {
     get applied() {
@@ -40,11 +40,11 @@ function harness() {
       return seat;
     },
     handlers: {
-      applyMove: (move: Move) => {
+      applyMove: (move: RoomMove) => {
         applied.push(move);
         return true;
       },
-      applyMoves: (moves: readonly Move[]) => {
+      applyMoves: (moves: readonly RoomMove[]) => {
         replayed.push([...moves]);
       },
       setError: (message: string | undefined) => {
@@ -64,7 +64,7 @@ function harness() {
 
 test("room_state sets seat, room info, and replays server moves", () => {
   const h = harness();
-  const move: Move = { seq: 1, seat: "player1", orig: "a2", dest: "a3" };
+  const move: RoomMove = { seq: 1, seat: "player1", orig: "a2", dest: "a3" };
 
   handleServerMessage(
     {

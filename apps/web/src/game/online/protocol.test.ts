@@ -38,5 +38,11 @@ describe("online protocol helpers", () => {
       type: "make_move",
       payload: { seq: 1, orig: "a2", dest: "a3" },
     });
+    expect(
+      JSON.parse(makeMoveMessage({ seq: 2, kind: "defect", color: "navy" })),
+    ).toEqual({
+      type: "make_move",
+      payload: { seq: 2, kind: "defect", color: "navy" },
+    });
   });
 });

@@ -1,4 +1,7 @@
 import {
+  castleSan,
+  defectionSan,
+  moveNotation,
   Setup,
   SovereignChess,
   initialFEN,
@@ -9,7 +12,14 @@ import {
   type Side,
 } from "@osc/rules";
 import type * as types from "../rules/types.ts";
-import type { OnlineSeat, SessionMove } from "./types.ts";
+import type {
+  OnlineSeat,
+  SessionAction,
+  SessionActionOption,
+  SessionHistoryMove,
+  SessionHistoryTurn,
+  SessionMove,
+} from "./types.ts";
 
 export function initialRulesPosition(): Position {
   return SovereignChess.fromSetup(Setup.parseFen(initialFEN));
@@ -49,13 +59,93 @@ export function legalDestsForSeat(
 
 export function playRulesMove(
   position: Position,
-  move: SessionMove,
+  move: SessionAction,
 ): Position | undefined {
   try {
-    return position.play(normalMove(move.orig, move.dest));
+    return applyRulesAction(position, move).position;
   } catch {
     return undefined;
   }
+}
+
+export function applyRulesAction(
+  position: Position,
+  action: SessionAction,
+): { position: Position; san: string } {
+  switch (action.kind) {
+    case "castle": {
+      const move = normalMove(action.orig, action.dest);
+      return {
+        position: position.playCastle(move),
+        san: castleSan(position, move),
+      };
+    }
+    case "defect":
+      return {
+        position: position.defect(action.color),
+        san: defectionSan(position, action.color),
+      };
+    default: {
+      const move = normalMove(action.orig, action.dest, action.promotion);
+      return {
+        position: position.play(move),
+        san: moveNotation(position, move),
+      };
+    }
+  }
+}
+
+export function castleActionsForSeat(
+  position: Position,
+  seat?: OnlineSeat,
+): SessionActionOption[] {
+  if (!canAct(position, seat)) {
+    return [];
+  }
+
+  const actions: SessionActionOption[] = [];
+  for (const [from, destinations] of position.legalCastlingMoves) {
+    for (const to of destinations.squares()) {
+      const move = normalMove(squareName(from), squareName(to));
+      actions.push({
+        label: castleSan(position, move),
+        action: {
+          kind: "castle",
+          orig: squareName(from) as types.Key,
+          dest: squareName(to) as types.Key,
+        },
+      });
+    }
+  }
+  return actions;
+}
+
+export function defectActionsForSeat(
+  position: Position,
+  seat?: OnlineSeat,
+): SessionActionOption[] {
+  if (!canAct(position, seat)) {
+    return [];
+  }
+
+  return [...position.controlledColors].map((color) => ({
+    label: color,
+    action: { kind: "defect", color },
+  }));
+}
+
+export function historyTurns(
+  entries: readonly SessionHistoryMove[],
+): SessionHistoryTurn[] {
+  const turns: SessionHistoryTurn[] = [];
+  for (let index = 0; index < entries.length; index += 2) {
+    turns.push({
+      number: index / 2 + 1,
+      first: entries[index],
+      second: entries[index + 1],
+    });
+  }
+  return turns;
 }
 
 export function isRulesMoveLegal(
@@ -65,6 +155,11 @@ export function isRulesMoveLegal(
   return position
     .legalMovesOf(squareFromName(move.orig))
     .has(squareFromName(move.dest));
+}
+
+export function canAct(position: Position, seat?: OnlineSeat): boolean {
+  const side = sideForSeat(seat);
+  return !!side && side === position.turn;
 }
 
 function sideForSeat(seat?: OnlineSeat): Side | undefined {

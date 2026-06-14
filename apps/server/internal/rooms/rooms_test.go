@@ -80,6 +80,45 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 	}
 }
 
+func TestApplyMovePreservesTypedActions(t *testing.T) {
+	store := NewStore()
+	room := store.Create()
+	_, player1, _ := store.Join(room.Code)
+	_, player2, _ := store.Join(room.Code)
+
+	castle, err := store.ApplyMove(
+		room.Code,
+		player1.ID,
+		protocol.ClientMove{Seq: 1, Kind: "castle", Orig: "i1", Dest: "j1"},
+	)
+	if err != nil {
+		t.Fatalf("apply castle: %v", err)
+	}
+	if castle.Kind != "castle" || castle.Orig != "i1" || castle.Dest != "j1" {
+		t.Fatalf("unexpected castle: %+v", castle)
+	}
+
+	defect, err := store.ApplyMove(
+		room.Code,
+		player2.ID,
+		protocol.ClientMove{Seq: 2, Kind: "defect", Color: "navy"},
+	)
+	if err != nil {
+		t.Fatalf("apply defection: %v", err)
+	}
+	if defect.Kind != "defect" || defect.Color != "navy" {
+		t.Fatalf("unexpected defection: %+v", defect)
+	}
+
+	state, err := store.Snapshot(room.Code, player1.ID)
+	if err != nil {
+		t.Fatalf("snapshot: %v", err)
+	}
+	if len(state.Moves) != 2 || state.Moves[1].Color != "navy" {
+		t.Fatalf("unexpected move history: %+v", state.Moves)
+	}
+}
+
 func TestObserversCannotMove(t *testing.T) {
 	store := NewStore()
 	room := store.Create()

@@ -1,4 +1,5 @@
 import type * as types from "../rules/types.ts";
+import type { PieceColor, Role } from "@osc/rules";
 
 export type Seat = "player1" | "player2" | "observer";
 
@@ -10,9 +11,28 @@ export interface Player {
 export interface Move {
   seq: number;
   seat: Seat;
+  kind?: "move";
+  orig: types.Key;
+  dest: types.Key;
+  promotion?: Role;
+}
+
+export interface CastleMove {
+  seq: number;
+  seat: Seat;
+  kind: "castle";
   orig: types.Key;
   dest: types.Key;
 }
+
+export interface DefectionMove {
+  seq: number;
+  seat: Seat;
+  kind: "defect";
+  color: PieceColor;
+}
+
+export type RoomMove = Move | CastleMove | DefectionMove;
 
 export interface RoomState {
   roomCode: string;
@@ -20,7 +40,7 @@ export interface RoomState {
   players: Player[];
   turn: Seat;
   seq: number;
-  moves: Move[] | null;
+  moves: RoomMove[] | null;
 }
 
 export interface MoveRejected {
@@ -36,17 +56,34 @@ export type ServerMessage =
   | { type: "room_state"; payload: RoomState }
   | { type: "player_joined"; payload: { player: Player } }
   | { type: "player_left"; payload: { player: Player } }
-  | { type: "move_applied"; payload: Move }
+  | { type: "move_applied"; payload: RoomMove }
   | { type: "move_rejected"; payload: MoveRejected }
   | { type: "error"; payload: ServerError };
 
 export interface ClientMove {
   seq: number;
+  kind?: "move";
+  orig: types.Key;
+  dest: types.Key;
+  promotion?: Role;
+}
+
+export interface ClientCastle {
+  seq: number;
+  kind: "castle";
   orig: types.Key;
   dest: types.Key;
 }
 
-export function makeMoveMessage(move: ClientMove): string {
+export interface ClientDefection {
+  seq: number;
+  kind: "defect";
+  color: PieceColor;
+}
+
+export type ClientAction = ClientMove | ClientCastle | ClientDefection;
+
+export function makeMoveMessage(move: ClientAction): string {
   return JSON.stringify({ type: "make_move", payload: move });
 }
 

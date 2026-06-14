@@ -34,16 +34,22 @@ type JoinRoom struct {
 }
 
 type ClientMove struct {
-	Seq  int    `json:"seq"`
-	Orig string `json:"orig"`
-	Dest string `json:"dest"`
+	Seq       int    `json:"seq"`
+	Kind      string `json:"kind,omitempty"`
+	Orig      string `json:"orig,omitempty"`
+	Dest      string `json:"dest,omitempty"`
+	Promotion string `json:"promotion,omitempty"`
+	Color     string `json:"color,omitempty"`
 }
 
 type Move struct {
-	Seq  int    `json:"seq"`
-	Seat Seat   `json:"seat"`
-	Orig string `json:"orig"`
-	Dest string `json:"dest"`
+	Seq       int    `json:"seq"`
+	Seat      Seat   `json:"seat"`
+	Kind      string `json:"kind,omitempty"`
+	Orig      string `json:"orig,omitempty"`
+	Dest      string `json:"dest,omitempty"`
+	Promotion string `json:"promotion,omitempty"`
+	Color     string `json:"color,omitempty"`
 }
 
 type Player struct {

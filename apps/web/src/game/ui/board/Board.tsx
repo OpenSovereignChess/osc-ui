@@ -43,30 +43,23 @@ export default function Board(props: BoardProps) {
         session.board.cancelDrag();
       }}
       onMovePiece={(orig, dest) => {
-        const moved = session.board.movePiece(
-          session.getState(),
-          orig as types.Key,
-          dest as types.Key,
-        );
-        if (moved) {
-          session.onLocalMove?.({
-            orig: orig as types.Key,
-            dest: dest as types.Key,
-          });
-        }
+        session.submitMove(orig as types.Key, dest as types.Key);
       }}
       onSelectSquare={(key) => {
         if (interaction().dropmodeActive) {
           session.editor.applyDrop(key as types.Key);
           return;
         }
-        const moved = session.board.selectSquare(
-          session.getState(),
-          key as types.Key,
-        );
-        if (moved) {
-          session.onLocalMove?.(moved);
+        const selected = session.getState().interaction.selected;
+        if (
+          selected &&
+          selected !== key &&
+          session.board.canMove(session.getState(), selected, key as types.Key)
+        ) {
+          session.submitMove(selected, key as types.Key);
+          return;
         }
+        session.board.selectSquare(session.getState(), key as types.Key);
       }}
       orientation={snapshot().orientation}
       pieces={snapshot().pieces}

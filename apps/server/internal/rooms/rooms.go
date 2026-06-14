@@ -135,15 +135,31 @@ func (s *Store) ApplyMove(code string, clientID string, move protocol.ClientMove
 	if move.Seq != room.seq+1 {
 		return protocol.Move{}, ErrBadSequence
 	}
-	if move.Orig == "" || move.Dest == "" || move.Orig == move.Dest {
+	kind := move.Kind
+	if kind == "" {
+		kind = "move"
+	}
+	switch kind {
+	case "move", "castle":
+		if move.Orig == "" || move.Dest == "" || move.Orig == move.Dest {
+			return protocol.Move{}, ErrBadSequence
+		}
+	case "defect":
+		if move.Color == "" {
+			return protocol.Move{}, ErrBadSequence
+		}
+	default:
 		return protocol.Move{}, ErrBadSequence
 	}
 
 	applied := protocol.Move{
-		Seq:  move.Seq,
-		Seat: client.Seat,
-		Orig: move.Orig,
-		Dest: move.Dest,
+		Seq:       move.Seq,
+		Seat:      client.Seat,
+		Kind:      move.Kind,
+		Orig:      move.Orig,
+		Dest:      move.Dest,
+		Promotion: move.Promotion,
+		Color:     move.Color,
 	}
 	room.seq = move.Seq
 	room.moves = append(room.moves, applied)
