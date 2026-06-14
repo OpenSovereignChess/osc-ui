@@ -66,6 +66,43 @@
   line-height: 1.35;
 }
 
+.play-room-details {
+  display: grid;
+  gap: 14px;
+}
+
+.play-room-facts {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--line);
+}
+
+.play-room-facts div {
+  display: grid;
+  grid-template-columns: minmax(82px, 0.8fr) minmax(0, 1.2fr);
+  gap: 10px;
+  align-items: center;
+  background: var(--surface-strong);
+  padding: 10px 12px;
+}
+
+.play-room-facts dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.play-room-facts dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
 .play-room-share {
   min-width: 0;
 }

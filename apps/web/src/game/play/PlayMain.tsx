@@ -37,6 +37,11 @@ interface ConnectionRequest {
   attempt: number;
 }
 
+interface ConnectOptions {
+  optimisticPlayers?: number;
+  optimisticSeat?: Seat;
+}
+
 export interface RoomInfo {
   code: string;
   role?: Seat;
@@ -67,13 +72,15 @@ export default function PlayMain() {
     turn: "player1",
     players: 0,
   });
+  const createDisabled = () => isCreateDisabled(status(), roomInfo());
+  const joinDisabled = () => isJoinDisabled(roomInfo());
 
   const updateUrl = (code: string) => {
     const url = playRoomUrl(code);
     window.history.replaceState({}, "", url);
   };
 
-  const connect = (code: string) => {
+  const connect = (code: string, options: ConnectOptions = {}) => {
     const normalized = normalizeRoomCode(code);
     if (!normalized) {
       setError("Enter a room code.");
@@ -87,6 +94,13 @@ export default function PlayMain() {
       code: normalized,
       attempt: current.attempt + 1,
     }));
+    setRoomInfo({
+      code: normalized,
+      role: options.optimisticSeat,
+      seq: 0,
+      turn: "player1",
+      players: options.optimisticPlayers ?? 0,
+    });
     updateUrl(normalized);
   };
 
@@ -95,12 +109,14 @@ export default function PlayMain() {
     setError(undefined);
     try {
       const response = await fetch(createRoomEndpoint(), { method: "POST" });
-      console.log("Create room response", response);
       if (!response.ok) {
         throw new Error("Could not create room.");
       }
       const body = (await response.json()) as { roomCode: string };
-      connect(body.roomCode);
+      connect(body.roomCode, {
+        optimisticPlayers: 1,
+        optimisticSeat: "player1",
+      });
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Could not create room.");
@@ -110,7 +126,6 @@ export default function PlayMain() {
   const sendLocalMove = (move: SessionMove) => {
     const ws = socket();
     const info = roomInfo();
-    console.log("Attempting to send move", move, "with info", info);
     if (!ws || ws.readyState !== WebSocket.OPEN || !info.role) {
       return;
     }
@@ -143,7 +158,7 @@ export default function PlayMain() {
           <div class="play-room-actions">
             <button
               class="button primary"
-              disabled={status() === "creating"}
+              disabled={createDisabled()}
               onClick={createRoom}
               type="button"
             >
@@ -164,7 +179,7 @@ export default function PlayMain() {
                   onInput={(event) => setEntryCode(event.currentTarget.value)}
                   value={entryCode()}
                 />
-                <button class="button" type="submit">
+                <button class="button" disabled={joinDisabled()} type="submit">
                   Join
                 </button>
               </div>
@@ -172,28 +187,12 @@ export default function PlayMain() {
           </div>
 
           <div class="play-room-status" aria-live="polite">
-            <strong>{statusLabel(status())}</strong>
-            <span>{roomSummary(roomInfo())}</span>
+            <strong>{statusLabel(status(), roomInfo())}</strong>
+            <span>{statusSummary(status(), roomInfo())}</span>
           </div>
 
           <Show when={roomInfo().code}>
-            <div class="play-room-share">
-              <label for="share-url">Share link</label>
-              <input
-                id="share-url"
-                readOnly
-                value={playRoomUrl(roomInfo().code)}
-              />
-              <button
-                class="button"
-                onClick={() =>
-                  navigator.clipboard?.writeText(playRoomUrl(roomInfo().code))
-                }
-                type="button"
-              >
-                Copy link
-              </button>
-            </div>
+            <RoomDetails info={roomInfo()} />
           </Show>
 
           <Show when={error()}>
@@ -274,6 +273,44 @@ function PlayRoomConnection(props: {
   return null;
 }
 
+function RoomDetails(props: { info: RoomInfo }) {
+  const shareUrl = () => playRoomUrl(props.info.code);
+
+  return (
+    <div class="play-room-details">
+      <dl class="play-room-facts">
+        <div>
+          <dt>Room</dt>
+          <dd>{props.info.code}</dd>
+        </div>
+        <div>
+          <dt>Your seat</dt>
+          <dd>{seatLabel(props.info.role)}</dd>
+        </div>
+        <div>
+          <dt>Players</dt>
+          <dd>{props.info.players}/2</dd>
+        </div>
+        <div>
+          <dt>Turn</dt>
+          <dd>{seatLabel(props.info.turn)}</dd>
+        </div>
+      </dl>
+      <div class="play-room-share">
+        <label for="share-url">Invite link</label>
+        <input id="share-url" readOnly value={shareUrl()} />
+        <button
+          class="button"
+          onClick={() => navigator.clipboard?.writeText(shareUrl())}
+          type="button"
+        >
+          Copy link
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function handleServerMessage(
   message: ServerMessage,
   handlers: {
@@ -336,14 +373,14 @@ function applyRoomState(
   });
 }
 
-function statusLabel(status: ConnectionState): string {
+export function statusLabel(status: ConnectionState, info: RoomInfo): string {
   switch (status) {
     case "creating":
       return "Creating room";
     case "connecting":
-      return "Connecting";
+      return info.role ? `Joining as ${seatLabel(info.role)}` : "Joining room";
     case "connected":
-      return "Connected";
+      return info.role ? `Joined as ${seatLabel(info.role)}` : "Connected";
     case "error":
       return "Needs attention";
     default:
@@ -351,10 +388,47 @@ function statusLabel(status: ConnectionState): string {
   }
 }
 
-function roomSummary(info: RoomInfo): string {
+export function statusSummary(status: ConnectionState, info: RoomInfo): string {
   if (!info.code) {
-    return "Create or join a room to play online.";
+    return status === "creating"
+      ? "Asking the server for a new invite room."
+      : "Create or join a room to play online.";
   }
-  const role = info.role ?? "joining";
-  return `${info.code} · ${role} · ${info.players} connected · move ${info.seq}`;
+  if (!info.role) {
+    return `Room ${info.code} is ready. Waiting for your seat assignment.`;
+  }
+  if (status === "connecting") {
+    return `Room ${info.code} was created. Opening the live connection.`;
+  }
+  if (info.role === "observer") {
+    return `Room ${info.code} is full. You are watching the game.`;
+  }
+  if (info.players < 2) {
+    return `Room ${info.code} is ready. Share the invite link with player 2.`;
+  }
+  return `${seatLabel(info.turn)} to move. Move ${info.seq}.`;
+}
+
+export function isCreateDisabled(
+  status: ConnectionState,
+  info: RoomInfo,
+): boolean {
+  return status === "creating" || info.code !== "";
+}
+
+export function isJoinDisabled(info: RoomInfo): boolean {
+  return info.role !== undefined;
+}
+
+function seatLabel(seat?: Seat): string {
+  switch (seat) {
+    case "player1":
+      return "Player 1";
+    case "player2":
+      return "Player 2";
+    case "observer":
+      return "Observer";
+    default:
+      return "Assigning";
+  }
 }

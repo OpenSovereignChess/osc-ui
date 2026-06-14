@@ -1,5 +1,12 @@
 import { expect, test } from "vitest";
-import { handleServerMessage, type RoomInfo } from "./PlayMain.tsx";
+import {
+  handleServerMessage,
+  isCreateDisabled,
+  isJoinDisabled,
+  statusLabel,
+  statusSummary,
+  type RoomInfo,
+} from "./PlayMain.tsx";
 import type { Move, Seat } from "../online/protocol.ts";
 
 function harness() {
@@ -116,4 +123,59 @@ test("move_rejected exposes server reason", () => {
   );
 
   expect(h.error).toBe("Move rejected: wrong turn");
+});
+
+test("connected room copy makes the created player1 seat obvious", () => {
+  const info: RoomInfo = {
+    code: "ABCD1234",
+    role: "player1",
+    seq: 0,
+    turn: "player1",
+    players: 1,
+  };
+
+  expect(statusLabel("connected", info)).toBe("Joined as Player 1");
+  expect(statusSummary("connected", info)).toBe(
+    "Room ABCD1234 is ready. Share the invite link with player 2.",
+  );
+});
+
+test("connecting room copy shows optimistic player1 details immediately", () => {
+  const info: RoomInfo = {
+    code: "ABCD1234",
+    role: "player1",
+    seq: 0,
+    turn: "player1",
+    players: 1,
+  };
+
+  expect(statusLabel("connecting", info)).toBe("Joining as Player 1");
+  expect(statusSummary("connecting", info)).toBe(
+    "Room ABCD1234 was created. Opening the live connection.",
+  );
+});
+
+test("room action disabled state follows membership", () => {
+  const noRoom: RoomInfo = {
+    code: "",
+    seq: 0,
+    turn: "player1",
+    players: 0,
+  };
+  const createdRoom: RoomInfo = {
+    code: "ABCD1234",
+    seq: 0,
+    turn: "player1",
+    players: 1,
+  };
+  const joinedRoom: RoomInfo = {
+    ...createdRoom,
+    role: "player1",
+  };
+
+  expect(isCreateDisabled("idle", noRoom)).toBe(false);
+  expect(isCreateDisabled("creating", noRoom)).toBe(true);
+  expect(isCreateDisabled("connected", createdRoom)).toBe(true);
+  expect(isJoinDisabled(createdRoom)).toBe(false);
+  expect(isJoinDisabled(joinedRoom)).toBe(true);
 });
