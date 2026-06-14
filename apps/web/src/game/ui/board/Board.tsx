@@ -12,6 +12,13 @@ export default function Board(props: BoardProps) {
   const session = useGameSession();
   const snapshot = createMemo(() => session.getSnapshot());
   const interaction = createMemo(() => session.getInteraction());
+  const moveHintKeys = createMemo(() => {
+    const selected = snapshot().selected;
+    if (!selected) {
+      return [];
+    }
+    return session.getState().position.movable.dests?.get(selected) ?? [];
+  });
 
   return (
     <BoardView
@@ -31,6 +38,7 @@ export default function Board(props: BoardProps) {
         )
       }
       fallback={<div>Loading...</div>}
+      moveHintKeys={moveHintKeys()}
       onCancelDrag={() => {
         session.board.cancelDrag();
       }}

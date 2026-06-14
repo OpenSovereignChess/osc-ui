@@ -10,8 +10,11 @@ export interface MoveResult {
 
 function isMovable(state: State, orig: types.Key): boolean {
   const piece = state.position.pieces.get(orig);
+  const legalDests = state.position.movable.dests?.get(orig);
   return (
     !!piece &&
+    (state.position.movable.free ||
+      (legalDests !== undefined && legalDests.length > 0)) &&
     (state.position.movable.color === "both" ||
       (state.position.movable.color === piece.color &&
         state.position.turnColor === piece.color))
@@ -24,13 +27,11 @@ function tryAutoCastle(): boolean {
 }
 
 export function createBoardActions(setState: SetStoreFunction<State>) {
-  function setSelected(state: State, key: types.Key): void {
-    console.log("board.setSelected", { key, state });
+  function setSelected(key: types.Key): void {
     setState("interaction", { selected: key });
   }
 
   function unselect(): void {
-    console.log("board.unselect");
     setState("interaction", { selected: undefined });
   }
 
@@ -126,42 +127,30 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     key: types.Key,
     force?: boolean,
   ): MoveResult | undefined {
-    console.log("board.selectSquare", { key, state });
     if (state.interaction.selected) {
-      console.log("state selected");
       if (
         state.interaction.selected === key &&
         !state.interaction.draggable.enabled
       ) {
-        console.log("state.selected === key");
         unselect();
         return undefined;
       } else if (
         (state.interaction.selectable.enabled || force) &&
         state.interaction.selected !== key
       ) {
-        console.log("state.selected !== key");
         const orig = state.interaction.selected;
         if (userMove(state, orig, key)) {
-          console.log("userMove true");
           setState("interaction", "stats", { dragged: false });
           return { orig, dest: key };
         }
       }
     }
-    console.log(
-      "isMovable",
-      state.interaction.selectable.enabled,
-      state.interaction.draggable.enabled,
-      isMovable(state, key),
-    );
     if (
       (state.interaction.selectable.enabled ||
         state.interaction.draggable.enabled) &&
       isMovable(state, key)
     ) {
-      console.log("set selected to key", key);
-      setSelected(state, key);
+      setSelected(key);
       state.interaction.hold.start();
     }
     return undefined;
