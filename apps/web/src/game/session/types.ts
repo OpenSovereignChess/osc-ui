@@ -21,11 +21,22 @@ export interface InteractionSnapshot {
   viewOnly: boolean;
 }
 
+export interface SessionMove {
+  orig: types.Key;
+  dest: types.Key;
+}
+
+export type OnlineSeat = "player1" | "player2" | "observer";
+
 export interface LocalGameSession {
   board: BoardActions;
   editor: EditorActions;
+  applyServerMove: (move: SessionMove) => boolean;
+  applyServerMoves: (moves: readonly SessionMove[]) => void;
   getInteraction: Accessor<InteractionSnapshot>;
   getSnapshot: Accessor<GameSnapshot>;
   getState: Accessor<State>;
+  onLocalMove?: (move: SessionMove) => void;
+  setOnlineSeat: (seat?: OnlineSeat) => void;
   setDom: (dom: types.Dom) => void;
 }

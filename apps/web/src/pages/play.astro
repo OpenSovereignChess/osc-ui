@@ -1,30 +1,8 @@
 ---
 import Layout from "./_Layout.astro";
-import Main from "../game/ui/Main.tsx";
+import PlayMain from "../game/play/PlayMain.tsx";
 ---
 
 <Layout title="Play | Open Sovereign Chess">
-  <section class="tool-shell">
-    <aside class="tool-panel">
-      <p class="eyebrow">Coming soon</p>
-      <h1>Play online</h1>
-      <p>
-        This page currently hosts a local game board while live-game lobby,
-        pairing, and account-aware play are built out.
-      </p>
-      <div class="button-row">
-        <a class="button primary disabled" aria-disabled="true">Create game</a>
-        <a class="button disabled" aria-disabled="true">Join lobby</a>
-      </div>
-    </aside>
-    <div class="tool-stage play-stage">
-      <Main client:only="solid-js" />
-    </div>
-  </section>
+  <PlayMain client:only="solid-js" />
 </Layout>
-
-<style>
-  .play-stage {
-    min-height: min(900px, calc(100vh - 220px));
-  }
-</style>

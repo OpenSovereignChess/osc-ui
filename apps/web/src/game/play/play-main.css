@@ -1,0 +1,78 @@
+.play-stage {
+  min-height: min(900px, calc(100vh - 220px));
+}
+
+.play-room-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.play-room-panel button {
+  cursor: pointer;
+}
+
+.play-room-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.play-room-actions {
+  display: grid;
+  gap: 16px;
+}
+
+.play-room-actions form,
+.play-room-share {
+  display: grid;
+  gap: 8px;
+}
+
+.play-room-actions label,
+.play-room-share label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.play-room-code-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.play-room-panel input {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 11px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  font: inherit;
+}
+
+.play-room-status {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-strong);
+}
+
+.play-room-status span {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.play-room-share {
+  min-width: 0;
+}
+
+.play-room-error {
+  margin: 0;
+  color: var(--danger);
+  font-weight: 700;
+  line-height: 1.45;
+}

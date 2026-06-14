@@ -1,0 +1,8 @@
+{
+  "type": "make_move",
+  "payload": {
+    "seq": 1,
+    "orig": "a2",
+    "dest": "a3"
+  }
+}

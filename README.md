@@ -34,6 +34,7 @@ Run these from the repo root:
 | `pnpm format`  | Format the web app |
 | `go run ./apps/server/cmd/server` | Start the Go server |
 | `go test ./apps/server/...` | Run the Go server tests |
+| `gofmt -s -w .` | Format the Go code |
 
 ## Direction
 

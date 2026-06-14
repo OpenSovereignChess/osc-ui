@@ -1,0 +1,19 @@
+{
+  "type": "room_state",
+  "payload": {
+    "roomCode": "ABCD1234",
+    "you": {
+      "id": "CLIENT1",
+      "seat": "player1"
+    },
+    "players": [
+      {
+        "id": "CLIENT1",
+        "seat": "player1"
+      }
+    ],
+    "turn": "player1",
+    "seq": 0,
+    "moves": []
+  }
+}

@@ -3,6 +3,11 @@ import { type State } from "../state/state.ts";
 import * as types from "../rules/types.ts";
 import * as util from "../rules/util.ts";
 
+export interface MoveResult {
+  orig: types.Key;
+  dest: types.Key;
+}
+
 function isMovable(state: State, orig: types.Key): boolean {
   const piece = state.position.pieces.get(orig);
   return (
@@ -96,6 +101,15 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     return false;
   }
 
+  function applyMove(state: State, orig: types.Key, dest: types.Key): boolean {
+    const result = baseUserMove(state, orig, dest);
+    if (result) {
+      unselect();
+      return true;
+    }
+    return false;
+  }
+
   function movePiece(state: State, orig: types.Key, dest: types.Key): boolean {
     const moved = userMove(state, orig, dest);
     setState("interaction", "stats", { dragged: moved });
@@ -107,7 +121,11 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     setState("interaction", "stats", { dragged: false });
   }
 
-  function selectSquare(state: State, key: types.Key, force?: boolean): void {
+  function selectSquare(
+    state: State,
+    key: types.Key,
+    force?: boolean,
+  ): MoveResult | undefined {
     console.log("board.selectSquare", { key, state });
     if (state.interaction.selected) {
       console.log("state selected");
@@ -117,16 +135,17 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
       ) {
         console.log("state.selected === key");
         unselect();
-        return;
+        return undefined;
       } else if (
         (state.interaction.selectable.enabled || force) &&
         state.interaction.selected !== key
       ) {
         console.log("state.selected !== key");
-        if (userMove(state, state.interaction.selected, key)) {
+        const orig = state.interaction.selected;
+        if (userMove(state, orig, key)) {
           console.log("userMove true");
           setState("interaction", "stats", { dragged: false });
-          return;
+          return { orig, dest: key };
         }
       }
     }
@@ -145,9 +164,11 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
       setSelected(state, key);
       state.interaction.hold.start();
     }
+    return undefined;
   }
 
   return {
+    applyMove,
     cancelDrag,
     canMove,
     canSelect: isMovable,
