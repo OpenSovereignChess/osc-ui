@@ -57,14 +57,12 @@ export default function PlayMain() {
     typeof window === "undefined" ? "" : roomCodeFromLocation(window.location);
   const [connectionRequest, setConnectionRequest] =
     createSignal<ConnectionRequest>({
-      code: initialRoomCode,
+      code: "",
       attempt: 0,
     });
   const [entryCode, setEntryCode] = createSignal(initialRoomCode);
   const [socket, setSocket] = createSignal<WebSocket>();
-  const [status, setStatus] = createSignal<ConnectionState>(
-    initialRoomCode ? "connecting" : "idle",
-  );
+  const [status, setStatus] = createSignal<ConnectionState>("idle");
   const [error, setError] = createSignal<string>();
   const [roomInfo, setRoomInfo] = createSignal<RoomInfo>({
     code: initialRoomCode,
@@ -75,6 +73,7 @@ export default function PlayMain() {
   const createDisabled = () => isCreateDisabled(status(), roomInfo());
   const joinDisabled = () => isJoinDisabled(roomInfo());
   const boardVisible = () => isBoardVisible(roomInfo());
+  const invitationVisible = () => isInvitationVisible(roomInfo());
 
   const updateUrl = (code: string) => {
     const url = playRoomUrl(code);
@@ -196,12 +195,27 @@ export default function PlayMain() {
             </div>
           </Show>
 
+          <Show when={invitationVisible()}>
+            <div class="play-room-invitation">
+              <p class="eyebrow">Game invitation</p>
+              <h1>Join room {roomInfo().code}</h1>
+              <button
+                class="button primary"
+                disabled={status() === "connecting"}
+                onClick={() => connect(roomInfo().code)}
+                type="button"
+              >
+                Join game
+              </button>
+            </div>
+          </Show>
+
           <div class="play-room-status" aria-live="polite">
             <strong>{statusLabel(status(), roomInfo())}</strong>
             <span>{statusSummary(status(), roomInfo())}</span>
           </div>
 
-          <Show when={roomInfo().code}>
+          <Show when={roomInfo().role}>
             <RoomDetails info={roomInfo()} />
           </Show>
 
@@ -375,7 +389,7 @@ function applyRoomState(
   },
 ): void {
   handlers.setSeat(state.you.seat);
-  handlers.applyMoves(state.moves);
+  handlers.applyMoves(state.moves ?? []);
   handlers.setInfo({
     code: state.roomCode,
     role: state.you.seat,
@@ -386,6 +400,10 @@ function applyRoomState(
 }
 
 export function statusLabel(status: ConnectionState, info: RoomInfo): string {
+  if (info.code && !info.role && status === "idle") {
+    return "Game invitation";
+  }
+
   switch (status) {
     case "creating":
       return "Creating room";
@@ -407,7 +425,7 @@ export function statusSummary(status: ConnectionState, info: RoomInfo): string {
       : "Create or join a room to play online.";
   }
   if (!info.role) {
-    return `Room ${info.code} is ready. Waiting for your seat assignment.`;
+    return "Join to enter the game. If both player seats are taken, you will watch as an observer.";
   }
   if (status === "connecting") {
     return `Room ${info.code} was created. Opening the live connection.`;
@@ -433,7 +451,11 @@ export function isJoinDisabled(info: RoomInfo): boolean {
 }
 
 export function isBoardVisible(info: RoomInfo): boolean {
-  return info.code !== "";
+  return info.role !== undefined;
+}
+
+export function isInvitationVisible(info: RoomInfo): boolean {
+  return info.code !== "" && info.role === undefined;
 }
 
 function seatLabel(seat?: Seat): string {

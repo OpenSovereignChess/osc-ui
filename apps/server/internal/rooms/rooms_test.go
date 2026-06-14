@@ -118,3 +118,20 @@ func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
 		t.Fatalf("expected player1 after rejoin, got %s", joined.Seat)
 	}
 }
+
+func TestSnapshotUsesEmptyMoveList(t *testing.T) {
+	store := NewStore()
+	room := store.Create()
+	_, player, _ := store.Join(room.Code)
+
+	state, err := store.Snapshot(room.Code, player.ID)
+	if err != nil {
+		t.Fatalf("snapshot: %v", err)
+	}
+	if state.Moves == nil {
+		t.Fatal("expected empty move slice, got nil")
+	}
+	if len(state.Moves) != 0 {
+		t.Fatalf("expected no moves, got %d", len(state.Moves))
+	}
+}

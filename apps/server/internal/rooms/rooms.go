@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base32"
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -56,7 +55,6 @@ func (s *Store) Create() *Room {
 			clients: make(map[string]*Client),
 		}
 		s.rooms[code] = room
-		fmt.Printf("Created room %s\n", code)
 		return room
 	}
 }
@@ -102,7 +100,6 @@ func (s *Store) Leave(code string, clientID string) (*protocol.Player, bool) {
 
 	delete(room.clients, clientID)
 	close(client.Send)
-	fmt.Printf("Client %s left room %s\n", clientID, code)
 	left := protocol.Player{ID: client.ID, Seat: client.Seat}
 	if len(room.clients) == 0 {
 		return &left, false
@@ -224,7 +221,8 @@ func (r *Room) snapshot(client *Client) protocol.RoomState {
 	for _, peer := range r.clients {
 		players = append(players, protocol.Player{ID: peer.ID, Seat: peer.Seat})
 	}
-	moves := append([]protocol.Move(nil), r.moves...)
+	moves := make([]protocol.Move, len(r.moves))
+	copy(moves, r.moves)
 	return protocol.RoomState{
 		RoomCode: r.Code,
 		You:      protocol.Player{ID: client.ID, Seat: client.Seat},

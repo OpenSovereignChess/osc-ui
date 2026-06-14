@@ -58,10 +58,13 @@ export function playRulesMove(
   }
 }
 
-export function isRulesMoveLegal(position: Position, move: SessionMove): boolean {
-  return position.legalMovesOf(squareFromName(move.orig)).has(
-    squareFromName(move.dest),
-  );
+export function isRulesMoveLegal(
+  position: Position,
+  move: SessionMove,
+): boolean {
+  return position
+    .legalMovesOf(squareFromName(move.orig))
+    .has(squareFromName(move.dest));
 }
 
 function sideForSeat(seat?: OnlineSeat): Side | undefined {

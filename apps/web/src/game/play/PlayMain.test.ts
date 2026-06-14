@@ -3,6 +3,7 @@ import {
   handleServerMessage,
   isBoardVisible,
   isCreateDisabled,
+  isInvitationVisible,
   isJoinDisabled,
   statusLabel,
   statusSummary,
@@ -94,6 +95,31 @@ test("room_state sets seat, room info, and replays server moves", () => {
   expect(h.replayed).toEqual([[move]]);
 });
 
+test("room_state tolerates a null move list", () => {
+  const h = harness();
+
+  handleServerMessage(
+    {
+      type: "room_state",
+      payload: {
+        roomCode: "ABCD1234",
+        you: { id: "c1", seat: "player2" },
+        players: [
+          { id: "c0", seat: "player1" },
+          { id: "c1", seat: "player2" },
+        ],
+        turn: "player1",
+        seq: 0,
+        moves: null,
+      },
+    },
+    h.handlers,
+  );
+
+  expect(h.seat).toBe("player2");
+  expect(h.replayed).toEqual([[]]);
+});
+
 test("move_applied updates sequence and next turn", () => {
   const h = harness();
 
@@ -181,21 +207,25 @@ test("room action disabled state follows membership", () => {
   expect(isJoinDisabled(joinedRoom)).toBe(true);
 });
 
-test("board is hidden until a room exists", () => {
-  expect(
-    isBoardVisible({
-      code: "",
-      seq: 0,
-      turn: "player1",
-      players: 0,
-    }),
-  ).toBe(false);
-  expect(
-    isBoardVisible({
-      code: "ABCD1234",
-      seq: 0,
-      turn: "player1",
-      players: 1,
-    }),
-  ).toBe(true);
+test("room links show an invitation until the user joins", () => {
+  const invitation: RoomInfo = {
+    code: "ABCD1234",
+    seq: 0,
+    turn: "player1",
+    players: 0,
+  };
+  const joined: RoomInfo = {
+    ...invitation,
+    role: "player2",
+    players: 2,
+  };
+
+  expect(isInvitationVisible(invitation)).toBe(true);
+  expect(isBoardVisible(invitation)).toBe(false);
+  expect(statusLabel("idle", invitation)).toBe("Game invitation");
+  expect(statusSummary("idle", invitation)).toBe(
+    "Join to enter the game. If both player seats are taken, you will watch as an observer.",
+  );
+  expect(isInvitationVisible(joined)).toBe(false);
+  expect(isBoardVisible(joined)).toBe(true);
 });

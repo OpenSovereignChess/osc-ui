@@ -20,7 +20,7 @@ export interface RoomState {
   players: Player[];
   turn: Seat;
   seq: number;
-  moves: Move[];
+  moves: Move[] | null;
 }
 
 export interface MoveRejected {
