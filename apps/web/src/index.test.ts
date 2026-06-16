@@ -17,10 +17,10 @@ test("home page renders", async () => {
   expect(html).toContain(
     "Play, study, and build positions for Sovereign Chess.",
   );
-  expect(html).toContain('href="/play/"');
-  expect(html).toContain('href="/analysis/"');
-  expect(html).toContain('href="/editor/"');
-  expect(html).toContain('href="/rules/"');
+  expect(html).toContain('href="/play"');
+  expect(html).toContain('href="/analysis"');
+  expect(html).toContain('href="/editor"');
+  expect(html).toContain('href="/rules"');
   expect(html).toContain("Official game site");
   expect(html).toContain("https://www.infinitepigames.com/sovereign-chess");
 });

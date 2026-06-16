@@ -107,7 +107,7 @@ export default function EditorShell() {
   );
   const currentFen = createMemo(() => writeSetup(snapshot().pieces));
   const analysisPositionHref = createMemo(() =>
-    positionUrl("/analysis/", currentFen()),
+    positionUrl("/analysis", currentFen()),
   );
 
   const eraseModeActive = createMemo(

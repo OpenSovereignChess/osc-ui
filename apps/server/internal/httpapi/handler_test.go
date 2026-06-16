@@ -56,7 +56,7 @@ func TestCreateRoom(t *testing.T) {
 	if body.RoomCode == "" {
 		t.Fatal("expected room code")
 	}
-	if body.RoomURL != "/play/?room="+body.RoomCode {
+	if body.RoomURL != "/play?room="+body.RoomCode {
 		t.Fatalf("unexpected room url: %s", body.RoomURL)
 	}
 }

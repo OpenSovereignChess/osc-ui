@@ -15,7 +15,7 @@ describe("online protocol helpers", () => {
 
   test("builds query-string play links", () => {
     expect(playRoomUrl("abcd1234", "https://play.example")).toBe(
-      "https://play.example/play/?room=ABCD1234",
+      "https://play.example/play?room=ABCD1234",
     );
   });
 

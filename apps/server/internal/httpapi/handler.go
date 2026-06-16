@@ -58,7 +58,7 @@ func (h *Handler) handleCreateRoom(w http.ResponseWriter, r *http.Request) {
 	room := h.rooms.Create()
 	writeJSON(w, http.StatusCreated, createRoomResponse{
 		RoomCode: room.Code,
-		RoomURL:  "/play/?room=" + room.Code,
+		RoomURL:  "/play?room=" + room.Code,
 	})
 }
 

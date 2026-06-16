@@ -99,7 +99,7 @@ export function playRoomUrl(
   roomCode: string,
   origin = window.location.origin,
 ): string {
-  const url = new URL("/play/", origin);
+  const url = new URL("/play", origin);
   url.searchParams.set("room", normalizeRoomCode(roomCode));
   return url.toString();
 }

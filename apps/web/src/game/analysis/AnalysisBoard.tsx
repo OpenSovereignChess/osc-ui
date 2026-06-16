@@ -137,7 +137,7 @@ export default function AnalysisBoard() {
   const pieces = createMemo(() => piecesFromPosition(position()));
   const currentFen = createMemo(() => position().fen);
   const editPositionHref = createMemo(() =>
-    positionUrl("/editor/", currentFen()),
+    positionUrl("/editor", currentFen()),
   );
   const isLatest = createMemo(() => currentIndex() === positions().length - 1);
   const historyTurns = createMemo<HistoryTurn[]>(() => {
