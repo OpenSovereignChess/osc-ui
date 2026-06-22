@@ -1,0 +1,7 @@
+beta.playsovereignchess.com {
+  root /srv/osc-site
+  file_server
+
+  reverse_proxy /api/* localhost:8080
+  reverse_proxy /healthz localhost:8080
+}

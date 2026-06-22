@@ -62,4 +62,82 @@ The web app can compose those packages, but package dependencies should stay one
 - Shared packages should not import from `apps/*`.
 - `packages/rules`, `packages/board-core`, `packages/protocol`, and `packages/rules-fixtures` should stay independent of UI frameworks.
 
-See [docs/architecture/monorepo.md](docs/architecture/monorepo.md) for package boundaries and placement guidance.
+Se [docs/architecture/monorepo.md](docs/architecture/monorepo.md) for package boundaries and placement guidance.
+
+## Deployment
+
+We have one backend server running through Vultr.  This serves both the frontend static Astro site as well as the Go backend server.
+
+To access (you need your SSH key added on the server):
+
+```sh
+# First time
+ssh root@<ip address>
+
+# After setting up the deploy user
+ssh osc@<ip address>
+```
+
+To provision the server ([reference](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu)):
+
+```sh
+# Create a deploy user
+adduser osc
+usermod -aG sudo osc
+rsync --archive --chown=osc:osc ~/.ssh /home/osc
+
+# Enable firewall
+ufw allow OpenSSH
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw enable
+
+# Disable password authentication (after verifying `osc` login works)
+sudo vi /etc/ssh/sshd_config
+
+# Edit this line to
+PasswordAuthentication no
+
+# TODO: PasswordAuthentication still says yes
+
+# Restart SSH
+sudo systemctl reload sshd
+
+# Install Caddy
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo chmod o+r /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+sudo chmod o+r /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+
+# Make static site directory
+sudo mkdir /srv/osc-site
+sudo chown -R osc:caddy /srv/osc-site
+
+# Copy ./Caddyfile contents to server:/etc/caddy/Caddyfile
+sudo systemctl reload caddy
+
+# Run Go server as a Systemd service
+sudo vi /etc/systemd/system/osc-server.service
+sudo systemctl daemon-reload
+sudo systemctl enable osc-server
+sudo systemctl restart osc-server
+```
+
+To deploy the static Astro site:
+
+```sh
+pnpm build
+rsync -a --delete apps/web/dist/ osc@<ip address>:/srv/osc-site/
+```
+
+To deploy the Go server:
+
+```sh
+go build ./apps/server/cmd/server
+
+# Copy resulting binary to server
+rsync -a server osc@<ip address>:/home/osc/osc-server/
+```
