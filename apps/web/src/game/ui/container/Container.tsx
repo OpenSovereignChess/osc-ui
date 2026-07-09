@@ -126,7 +126,7 @@ export default function Container() {
   return (
     <>
       <div class="game-board-shell">
-        <div class="wrap w-full h-full" ref={setWrapEl}>
+        <div class="wrap" ref={setWrapEl}>
           <div class="sc-container" ref={setContainerEl}>
             <Board ref={setBoardEl} bounds={bounds()} />
             <Show
