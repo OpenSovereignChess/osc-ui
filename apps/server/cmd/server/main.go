@@ -11,16 +11,26 @@ import (
 	"time"
 
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/httpapi"
+	"github.com/opensovereignchess/osc-ui/apps/server/internal/rooms"
+	"github.com/opensovereignchess/osc-ui/apps/server/internal/storage"
 )
 
 func main() {
 	addr := flag.String("addr", envOrDefault("OSC_SERVER_ADDR", ":8080"), "HTTP listen address")
+	dbPath := flag.String("db", envOrDefault("OSC_DB_PATH", "osc.db"), "SQLite database path")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	db, err := storage.OpenSQLite(*dbPath)
+	if err != nil {
+		logger.Error("database open failed", "path", *dbPath, "error", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
 	server := &http.Server{
 		Addr:              *addr,
-		Handler:           httpapi.NewHandler(),
+		Handler:           httpapi.NewHandlerWithRoomsAndSessions(rooms.NewStoreWithRepository(db), db),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

@@ -108,7 +108,10 @@ export default function PlayMain() {
     setStatus("creating");
     setError(undefined);
     try {
-      const response = await fetch(createRoomEndpoint(), { method: "POST" });
+      const response = await fetch(createRoomEndpoint(), {
+        credentials: "include",
+        method: "POST",
+      });
       if (!response.ok) {
         throw new Error("Could not create room.");
       }

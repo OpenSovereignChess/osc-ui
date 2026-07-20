@@ -43,10 +43,16 @@ func Upgrade(w http.ResponseWriter, r *http.Request) (*Conn, error) {
 	}
 
 	accept := acceptKey(key)
-	_, err = rw.WriteString("HTTP/1.1 101 Switching Protocols\r\n" +
+	response := "HTTP/1.1 101 Switching Protocols\r\n" +
 		"Upgrade: websocket\r\n" +
 		"Connection: Upgrade\r\n" +
-		"Sec-WebSocket-Accept: " + accept + "\r\n\r\n")
+		"Sec-WebSocket-Accept: " + accept + "\r\n"
+	for name, values := range w.Header() {
+		for _, value := range values {
+			response += name + ": " + value + "\r\n"
+		}
+	}
+	_, err = rw.WriteString(response + "\r\n")
 	if err != nil {
 		_ = conn.Close()
 		return nil, err

@@ -1,6 +1,7 @@
 package rooms
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base32"
 	"errors"
@@ -17,165 +18,123 @@ var (
 	ErrBadSequence  = errors.New("bad sequence")
 )
 
+type Repository interface {
+	CreateGame(ctx context.Context, roomCode string, createdByUserID string) (*Room, error)
+	Exists(ctx context.Context, roomCode string) (bool, error)
+	ClaimSeat(ctx context.Context, roomCode string, userID string) (protocol.Seat, bool, error)
+	Snapshot(ctx context.Context, roomCode string, userID string) (protocol.RoomState, error)
+	ApplyMove(ctx context.Context, roomCode string, userID string, move protocol.ClientMove) (protocol.Move, error)
+}
+
 type Store struct {
-	mu    sync.Mutex
-	rooms map[string]*Room
+	mu      sync.Mutex
+	repo    Repository
+	clients map[string]map[string]*Client
 }
 
 type Room struct {
-	Code    string
-	turn    protocol.Seat
-	seq     int
-	moves   []protocol.Move
-	clients map[string]*Client
+	Code string
 }
 
 type Client struct {
-	ID   string
-	Seat protocol.Seat
-	Send chan []byte
+	ID           string
+	UserID       string
+	Seat         protocol.Seat
+	NewlyClaimed bool
+	Send         chan []byte
 }
 
 func NewStore() *Store {
-	return &Store{rooms: make(map[string]*Room)}
+	return NewStoreWithRepository(NewMemoryRepository())
 }
 
-func (s *Store) Create() *Room {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func NewStoreWithRepository(repo Repository) *Store {
+	return &Store{
+		repo:    repo,
+		clients: make(map[string]map[string]*Client),
+	}
+}
 
+func (s *Store) Create(userID string) (*Room, error) {
 	for {
 		code := roomCode()
-		if _, ok := s.rooms[code]; ok {
+		room, err := s.repo.CreateGame(context.Background(), code, userID)
+		if errors.Is(err, ErrBadSequence) {
 			continue
 		}
-		room := &Room{
-			Code:    code,
-			turn:    protocol.SeatPlayer1,
-			clients: make(map[string]*Client),
+		if err != nil {
+			return nil, err
 		}
-		s.rooms[code] = room
-		return room
+		return room, nil
 	}
 }
 
 func (s *Store) Exists(code string) bool {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	_, ok := s.rooms[normalizeCode(code)]
-	return ok
+	exists, err := s.repo.Exists(context.Background(), normalizeCode(code))
+	return err == nil && exists
 }
 
-func (s *Store) Join(code string) (*Room, *Client, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	room, ok := s.rooms[normalizeCode(code)]
-	if !ok {
-		return nil, nil, ErrRoomNotFound
+func (s *Store) Join(code string, userID string) (*Room, *Client, error) {
+	code = normalizeCode(code)
+	seat, newlyClaimed, err := s.repo.ClaimSeat(context.Background(), code, userID)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	client := &Client{
-		ID:   clientID(),
-		Seat: room.nextSeat(),
-		Send: make(chan []byte, 16),
+		ID:           clientID(),
+		UserID:       userID,
+		Seat:         seat,
+		NewlyClaimed: newlyClaimed,
+		Send:         make(chan []byte, 16),
 	}
-	room.clients[client.ID] = client
-	return room, client, nil
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.clients[code] == nil {
+		s.clients[code] = make(map[string]*Client)
+	}
+	s.clients[code][client.ID] = client
+	return &Room{Code: code}, client, nil
 }
 
 func (s *Store) Leave(code string, clientID string) (*protocol.Player, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	room, ok := s.rooms[normalizeCode(code)]
+	code = normalizeCode(code)
+	clients, ok := s.clients[code]
 	if !ok {
 		return nil, false
 	}
-	client, ok := room.clients[clientID]
+	client, ok := clients[clientID]
 	if !ok {
 		return nil, false
 	}
 
-	delete(room.clients, clientID)
+	delete(clients, clientID)
 	close(client.Send)
-	left := protocol.Player{ID: client.ID, Seat: client.Seat}
-	if len(room.clients) == 0 {
-		return &left, false
+	left := protocol.Player{ID: client.UserID, Seat: client.Seat}
+
+	if len(clients) == 0 {
+		delete(s.clients, code)
 	}
-	return &left, true
+	return &left, false
 }
 
-func (s *Store) Snapshot(code string, clientID string) (protocol.RoomState, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	room, client, err := s.roomAndClient(code, clientID)
-	if err != nil {
-		return protocol.RoomState{}, err
-	}
-	return room.snapshot(client), nil
+func (s *Store) Snapshot(code string, userID string) (protocol.RoomState, error) {
+	return s.repo.Snapshot(context.Background(), normalizeCode(code), userID)
 }
 
-func (s *Store) ApplyMove(code string, clientID string, move protocol.ClientMove) (protocol.Move, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	room, client, err := s.roomAndClient(code, clientID)
-	if err != nil {
-		return protocol.Move{}, err
-	}
-	if client.Seat == protocol.SeatObserver {
-		return protocol.Move{}, ErrNotPlayer
-	}
-	if client.Seat != room.turn {
-		return protocol.Move{}, ErrWrongTurn
-	}
-	if move.Seq != room.seq+1 {
-		return protocol.Move{}, ErrBadSequence
-	}
-	kind := move.Kind
-	if kind == "" {
-		kind = "move"
-	}
-	switch kind {
-	case "move", "castle":
-		if move.Orig == "" || move.Dest == "" || move.Orig == move.Dest {
-			return protocol.Move{}, ErrBadSequence
-		}
-	case "defect":
-		if move.Color == "" {
-			return protocol.Move{}, ErrBadSequence
-		}
-	default:
-		return protocol.Move{}, ErrBadSequence
-	}
-
-	applied := protocol.Move{
-		Seq:       move.Seq,
-		Seat:      client.Seat,
-		Kind:      move.Kind,
-		Orig:      move.Orig,
-		Dest:      move.Dest,
-		Promotion: move.Promotion,
-		Color:     move.Color,
-	}
-	room.seq = move.Seq
-	room.moves = append(room.moves, applied)
-	room.turn = oppositeSeat(room.turn)
-	return applied, nil
+func (s *Store) ApplyMove(code string, userID string, move protocol.ClientMove) (protocol.Move, error) {
+	return s.repo.ApplyMove(context.Background(), normalizeCode(code), userID, move)
 }
 
 func (s *Store) Broadcast(code string, message []byte) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	room, ok := s.rooms[normalizeCode(code)]
-	if !ok {
-		return
-	}
-	for _, client := range room.clients {
+	for _, client := range s.clients[normalizeCode(code)] {
 		select {
 		case client.Send <- message:
 		default:
@@ -187,11 +146,7 @@ func (s *Store) BroadcastExcept(code string, exceptClientID string, message []by
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	room, ok := s.rooms[normalizeCode(code)]
-	if !ok {
-		return
-	}
-	for _, client := range room.clients {
+	for _, client := range s.clients[normalizeCode(code)] {
 		if client.ID == exceptClientID {
 			continue
 		}
@@ -206,11 +161,7 @@ func (s *Store) Send(code string, clientID string, message []byte) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	room, ok := s.rooms[normalizeCode(code)]
-	if !ok {
-		return
-	}
-	client, ok := room.clients[clientID]
+	client, ok := s.clients[normalizeCode(code)][clientID]
 	if !ok {
 		return
 	}
@@ -218,51 +169,6 @@ func (s *Store) Send(code string, clientID string, message []byte) {
 	case client.Send <- message:
 	default:
 	}
-}
-
-func (s *Store) roomAndClient(code string, clientID string) (*Room, *Client, error) {
-	room, ok := s.rooms[normalizeCode(code)]
-	if !ok {
-		return nil, nil, ErrRoomNotFound
-	}
-	client, ok := room.clients[clientID]
-	if !ok {
-		return nil, nil, ErrRoomNotFound
-	}
-	return room, client, nil
-}
-
-func (r *Room) snapshot(client *Client) protocol.RoomState {
-	players := make([]protocol.Player, 0, len(r.clients))
-	for _, peer := range r.clients {
-		players = append(players, protocol.Player{ID: peer.ID, Seat: peer.Seat})
-	}
-	moves := make([]protocol.Move, len(r.moves))
-	copy(moves, r.moves)
-	return protocol.RoomState{
-		RoomCode: r.Code,
-		You:      protocol.Player{ID: client.ID, Seat: client.Seat},
-		Players:  players,
-		Turn:     r.turn,
-		Seq:      r.seq,
-		Moves:    moves,
-	}
-}
-
-func (r *Room) nextSeat() protocol.Seat {
-	hasPlayer1 := false
-	hasPlayer2 := false
-	for _, client := range r.clients {
-		hasPlayer1 = hasPlayer1 || client.Seat == protocol.SeatPlayer1
-		hasPlayer2 = hasPlayer2 || client.Seat == protocol.SeatPlayer2
-	}
-	if !hasPlayer1 {
-		return protocol.SeatPlayer1
-	}
-	if !hasPlayer2 {
-		return protocol.SeatPlayer2
-	}
-	return protocol.SeatObserver
 }
 
 func oppositeSeat(seat protocol.Seat) protocol.Seat {

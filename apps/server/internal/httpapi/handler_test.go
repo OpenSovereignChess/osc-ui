@@ -59,4 +59,7 @@ func TestCreateRoom(t *testing.T) {
 	if body.RoomURL != "/play?room="+body.RoomCode {
 		t.Fatalf("unexpected room url: %s", body.RoomURL)
 	}
+	if cookie := response.Result().Cookies(); len(cookie) == 0 || cookie[0].Name != sessionCookieName {
+		t.Fatalf("expected anonymous session cookie, got %+v", cookie)
+	}
 }

@@ -119,6 +119,10 @@ sudo chown -R osc:caddy /srv/osc-site
 # Copy ./Caddyfile contents to server:/etc/caddy/Caddyfile
 sudo systemctl reload caddy
 
+# Create SQLite data directory
+sudo mkdir -p /var/lib/osc
+sudo chown osc:osc /var/lib/osc
+
 # Run Go server as a Systemd service
 sudo vi /etc/systemd/system/osc-server.service
 sudo systemctl daemon-reload

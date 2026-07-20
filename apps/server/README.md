@@ -6,11 +6,12 @@ Go realtime server for Open Sovereign Chess.
 
 Start with invite-only casual play:
 
-- create an in-memory room
+- create a SQLite-backed room
+- issue a long-lived anonymous user cookie when someone creates or joins
 - share a room code or link
 - allow two browsers to join
-- broadcast room state, moves, joins, and leaves over websockets
-- keep live match state in process memory
+- persist player seat claims and move history for reconnects/server restarts
+- keep only live websocket presence and broadcast channels in process memory
 
 The web client will use the existing TypeScript rules engine for the first
 playable version. The server should validate message shape, room membership,
@@ -20,7 +21,7 @@ a Go rules implementation validates moves against the shared fixtures.
 
 ## Later responsibilities
 
-- SQLite persistence for rooms, move logs, completed matches, and reconnects
+- completed match views and retention/cleanup policies
 - authoritative Go move validation using `packages/rules-fixtures`
 - clocks
 - basic matchmaking, if invite-only rooms are not enough
@@ -31,12 +32,26 @@ a Go rules implementation validates moves against the shared fixtures.
 ```text
 cmd/server/          process entrypoint, flags, and config
 internal/httpapi/    HTTP routes, health checks, websocket upgrade handlers
-internal/rooms/      in-memory room lifecycle and broadcasting
+internal/rooms/      live websocket presence and broadcasting
 internal/protocol/   JSON message envelopes and payloads
-internal/storage/    SQLite persistence once needed
+internal/storage/    SQLite persistence for users, sessions, games, seats, moves
 internal/rules/      future Go rule validation
 ```
 
 Keep the server small and authoritative over room state. Avoid distributed
 presence, queues, Redis, ratings, and account systems until the simple room flow
 needs them.
+
+## Persistence
+
+The server uses SQLite by default. Configure the database location with either
+`-db` or `OSC_DB_PATH`:
+
+```sh
+OSC_DB_PATH=/var/lib/osc/osc.db /srv/osc-server/server
+```
+
+Anonymous users are durable browser/device users. The server stores users and
+session token hashes in SQLite, then sends an `HttpOnly` `osc_session` cookie.
+Seat ownership is stored in `game_seats`; disconnecting does not free a player
+seat, so reloading or reconnecting from the same browser restores the same seat.

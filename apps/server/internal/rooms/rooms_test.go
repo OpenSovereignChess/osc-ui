@@ -9,17 +9,20 @@ import (
 
 func TestJoinAutoSeatsPlayersThenObservers(t *testing.T) {
 	store := NewStore()
-	room := store.Create()
+	room, err := store.Create("creator")
+	if err != nil {
+		t.Fatalf("create room: %v", err)
+	}
 
-	_, player1, err := store.Join(room.Code)
+	_, player1, err := store.Join(room.Code, "user1")
 	if err != nil {
 		t.Fatalf("join player1: %v", err)
 	}
-	_, player2, err := store.Join(room.Code)
+	_, player2, err := store.Join(room.Code, "user2")
 	if err != nil {
 		t.Fatalf("join player2: %v", err)
 	}
-	_, observer, err := store.Join(room.Code)
+	_, observer, err := store.Join(room.Code, "user3")
 	if err != nil {
 		t.Fatalf("join observer: %v", err)
 	}
@@ -37,13 +40,16 @@ func TestJoinAutoSeatsPlayersThenObservers(t *testing.T) {
 
 func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 	store := NewStore()
-	room := store.Create()
-	_, player1, _ := store.Join(room.Code)
-	_, player2, _ := store.Join(room.Code)
+	room, err := store.Create("creator")
+	if err != nil {
+		t.Fatalf("create room: %v", err)
+	}
+	_, player1, _ := store.Join(room.Code, "user1")
+	_, player2, _ := store.Join(room.Code, "user2")
 
-	_, err := store.ApplyMove(
+	_, err = store.ApplyMove(
 		room.Code,
-		player2.ID,
+		player2.UserID,
 		protocol.ClientMove{Seq: 1, Orig: "a2", Dest: "a3"},
 	)
 	if !errors.Is(err, ErrWrongTurn) {
@@ -52,7 +58,7 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 
 	_, err = store.ApplyMove(
 		room.Code,
-		player1.ID,
+		player1.UserID,
 		protocol.ClientMove{Seq: 2, Orig: "a2", Dest: "a3"},
 	)
 	if !errors.Is(err, ErrBadSequence) {
@@ -61,7 +67,7 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 
 	move, err := store.ApplyMove(
 		room.Code,
-		player1.ID,
+		player1.UserID,
 		protocol.ClientMove{Seq: 1, Orig: "a2", Dest: "a3"},
 	)
 	if err != nil {
@@ -71,7 +77,7 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 		t.Fatalf("unexpected move: %+v", move)
 	}
 
-	state, err := store.Snapshot(room.Code, player2.ID)
+	state, err := store.Snapshot(room.Code, player2.UserID)
 	if err != nil {
 		t.Fatalf("snapshot: %v", err)
 	}
@@ -82,13 +88,16 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 
 func TestApplyMovePreservesTypedActions(t *testing.T) {
 	store := NewStore()
-	room := store.Create()
-	_, player1, _ := store.Join(room.Code)
-	_, player2, _ := store.Join(room.Code)
+	room, err := store.Create("creator")
+	if err != nil {
+		t.Fatalf("create room: %v", err)
+	}
+	_, player1, _ := store.Join(room.Code, "user1")
+	_, player2, _ := store.Join(room.Code, "user2")
 
 	castle, err := store.ApplyMove(
 		room.Code,
-		player1.ID,
+		player1.UserID,
 		protocol.ClientMove{Seq: 1, Kind: "castle", Orig: "i1", Dest: "j1"},
 	)
 	if err != nil {
@@ -100,7 +109,7 @@ func TestApplyMovePreservesTypedActions(t *testing.T) {
 
 	defect, err := store.ApplyMove(
 		room.Code,
-		player2.ID,
+		player2.UserID,
 		protocol.ClientMove{Seq: 2, Kind: "defect", Color: "navy"},
 	)
 	if err != nil {
@@ -110,7 +119,7 @@ func TestApplyMovePreservesTypedActions(t *testing.T) {
 		t.Fatalf("unexpected defection: %+v", defect)
 	}
 
-	state, err := store.Snapshot(room.Code, player1.ID)
+	state, err := store.Snapshot(room.Code, player1.UserID)
 	if err != nil {
 		t.Fatalf("snapshot: %v", err)
 	}
@@ -121,14 +130,17 @@ func TestApplyMovePreservesTypedActions(t *testing.T) {
 
 func TestObserversCannotMove(t *testing.T) {
 	store := NewStore()
-	room := store.Create()
-	_, _, _ = store.Join(room.Code)
-	_, _, _ = store.Join(room.Code)
-	_, observer, _ := store.Join(room.Code)
+	room, err := store.Create("creator")
+	if err != nil {
+		t.Fatalf("create room: %v", err)
+	}
+	_, _, _ = store.Join(room.Code, "user1")
+	_, _, _ = store.Join(room.Code, "user2")
+	_, observer, _ := store.Join(room.Code, "user3")
 
-	_, err := store.ApplyMove(
+	_, err = store.ApplyMove(
 		room.Code,
-		observer.ID,
+		observer.UserID,
 		protocol.ClientMove{Seq: 1, Orig: "a2", Dest: "a3"},
 	)
 	if !errors.Is(err, ErrNotPlayer) {
@@ -138,8 +150,11 @@ func TestObserversCannotMove(t *testing.T) {
 
 func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
 	store := NewStore()
-	room := store.Create()
-	_, player, _ := store.Join(room.Code)
+	room, err := store.Create("creator")
+	if err != nil {
+		t.Fatalf("create room: %v", err)
+	}
+	_, player, _ := store.Join(room.Code, "user1")
 
 	left, shouldBroadcast := store.Leave(room.Code, player.ID)
 	if left == nil {
@@ -149,7 +164,7 @@ func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
 		t.Fatal("expected no broadcast for empty room")
 	}
 
-	_, joined, err := store.Join(room.Code)
+	_, joined, err := store.Join(room.Code, "user1")
 	if err != nil {
 		t.Fatalf("expected room to remain joinable, got %v", err)
 	}
@@ -160,10 +175,13 @@ func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
 
 func TestSnapshotUsesEmptyMoveList(t *testing.T) {
 	store := NewStore()
-	room := store.Create()
-	_, player, _ := store.Join(room.Code)
+	room, err := store.Create("creator")
+	if err != nil {
+		t.Fatalf("create room: %v", err)
+	}
+	_, player, _ := store.Join(room.Code, "user1")
 
-	state, err := store.Snapshot(room.Code, player.ID)
+	state, err := store.Snapshot(room.Code, player.UserID)
 	if err != nil {
 		t.Fatalf("snapshot: %v", err)
 	}
