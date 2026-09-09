@@ -135,6 +135,7 @@ To deploy the static Astro site:
 ```sh
 pnpm build
 rsync -a --delete apps/web/dist/ osc@<ip address>:/srv/osc-site/
+# No need to restart any server
 ```
 
 To deploy the Go server:
@@ -143,5 +144,8 @@ To deploy the Go server:
 go build ./apps/server/cmd/server
 
 # Copy resulting binary to server
-rsync -a server osc@<ip address>:/home/osc/osc-server/
+rsync -a server osc@<ip address>:/srv/osc-server/
+
+# Restart service
+ssh osc@<ip address> 'sudo systemctl restart osc-server'
 ```
