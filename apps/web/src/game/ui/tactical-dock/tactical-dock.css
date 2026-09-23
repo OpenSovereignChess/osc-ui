@@ -1,0 +1,106 @@
+.game-tactical-dock {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 8px;
+}
+
+.game-tactical-dock__panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 12px;
+  position: relative;
+}
+
+.game-tactical-dock__panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: var(--noise-texture);
+}
+
+.game-tactical-dock__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.game-tactical-dock__heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.color-control-matrix {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.color-control-matrix__cell {
+  min-height: 42px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.color-control-matrix__cell[aria-pressed="true"] {
+  box-shadow:
+    inset 0 0 0 2px var(--swatch-border),
+    0 0 0 2px var(--ink);
+}
+
+.color-control-matrix__owner {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  font: 700 9px/1 var(--font-mono);
+  opacity: 0.82;
+}
+
+.game-inspector-card {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1023px) {
+  .game-tactical-dock {
+    position: sticky;
+    z-index: 5;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .game-tactical-dock__panel {
+    border-width: 0 0 1px;
+  }
+
+  .game-tactical-dock__panel:nth-child(n + 3) {
+    display: none;
+  }
+
+  .color-control-matrix {
+    grid-template-columns: repeat(12, minmax(22px, 1fr));
+    gap: 2px;
+  }
+
+  .color-control-matrix__cell {
+    min-height: 32px;
+  }
+
+  .color-control-matrix__owner {
+    display: none;
+  }
+}

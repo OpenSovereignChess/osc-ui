@@ -3,6 +3,6 @@ import Layout from "./_Layout.astro";
 import PlayMain from "../game/play/PlayMain.tsx";
 ---
 
-<Layout title="Play | Open Sovereign Chess">
+<Layout title="Play | Open Sovereign Chess" showFooter={false}>
   <PlayMain client:only="solid-js" />
 </Layout>

@@ -26,7 +26,32 @@ export default defineConfig({
     },
   },
   integrations: [
-    AstroPWA(),
+    AstroPWA({
+      registerType: "autoUpdate",
+      manifest: {
+        name: "Open Sovereign Chess",
+        short_name: "OSC",
+        description:
+          "Offline-capable Sovereign Chess board, analysis, and editor tools.",
+        theme_color: "#F4F0EA",
+        background_color: "#F4F0EA",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
+        icons: [
+          {
+            src: "/favicon.svg",
+            sizes: "any",
+            type: "image/svg+xml",
+            purpose: "any maskable",
+          },
+        ],
+      },
+      workbox: {
+        navigateFallback: "/",
+        globPatterns: ["**/*.{js,css,html,svg,webmanifest,woff2}"],
+      },
+    }),
     UnoCSS({
       injectReset: true,
     }),

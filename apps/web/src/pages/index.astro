@@ -1,26 +1,28 @@
 ---
 import Layout from "./_Layout.astro";
+import ColorMatrix from "../app/components/ColorMatrix.astro";
+import TacticalDock from "../app/components/TacticalDock.astro";
 
-const boardSquares = Array.from({ length: 64 });
+const boardSquares = Array.from({ length: 256 });
 
 const features = [
   {
-    title: "Play online",
-    text: "Find a live game, pick a time control, and play Sovereign Chess with other players.",
+    kicker: "Zone B",
+    title: "Maximum board canvas",
+    text: "A centered 16×16 stage prioritizes board scale while preserving room for persistent telemetry.",
     href: "/play",
-    status: "Stubbed",
   },
   {
-    title: "Analysis board",
-    text: "Explore positions, replay lines, and inspect move ideas without starting a game.",
+    kicker: "Zone C",
+    title: "Reusable tactical dock",
+    text: "Color control, notation, and inspector panels use the same compact UI components across tools.",
     href: "/analysis",
-    status: "Stubbed",
   },
   {
-    title: "Board editor",
-    text: "Set up positions on the current board implementation and prepare custom scenarios.",
-    href: "/editor",
-    status: "Active shell",
+    kicker: "A11y",
+    title: "Color-blind first matrix",
+    text: "Every regime is encoded by hue, tactile pattern, and a two-letter code—never by color alone.",
+    href: "/rules",
   },
 ];
 ---
@@ -30,17 +32,26 @@ const features = [
     <div class="site-inner home-hero__grid">
       <div class="home-hero__copy">
         <p class="eyebrow">Sovereign Chess online</p>
-        <h1>Play, study, and build positions for Sovereign Chess.</h1>
+        <h1>Braun-Swiss tools for a 12-color chess system.</h1>
         <p>
-          A web home for learning the variant, exploring the board, and
-          eventually playing live games with other people.
+          Play, study, and build positions for Sovereign Chess. Use a precise
+          three-zone interface: fixed system status, maximal board canvas, and
+          persistent tactical telemetry.
         </p>
         <div class="button-row">
-          <a class="button primary" href="/editor">Open board editor</a>
-          <a class="button" href="/rules">Learn the rules</a>
+          <a class="button primary" href="/play">Enter play shell</a>
+          <a class="button" href="/editor">Open board editor</a>
+          <a class="button" href="/rules">Learn rules</a>
         </div>
       </div>
-      <div class="home-board" aria-hidden="true">
+      <div
+        class="home-board-card ui-panel"
+        aria-label="16 by 16 Sovereign Chess board preview"
+      >
+        <div class="home-board-meta">
+          <span>16×16</span>
+          <span>256 cells</span>
+        </div>
         <div class="stub-board">
           {boardSquares.map(() => <span />)}
         </div>
@@ -48,48 +59,45 @@ const features = [
     </div>
   </section>
 
+  <section class="site-section matrix-band">
+    <div class="site-inner matrix-band__grid">
+      <div>
+        <p class="eyebrow">Dual encoding</p>
+        <h2>12 regimes remain identifiable without hue perception.</h2>
+        <p>
+          The component library exposes a single color matrix model for the
+          header, dock, editor palette, and inspector cards.
+        </p>
+      </div>
+      <ColorMatrix />
+    </div>
+  </section>
+
   <section class="site-section">
-    <div class="site-inner">
-      <div class="section-heading">
-        <p class="eyebrow">What is here</p>
-        <h2>Core areas</h2>
-      </div>
-      <div class="feature-grid">
-        {
-          features.map((feature) => (
-            <a class="feature-card" href={feature.href}>
-              <span>{feature.status}</span>
-              <h3>{feature.title}</h3>
-              <p>{feature.text}</p>
-            </a>
-          ))
-        }
-      </div>
+    <div class="site-inner feature-grid">
+      {
+        features.map((feature) => (
+          <a class="feature-card ui-panel" href={feature.href}>
+            <span>{feature.kicker}</span>
+            <h3>{feature.title}</h3>
+            <p>{feature.text}</p>
+          </a>
+        ))
+      }
     </div>
   </section>
 
   <section class="site-section rules-band">
     <div class="site-inner rules-band__grid">
       <div>
-        <p class="eyebrow">Game rules</p>
-        <h2>Learn the variant before jumping into the tools.</h2>
-      </div>
-      <div>
+        <p class="eyebrow">Architecture preview</p>
+        <h2>Persistent dock, no modal friction.</h2>
         <p>
-          Sovereign Chess changes how piece ownership and board regions work, so
-          the homepage should make the learning path visible before asking
-          people to play.
+          Supporting UI is visible, dense, keyboard-focusable, and intentionally
+          flat.
         </p>
-        <div class="button-row">
-          <a class="button primary" href="/rules">Read the site overview</a>
-          <a
-            class="button"
-            href="https://www.infinitepigames.com/sovereign-chess"
-          >
-            Official game site
-          </a>
-        </div>
       </div>
+      <TacticalDock title="Homepage tactical dock preview" />
     </div>
   </section>
 </Layout>
@@ -97,121 +105,110 @@ const features = [
 <style>
   .home-hero {
     border-bottom: 1px solid var(--line);
-    background: var(--surface);
+    background: var(--panel);
     padding: clamp(28px, 6vw, 72px) clamp(16px, 4vw, 56px);
   }
 
   .home-hero__grid {
     display: grid;
     align-items: center;
-    gap: clamp(28px, 6vw, 72px);
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 460px);
+    gap: clamp(20px, 4vw, 48px);
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 500px);
   }
 
   .home-hero__copy h1 {
-    max-width: 760px;
+    max-width: 820px;
     margin: 0;
-    font-size: clamp(2.5rem, 7vw, 5.5rem);
-    line-height: 0.96;
-    letter-spacing: 0;
+    font-size: clamp(42px, 8vw, 96px);
+    line-height: 0.9;
+    letter-spacing: -0.065em;
   }
 
-  .home-hero__copy p:not(.eyebrow) {
-    max-width: 620px;
-    margin: 18px 0 24px;
+  .home-hero__copy p:not(.eyebrow),
+  .matrix-band p,
+  .rules-band p {
+    max-width: 640px;
+    margin: 16px 0 24px;
     color: var(--muted);
-    font-size: 1.1rem;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.55;
   }
 
-  .home-board {
-    display: flex;
-    justify-content: center;
+  .home-board-card {
+    padding: 8px;
   }
 
-  .section-heading {
+  .home-board-meta {
     display: flex;
-    align-items: end;
     justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 18px;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font: 800 12px/1 var(--font-mono);
+    text-transform: uppercase;
   }
 
-  .section-heading h2,
+  .matrix-band__grid,
+  .rules-band__grid {
+    display: grid;
+    align-items: start;
+    gap: 24px;
+    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  }
+
+  .matrix-band h2,
   .rules-band h2 {
+    max-width: 720px;
     margin: 0;
-    font-size: clamp(1.7rem, 4vw, 3rem);
-    line-height: 1.05;
-    letter-spacing: 0;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
   }
 
   .feature-grid {
     display: grid;
-    gap: 14px;
+    gap: 8px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .feature-card {
-    min-height: 230px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 22px;
-    background: var(--surface-strong);
+    min-height: 224px;
+    padding: 18px;
     color: inherit;
     text-decoration: none;
   }
 
   .feature-card:hover,
   .feature-card:focus-visible {
-    border-color: var(--primary);
-    outline: none;
+    background: var(--card);
   }
 
   .feature-card span {
-    color: var(--accent);
-    font-size: 0.78rem;
-    font-weight: 850;
+    color: var(--muted);
+    font: 800 12px/1 var(--font-mono);
     text-transform: uppercase;
   }
 
   .feature-card h3 {
-    margin: 42px 0 10px;
-    font-size: 1.45rem;
+    margin: 44px 0 10px;
+    font-size: 24px;
+    letter-spacing: -0.03em;
   }
 
-  .feature-card p,
-  .rules-band p {
+  .feature-card p {
     color: var(--muted);
-    line-height: 1.58;
+    line-height: 1.5;
   }
 
   .rules-band {
-    background: #ece7da;
+    background: var(--panel);
   }
 
-  .rules-band__grid {
-    display: grid;
-    align-items: start;
-    gap: 32px;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  }
-
-  .rules-band .button-row {
-    margin-top: 20px;
-  }
-
-  @media (max-width: 860px) {
+  @media (max-width: 900px) {
     .home-hero__grid,
-    .rules-band__grid {
-      grid-template-columns: 1fr;
-    }
-
+    .matrix-band__grid,
+    .rules-band__grid,
     .feature-grid {
       grid-template-columns: 1fr;
-    }
-
-    .home-board {
-      justify-content: flex-start;
     }
   }
 </style>

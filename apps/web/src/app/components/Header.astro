@@ -1,64 +1,204 @@
 ---
-import Navigation from "./Navigation.astro";
+import ColorMatrix from "./ColorMatrix.astro";
 ---
 
 <header class="site-header">
-  <div class="site-header__inner">
+  <div class="site-header__zone site-header__brand-zone">
     <a class="site-brand" href="/" aria-label="Open Sovereign Chess home">
-      <span class="site-brand__mark"></span>
-      <span>Open Sovereign Chess</span>
+      <svg class="site-brand__mark" aria-hidden="true" viewBox="0 0 24 24">
+        <path d="M2 2h20v20H2zM2 8h20M2 14h20M8 2v20M14 2v20"></path>
+      </svg>
+      <span>OSC</span>
     </a>
-    <Navigation />
+    <span class="state-badge">Beta</span>
   </div>
+
+  <div
+    class="site-header__zone site-header__telemetry"
+    aria-label="Game clock and turn status"
+  >
+    <div class="clock-pair">
+      <span>12:00</span>
+      <span>12:00</span>
+    </div>
+    <div class="turn-banner">
+      <span>Turn</span><strong>P1 / WT</strong>
+    </div>
+    <div class="header-matrix" aria-hidden="true">
+      <ColorMatrix compact />
+    </div>
+  </div>
+
+  <nav class="site-header__zone system-actions" aria-label="System actions">
+    <a href="/play">Play</a>
+    <a href="/analysis">Analyze</a>
+    <a href="/editor">Editor</a>
+    <a href="/rules">Rules</a>
+  </nav>
 </header>
 
 <style>
   .site-header {
     position: sticky;
-    z-index: 10;
+    z-index: 20;
     top: 0;
+    display: grid;
+    height: 48px;
+    grid-template-columns: minmax(230px, 0.8fr) minmax(340px, 1fr) minmax(
+        330px,
+        0.9fr
+      );
+    gap: 1px;
     border-bottom: 1px solid var(--line);
-    background: rgba(247, 245, 239, 0.94);
-    backdrop-filter: blur(12px);
+    background: var(--line);
   }
 
-  .site-header__inner {
+  .site-header__zone {
     display: flex;
-    width: min(1180px, calc(100% - 32px));
-    min-height: 68px;
+    min-width: 0;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    margin: 0 auto;
+    background: rgba(244, 240, 234, 0.96);
+    padding: 0 12px;
+  }
+
+  .site-header__brand-zone {
+    gap: 10px;
   }
 
   .site-brand {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     color: var(--ink);
-    font-weight: 850;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
     text-decoration: none;
     white-space: nowrap;
   }
 
   .site-brand__mark {
-    width: 28px;
-    height: 28px;
-    border: 2px solid var(--ink);
-    border-radius: 6px;
-    background:
-      linear-gradient(90deg, transparent 50%, #6c8a73 50%) 0 0 / 14px 14px,
-      linear-gradient(90deg, #e6d8b8 50%, transparent 50%) 0 14px / 14px 14px;
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    shape-rendering: crispEdges;
   }
 
-  @media (max-width: 760px) {
-    .site-header__inner {
-      min-height: 60px;
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 10px;
-      padding: 12px 0;
+  .state-badge,
+  .turn-banner,
+  .system-actions a,
+  .system-actions button {
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--card);
+  }
+
+  .state-badge {
+    padding: 4px 6px;
+    color: var(--muted);
+    font: 700 11px/1 var(--font-mono);
+    text-transform: uppercase;
+  }
+
+  .site-header__telemetry {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .clock-pair {
+    display: flex;
+    overflow: hidden;
+    border: 1px solid var(--ink);
+    border-radius: 2px;
+    background: var(--ink);
+    color: #ffffff;
+    font: 800 13px/1 var(--font-mono);
+  }
+
+  .clock-pair span {
+    padding: 7px 9px;
+  }
+  .clock-pair span + span {
+    border-left: 1px solid rgba(255, 255, 255, 0.22);
+  }
+
+  .turn-banner {
+    display: inline-flex;
+    min-height: 29px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .turn-banner span {
+    color: var(--muted);
+  }
+  .turn-banner strong {
+    font-family: var(--font-mono);
+  }
+
+  .header-matrix {
+    width: min(168px, 26vw);
+  }
+
+  .system-actions {
+    justify-content: flex-end;
+    gap: 4px;
+  }
+
+  .system-actions a,
+  .system-actions button {
+    display: inline-flex;
+    min-height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 9px;
+    color: var(--ink);
+    cursor: pointer;
+    font: 800 12px/1 var(--font-sans);
+    text-decoration: none;
+  }
+
+  .system-actions svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+  }
+
+  @media (max-width: 1023px) {
+    .site-header {
+      height: 96px;
+      grid-template-columns: 1fr;
+    }
+
+    .site-header__zone {
+      min-height: 32px;
+    }
+
+    .site-header__telemetry {
+      order: 3;
+      justify-content: start;
+    }
+
+    .system-actions {
+      justify-content: start;
+      overflow-x: auto;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .header-matrix {
+      display: none;
+    }
+    .system-actions a,
+    .system-actions button {
+      min-width: 48px;
+      min-height: 32px;
     }
   }
 </style>

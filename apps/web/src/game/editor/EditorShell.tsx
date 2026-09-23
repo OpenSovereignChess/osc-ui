@@ -19,6 +19,10 @@ import {
 import { read, readSetup, writeSetup } from "../rules/fen.ts";
 import { useGameSession } from "../session/useGameSession.ts";
 import Container from "../ui/container/Container.tsx";
+import {
+  sovereignColorById,
+  swatchStyle,
+} from "../../app/design/color-system.ts";
 
 import "../../../../../packages/board-solid/src/styles/piece.generated.css";
 import "./editor.css";
@@ -37,20 +41,9 @@ const roleLabels: Record<Role, string> = {
   rook: "Rook",
 };
 
-const colorLabels: Record<Color, string> = {
-  ash: "Ash",
-  black: "Black",
-  cyan: "Cyan",
-  green: "Green",
-  navy: "Navy",
-  orange: "Orange",
-  pink: "Pink",
-  red: "Red",
-  slate: "Slate",
-  violet: "Violet",
-  white: "White",
-  yellow: "Yellow",
-};
+const colorLabels = Object.fromEntries(
+  Object.entries(sovereignColorById).map(([id, spec]) => [id, spec.label]),
+) as Record<Color, string>;
 
 function samePiece(a?: Piece, b?: Piece): boolean {
   return !!a && !!b && a.color === b.color && a.role === b.role;
@@ -299,13 +292,19 @@ export default function EditorShell() {
           <For each={colors}>
             {(color) => (
               <button
-                aria-label={colorLabels[color]}
-                class={`editor-color-swatch${paletteColor() === color ? " active" : ""}`}
+                aria-label={`${colorLabels[color]} (${sovereignColorById[color].code})`}
+                class={`editor-color-swatch osc-swatch${paletteColor() === color ? " active" : ""}`}
                 data-color={color}
+                data-pattern={sovereignColorById[color].pattern}
                 role="tab"
+                style={swatchStyle(sovereignColorById[color])}
                 type="button"
                 onClick={() => setPaletteColor(color)}
-              />
+              >
+                <span class="osc-swatch__code">
+                  {sovereignColorById[color].code}
+                </span>
+              </button>
             )}
           </For>
         </div>

@@ -1,0 +1,82 @@
+---
+import {
+  sovereignColorSpecs,
+  swatchStyleAttribute,
+} from "../design/color-system";
+
+interface Props {
+  compact?: boolean;
+  label?: string;
+}
+
+const { compact = false, label = "12-color control matrix" } = Astro.props;
+---
+
+<div
+  class:list={["color-matrix", { "color-matrix--compact": compact }]}
+  aria-label={label}
+>
+  {
+    sovereignColorSpecs.map((color) => (
+      <div
+        class="color-matrix__cell osc-swatch"
+        data-owner={color.owner}
+        data-pattern={color.pattern}
+        style={swatchStyleAttribute(color)}
+        title={`${color.label} (${color.code}) — ${color.owner}`}
+      >
+        <span class="osc-swatch__code">{color.code}</span>
+        <span class="color-matrix__owner" aria-label={`Owner: ${color.owner}`}>
+          {color.owner === "Player 1"
+            ? "P1"
+            : color.owner === "Player 2"
+              ? "P2"
+              : "--"}
+        </span>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .color-matrix {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .color-matrix--compact {
+    grid-template-columns: repeat(12, minmax(18px, 1fr));
+    gap: 2px;
+  }
+
+  .color-matrix__cell {
+    min-height: 42px;
+  }
+
+  .color-matrix--compact .color-matrix__cell {
+    min-height: 22px;
+  }
+
+  .color-matrix__owner {
+    position: absolute;
+    right: 3px;
+    bottom: 2px;
+    font: 700 9px/1 var(--font-mono);
+    opacity: 0.82;
+  }
+
+  .color-matrix--compact .color-matrix__owner {
+    display: none;
+  }
+
+  .color-matrix--compact .osc-swatch__code {
+    font-size: 9px;
+  }
+
+  @media (max-width: 720px) {
+    .color-matrix:not(.color-matrix--compact) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+</style>

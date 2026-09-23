@@ -7,7 +7,9 @@ import * as util from "../../rules/util.ts";
 import Board from "../board/Board.tsx";
 import Coords from "../coords/Coords.tsx";
 import BoardPlayControls from "../play-controls/BoardPlayControls.tsx";
+import ColorControlMatrix from "../tactical-dock/ColorControlMatrix.tsx";
 
+import "../tactical-dock/tactical-dock.css";
 import "./container.css";
 
 function updateBounds(
@@ -165,20 +167,49 @@ export default function Container() {
             <Coords />
           </div>
         </div>
-        <aside class="game-board-controls">
-          <BoardPlayControls
-            castleActions={session.getCastleActions().map((option) => ({
-              label: option.label,
-              onClick: () => session.submitAction(option.action),
-            }))}
-            defectActions={session.getDefectActions().map((option) => ({
-              label: option.label,
-              onClick: () => session.submitAction(option.action),
-            }))}
-          />
-          <section class="play-history" aria-label="Move history">
-            <div class="play-history-header">
-              <h2>Move history</h2>
+        <aside
+          class="game-board-controls game-tactical-dock"
+          aria-label="Dock and telemetry"
+        >
+          <section
+            class="game-tactical-dock__panel"
+            aria-label="Color control matrix"
+          >
+            <div class="game-tactical-dock__heading">
+              <div>
+                <p class="eyebrow">Color control</p>
+                <h2>12-regime matrix</h2>
+              </div>
+            </div>
+            <ColorControlMatrix />
+          </section>
+          <section class="game-tactical-dock__panel" aria-label="Move actions">
+            <div class="game-tactical-dock__heading">
+              <div>
+                <p class="eyebrow">Move controls</p>
+                <h2>Special actions</h2>
+              </div>
+            </div>
+            <BoardPlayControls
+              castleActions={session.getCastleActions().map((option) => ({
+                label: option.label,
+                onClick: () => session.submitAction(option.action),
+              }))}
+              defectActions={session.getDefectActions().map((option) => ({
+                label: option.label,
+                onClick: () => session.submitAction(option.action),
+              }))}
+            />
+          </section>
+          <section
+            class="game-tactical-dock__panel play-history"
+            aria-label="Move history"
+          >
+            <div class="game-tactical-dock__heading play-history-header">
+              <div>
+                <p class="eyebrow">Notation</p>
+                <h2>Move log</h2>
+              </div>
             </div>
             <ol class="play-history-list">
               <For each={session.getHistoryTurns()}>
@@ -195,6 +226,23 @@ export default function Container() {
               <p class="play-history-empty">No moves yet.</p>
             </Show>
           </section>
+          {/*
+          <section
+            class="game-tactical-dock__panel"
+            aria-label="Contextual inspector"
+          >
+            <div class="game-tactical-dock__heading">
+              <div>
+                <p class="eyebrow">Inspector</p>
+                <h2>Rule helper</h2>
+              </div>
+            </div>
+            <p class="game-inspector-card">
+              Select a square or control to inspect legal mechanics. Regimes use
+              color, pattern, and two-letter codes.
+            </p>
+          </section>
+          */}
         </aside>
       </div>
     </>

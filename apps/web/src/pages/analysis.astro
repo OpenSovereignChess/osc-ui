@@ -1,41 +1,68 @@
 ---
 import Layout from "./_Layout.astro";
 import AnalysisBoard from "../game/analysis/AnalysisBoard.tsx";
+import TacticalDock from "../app/components/TacticalDock.astro";
 ---
 
-<Layout title="Analysis | Open Sovereign Chess">
-  <section class="tool-shell">
-    <aside class="tool-panel">
-      <p class="eyebrow">Analysis</p>
-      <h1>Analysis board</h1>
-      <p>
-        Select a piece to inspect its legal moves from the starting position.
-      </p>
-      <div class="button-row">
-        <a class="button" href="/editor">Set up board</a>
-        <a class="button disabled" aria-disabled="true">Import PGN</a>
+<Layout title="Analysis | Open Sovereign Chess" showFooter={false}>
+  <section class="app-workbench analysis-workbench">
+    <div class="app-canvas analysis-canvas">
+      <div class="analysis-toolbar ui-panel">
+        <div>
+          <p class="eyebrow">Analysis</p>
+          <h1>Board analysis</h1>
+        </div>
+        <div class="button-row">
+          <a class="button" href="/editor">Set up board</a>
+          <a class="button disabled" aria-disabled="true">Import PGN</a>
+        </div>
       </div>
-    </aside>
-    <div class="tool-stage">
       <div class="analysis-board">
         <AnalysisBoard client:only="solid-js" />
       </div>
     </div>
+    <TacticalDock title="Analysis dock and telemetry" />
   </section>
 </Layout>
 
 <style>
+  .analysis-canvas {
+    position: relative;
+    align-content: stretch;
+    padding: 8px;
+  }
+
+  .analysis-toolbar {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 12px;
+  }
+
+  .analysis-toolbar h1 {
+    margin: 0;
+    font-size: 24px;
+    letter-spacing: -0.04em;
+  }
+
   .analysis-board {
     width: 100%;
     min-width: 280px;
-    height: calc(100vh - 236px);
+    height: calc(100svh - 118px);
     min-height: 520px;
   }
 
-  @media (max-width: 760px) {
+  @media (max-width: 1023px) {
     .analysis-board {
       height: auto;
       min-height: 0;
+    }
+
+    .analysis-toolbar {
+      align-items: flex-start;
+      flex-direction: column;
     }
   }
 </style>
