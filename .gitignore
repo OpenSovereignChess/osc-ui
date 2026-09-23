@@ -31,3 +31,8 @@ pnpm-debug.log*
 
 # codex
 .codex
+
+# sqlite
+*.db
+*.db-shm
+*.db-wal
