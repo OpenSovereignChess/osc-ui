@@ -1,4 +1,12 @@
-import { For, Show, createEffect, createMemo, createSignal } from "solid-js";
+import {
+  For,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  onCleanup,
+  onMount,
+} from "solid-js";
 import { key2pos, posToTranslate } from "@osc/board-solid";
 import { useGameSession } from "../../session/useGameSession.ts";
 import { BOARD_SIZE } from "../../rules/constants.ts";
@@ -114,6 +122,12 @@ export default function Container() {
 
     session.setDom(dom);
     setDomRegistered(true);
+  });
+
+  onMount(() => {
+    const onFlipBoard = (): void => session.flipOrientation();
+    window.addEventListener("osc:flip-board", onFlipBoard);
+    onCleanup(() => window.removeEventListener("osc:flip-board", onFlipBoard));
   });
 
   createEffect(() => {

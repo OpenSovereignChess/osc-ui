@@ -3,6 +3,10 @@ import Layout from "./_Layout.astro";
 import EditorMain from "../game/editor/EditorMain.tsx";
 ---
 
-<Layout title="Board editor | Open Sovereign Chess" showFooter={false}>
+<Layout
+  title="Board editor | Open Sovereign Chess"
+  showFooter={false}
+  headerMode="workspace"
+>
   <EditorMain client:only="solid-js" />
 </Layout>

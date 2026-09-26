@@ -4,7 +4,11 @@ import AnalysisBoard from "../game/analysis/AnalysisBoard.tsx";
 import TacticalDock from "../app/components/TacticalDock.astro";
 ---
 
-<Layout title="Analysis | Open Sovereign Chess" showFooter={false}>
+<Layout
+  title="Analysis | Open Sovereign Chess"
+  showFooter={false}
+  headerMode="workspace"
+>
   <section class="app-workbench analysis-workbench">
     <div class="app-canvas analysis-canvas">
       <div class="analysis-toolbar ui-panel">
@@ -50,7 +54,7 @@ import TacticalDock from "../app/components/TacticalDock.astro";
   .analysis-board {
     width: 100%;
     min-width: 280px;
-    height: calc(100svh - 118px);
+    height: calc(100svh - var(--osc-header-height) - 70px);
     min-height: 520px;
   }
 

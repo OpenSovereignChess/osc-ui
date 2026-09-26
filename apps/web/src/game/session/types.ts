@@ -65,6 +65,7 @@ export interface LocalGameSession {
   editor: EditorActions;
   applyServerMove: (move: SessionAction) => boolean;
   applyServerMoves: (moves: readonly SessionAction[]) => void;
+  flipOrientation: () => void;
   getCastleActions: Accessor<readonly SessionActionOption[]>;
   getDefectActions: Accessor<readonly SessionActionOption[]>;
   getHistoryTurns: Accessor<readonly SessionHistoryTurn[]>;

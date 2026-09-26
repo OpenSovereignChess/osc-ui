@@ -171,6 +171,13 @@ export function createLocalGameSession(
     },
     board,
     editor,
+    flipOrientation: () => {
+      setPendingPromotion(undefined);
+      setState("interaction", { selected: undefined });
+      setState("position", "orientation", (orientation) =>
+        orientation === "white" ? "black" : "white",
+      );
+    },
     getCastleActions: createMemo(
       () => (rulesVersion(), castleActionsForSeat(rulesPosition, onlineSeat)),
     ),

@@ -21,6 +21,7 @@ import {
   createMemo,
   createSignal,
   onCleanup,
+  onMount,
 } from "solid-js";
 import { BOARD_SIZE } from "../rules/constants.ts";
 import { readSetup } from "../rules/fen.ts";
@@ -130,6 +131,9 @@ export default function AnalysisBoard() {
   const [fenStatus, setFenStatus] = createSignal<string>();
   const [pendingPromotion, setPendingPromotion] =
     createSignal<PromotionRequest>();
+  const [orientation, setOrientation] = createSignal<"white" | "black">(
+    "white",
+  );
 
   const position = createMemo(
     () => positions()[currentIndex()] ?? positions()[0],
@@ -290,6 +294,16 @@ export default function AnalysisBoard() {
     setPendingPromotion(undefined);
   });
 
+  onMount(() => {
+    const onFlipBoard = (): void => {
+      setOrientation((current) => (current === "white" ? "black" : "white"));
+      setSelectedKey(undefined);
+      setPendingPromotion(undefined);
+    };
+    window.addEventListener("osc:flip-board", onFlipBoard);
+    onCleanup(() => window.removeEventListener("osc:flip-board", onFlipBoard));
+  });
+
   createEffect(() => {
     const index = currentIndex();
     const moveCount = moves().length;
@@ -352,7 +366,10 @@ export default function AnalysisBoard() {
     }
 
     const squareSize = boardBounds.width / BOARD_SIZE;
-    const [x, y] = posToTranslate(boardBounds)(key2pos(pending.dest), "white");
+    const [x, y] = posToTranslate(boardBounds)(
+      key2pos(pending.dest),
+      orientation(),
+    );
     const width = pending.roles.length * squareSize;
     const left = Math.min(
       Math.max(0, x - (width - squareSize) / 2),
@@ -455,7 +472,7 @@ export default function AnalysisBoard() {
                 movePiece(orig as types.Key, dest as types.Key)
               }
               onSelectSquare={(key) => selectSquare(key as types.Key)}
-              orientation="white"
+              orientation={orientation()}
               pieces={pieces()}
               selectedKey={selectedKey()}
             >

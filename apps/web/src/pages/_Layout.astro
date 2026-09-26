@@ -1,13 +1,17 @@
 ---
 import Footer from "../app/components/Footer.astro";
-import Header from "../app/components/Header.astro";
+import Header from "../app/components/Header.tsx";
+
+type HeaderMode = "global" | "gameplay" | "workspace";
 
 interface Props {
   title: string;
   showFooter?: boolean;
+  headerMode?: HeaderMode;
 }
 
-const { title, showFooter = true } = Astro.props;
+const { title, showFooter = true, headerMode = "global" } = Astro.props;
+const bodyClass = `header-mode-${headerMode}`;
 ---
 
 <html lang="en">
@@ -21,8 +25,8 @@ const { title, showFooter = true } = Astro.props;
     <title>{title}</title>
     <link rel="canonical" href="https://playsovereignchess.com/" />
   </head>
-  <body>
-    <Header />
+  <body class={bodyClass} data-header-mode={headerMode}>
+    <Header mode={headerMode} currentPath={Astro.url.pathname} client:load />
     <main>
       <slot />
     </main>
@@ -84,8 +88,17 @@ const { title, showFooter = true } = Astro.props;
     color: inherit;
   }
 
+  body {
+    --osc-header-height: 48px;
+  }
+
+  body.header-mode-gameplay,
+  body.header-mode-workspace {
+    --osc-header-height: 32px;
+  }
+
   main {
-    min-height: calc(100svh - 48px);
+    min-height: calc(100svh - var(--osc-header-height));
   }
 
   :where(a, button, input, textarea, select, [tabindex]):focus-visible {
@@ -184,7 +197,7 @@ const { title, showFooter = true } = Astro.props;
 
   .app-workbench {
     display: grid;
-    min-height: calc(100svh - 48px);
+    min-height: calc(100svh - var(--osc-header-height));
     grid-template-columns: minmax(0, 1fr) minmax(292px, 352px);
     gap: 8px;
     padding: 8px;
@@ -201,7 +214,7 @@ const { title, showFooter = true } = Astro.props;
 
   .tool-shell {
     display: grid;
-    min-height: calc(100svh - 48px);
+    min-height: calc(100svh - var(--osc-header-height));
     grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
     border-top: 1px solid var(--line);
   }
@@ -392,8 +405,13 @@ const { title, showFooter = true } = Astro.props;
   }
 
   @media (max-width: 1023px) {
+    body.header-mode-gameplay,
+    body.header-mode-workspace {
+      --osc-header-height: 36px;
+    }
+
     main {
-      min-height: calc(100svh - 96px);
+      min-height: calc(100svh - var(--osc-header-height));
     }
     .app-workbench {
       grid-template-columns: 1fr;
