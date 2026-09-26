@@ -376,7 +376,7 @@ export default function EditorShell() {
       </aside>
       <div class="editor-stage">
         <div class="editor-board-frame">
-          <Container />
+          <Container showControls={false} />
         </div>
       </div>
       <Show when={paletteDrag()}>

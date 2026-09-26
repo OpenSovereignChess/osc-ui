@@ -36,13 +36,18 @@ function updateBounds(
   return containerEl.getBoundingClientRect();
 }
 
-export default function Container() {
+type ContainerProps = {
+  showControls?: boolean;
+};
+
+export default function Container(props: ContainerProps) {
   const [wrapEl, setWrapEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [boardEl, setBoardEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
   const [domRegistered, setDomRegistered] = createSignal<boolean>(false);
   const session = useGameSession();
+  const showControls = () => props.showControls ?? true;
   const promotionPickerStyle = createMemo(() => {
     const pending = session.getPendingPromotion();
     const boardBounds = bounds();
@@ -141,7 +146,9 @@ export default function Container() {
 
   return (
     <>
-      <div class="game-board-shell">
+      <div
+        class={`game-board-shell${showControls() ? "" : " game-board-shell--board-only"}`}
+      >
         <div class="wrap" ref={setWrapEl}>
           <div class="sc-container" ref={setContainerEl}>
             <Board ref={setBoardEl} bounds={bounds()} />
@@ -181,66 +188,70 @@ export default function Container() {
             <Coords />
           </div>
         </div>
-        <aside
-          class="game-board-controls game-tactical-dock"
-          aria-label="Dock and telemetry"
-        >
-          <section
-            class="game-tactical-dock__panel"
-            aria-label="Color control matrix"
+        <Show when={showControls()}>
+          <aside
+            class="game-board-controls game-tactical-dock"
+            aria-label="Dock and telemetry"
           >
-            <div class="game-tactical-dock__heading">
-              <div>
-                <p class="eyebrow">Color control</p>
-                <h2>12-regime matrix</h2>
+            <section
+              class="game-tactical-dock__panel"
+              aria-label="Color control matrix"
+            >
+              <div class="game-tactical-dock__heading">
+                <div>
+                  <p class="eyebrow">Color control</p>
+                  <h2>12-regime matrix</h2>
+                </div>
               </div>
-            </div>
-            <ColorControlMatrix />
-          </section>
-          <section class="game-tactical-dock__panel" aria-label="Move actions">
-            <div class="game-tactical-dock__heading">
-              <div>
-                <p class="eyebrow">Move controls</p>
-                <h2>Special actions</h2>
+              <ColorControlMatrix />
+            </section>
+            <section
+              class="game-tactical-dock__panel"
+              aria-label="Move actions"
+            >
+              <div class="game-tactical-dock__heading">
+                <div>
+                  <p class="eyebrow">Move controls</p>
+                  <h2>Special actions</h2>
+                </div>
               </div>
-            </div>
-            <BoardPlayControls
-              castleActions={session.getCastleActions().map((option) => ({
-                label: option.label,
-                onClick: () => session.submitAction(option.action),
-              }))}
-              defectActions={session.getDefectActions().map((option) => ({
-                label: option.label,
-                onClick: () => session.submitAction(option.action),
-              }))}
-            />
-          </section>
-          <section
-            class="game-tactical-dock__panel play-history"
-            aria-label="Move history"
-          >
-            <div class="game-tactical-dock__heading play-history-header">
-              <div>
-                <p class="eyebrow">Notation</p>
-                <h2>Move log</h2>
+              <BoardPlayControls
+                castleActions={session.getCastleActions().map((option) => ({
+                  label: option.label,
+                  onClick: () => session.submitAction(option.action),
+                }))}
+                defectActions={session.getDefectActions().map((option) => ({
+                  label: option.label,
+                  onClick: () => session.submitAction(option.action),
+                }))}
+              />
+            </section>
+            <section
+              class="game-tactical-dock__panel play-history"
+              aria-label="Move history"
+            >
+              <div class="game-tactical-dock__heading play-history-header">
+                <div>
+                  <p class="eyebrow">Notation</p>
+                  <h2>Move log</h2>
+                </div>
               </div>
-            </div>
-            <ol class="play-history-list">
-              <For each={session.getHistoryTurns()}>
-                {(turn) => (
-                  <li>
-                    <span class="play-history-turn">{turn.number}.</span>
-                    <span>{turn.first?.san}</span>
-                    <span>{turn.second?.san}</span>
-                  </li>
-                )}
-              </For>
-            </ol>
-            <Show when={session.getHistoryTurns().length === 0}>
-              <p class="play-history-empty">No moves yet.</p>
-            </Show>
-          </section>
-          {/*
+              <ol class="play-history-list">
+                <For each={session.getHistoryTurns()}>
+                  {(turn) => (
+                    <li>
+                      <span class="play-history-turn">{turn.number}.</span>
+                      <span>{turn.first?.san}</span>
+                      <span>{turn.second?.san}</span>
+                    </li>
+                  )}
+                </For>
+              </ol>
+              <Show when={session.getHistoryTurns().length === 0}>
+                <p class="play-history-empty">No moves yet.</p>
+              </Show>
+            </section>
+            {/*
           <section
             class="game-tactical-dock__panel"
             aria-label="Contextual inspector"
@@ -257,7 +268,8 @@ export default function Container() {
             </p>
           </section>
           */}
-        </aside>
+          </aside>
+        </Show>
       </div>
     </>
   );

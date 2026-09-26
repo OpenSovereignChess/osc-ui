@@ -272,8 +272,13 @@ export default function Header(props: HeaderProps) {
           <Show
             when={mode() === "gameplay"}
             fallback={
-              <div aria-label="Workspace status" class="osc-header__workspace-status">
-                <span class="osc-header__workspace-title">{workspaceTitle()}</span>
+              <div
+                aria-label="Workspace status"
+                class="osc-header__workspace-status"
+              >
+                <span class="osc-header__workspace-title">
+                  {workspaceTitle()}
+                </span>
               </div>
             }
           >
@@ -309,7 +314,9 @@ export default function Header(props: HeaderProps) {
                 <span aria-hidden="true">•</span>
                 {renderRegimeBadge(telemetry().activeRegime, "Active regime")}
                 <span>{activeSpec().label} active</span>
-                <span class="osc-header__clock">{telemetry().playerOneClock}</span>
+                <span class="osc-header__clock">
+                  {telemetry().playerOneClock}
+                </span>
               </div>
             </>
           </Show>
@@ -414,7 +421,11 @@ export default function Header(props: HeaderProps) {
                 MENU ▾
               </button>
               <Show when={isActionMenuOpen()}>
-                <div class="osc-header__game-menu" id="osc-game-menu" role="menu">
+                <div
+                  class="osc-header__game-menu"
+                  id="osc-game-menu"
+                  role="menu"
+                >
                   <button
                     class="osc-header__menu-action osc-header__menu-action--mobile"
                     onClick={() => {
