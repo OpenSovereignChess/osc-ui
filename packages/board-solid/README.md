@@ -1,6 +1,6 @@
 # Board Solid
 
-Internal package-shaped board renderer for Open Sovereign Chess.
+Internal package-shaped board renderer for Play Sovereign Chess.
 
 This package is intentionally narrow:
 

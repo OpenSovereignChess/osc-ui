@@ -29,10 +29,10 @@ export default defineConfig({
     AstroPWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "Open Sovereign Chess",
-        short_name: "OSC",
+        name: "Play Sovereign Chess",
+        short_name: "PSC",
         description:
-          "Offline-capable Sovereign Chess board, analysis, and editor tools.",
+          "Browser-based Sovereign Chess board, analysis, and editor tools.",
         theme_color: "#F4F0EA",
         background_color: "#F4F0EA",
         display: "standalone",

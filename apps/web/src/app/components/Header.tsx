@@ -159,12 +159,14 @@ export default function Header(props: HeaderProps) {
               <a
                 class="osc-header__brand"
                 href="/"
-                aria-label="Open Sovereign Chess home"
+                aria-label="Play Sovereign Chess home"
               >
                 <span class="osc-header__brand-mark" aria-hidden="true">
-                  SC
+                  PSC
                 </span>
-                <span class="osc-header__brand-label">SOVEREIGN CHESS</span>
+                <span class="osc-header__brand-label">
+                  PLAY SOVEREIGN CHESS
+                </span>
               </a>
             </div>
 
@@ -243,7 +245,7 @@ export default function Header(props: HeaderProps) {
               size="sm"
               variant="ghost"
             >
-              [SC ▾]
+              [PSC ▾]
             </Button>
             <Show when={isNavOpen()}>
               <nav

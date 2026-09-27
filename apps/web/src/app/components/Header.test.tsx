@@ -8,7 +8,8 @@ test("global mode renders brand, nav, account, and active route", () => {
     <Header mode="global" currentPath="/rules" />
   ));
 
-  expect(html).toContain("SOVEREIGN CHESS");
+  expect(html).toContain("PLAY SOVEREIGN CHESS");
+  expect(html).toContain('aria-label="Play Sovereign Chess home"');
   expect(html).toContain('href="/play"');
   expect(html).toContain('href="/analysis"');
   expect(html).toContain('href="/editor"');
@@ -23,7 +24,7 @@ test("gameplay mode renders compact nav, telemetry, flip, and game menu trigger"
     <Header mode="gameplay" currentPath="/play" />
   ));
 
-  expect(html).toContain("[SC ▾]");
+  expect(html).toContain("[PSC ▾]");
   expect(html).toContain("03:42");
   expect(html).toContain("04:15");
   expect(html).toContain("WHITE REGIME");
@@ -37,7 +38,7 @@ test("workspace mode renders compact nav, route status, flip, and workspace menu
     <Header mode="workspace" currentPath="/analysis" />
   ));
 
-  expect(html).toContain("[SC ▾]");
+  expect(html).toContain("[PSC ▾]");
   expect(html).toContain("ANALYSIS BOARD");
   expect(html).toContain('aria-label="Flip board"');
   expect(html).toContain("Workspace Menu ▾");

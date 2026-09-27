@@ -1,4 +1,4 @@
-# Open Sovereign Chess
+# Play Sovereign Chess
 
 Monorepo for the web client, the Go realtime server, and the shared contracts that keep them aligned.
 

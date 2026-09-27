@@ -26,18 +26,31 @@ test("home page renders", async () => {
     request: new Request("https://playsovereignchess.com/"),
   });
 
-  expect(html).toContain("<title>Open Sovereign Chess</title>");
+  expect(html).toContain("<title>Play Sovereign Chess</title>");
   expect(html).toContain('<html lang="en">');
-  expect(html).toContain("Open Sovereign Chess");
-  expect(html).toContain(
-    "Play, study, and build positions for Sovereign Chess.",
-  );
+  expect(html).toContain("Play Sovereign Chess");
+  expect(html).toContain("Play Sovereign Chess on a board built for it.");
   expect(html).toContain('href="/play"');
   expect(html).toContain('href="/analysis"');
   expect(html).toContain('href="/editor"');
   expect(html).toContain('href="/rules"');
-  expect(html).toContain("Official game site");
+  expect(html).toContain("Visit official game site");
   expect(html).toContain("https://www.infinitepigames.com/sovereign-chess");
+  expect(html).toContain("Twelve colors, readable at a glance.");
+  expect(html).toContain("Homepage tactical dock preview");
+  expect(html).toContain("What works today");
+  const removedCopy = [
+    ["Open", "Sovereign", "Chess"].join(" "),
+    ["open", "source"].join("-"),
+    ["open", "digital", "companion"].join(" "),
+    ["community", "project"].join(" "),
+    `Zone ${"B"}`,
+    `Zone ${"C"}`,
+    ["Braun", "Swiss tools"].join("-"),
+  ];
+  for (const copy of removedCopy) {
+    expect(html).not.toContain(copy);
+  }
 });
 
 test("global pages render the global header mode", async () => {
@@ -53,6 +66,8 @@ test("global pages render the global header mode", async () => {
   });
 
   expect(homeHtml).toContain('data-header-mode="global"');
+  expect(homeHtml).toContain('aria-label="Play Sovereign Chess home"');
+  expect(homeHtml).toContain("Play Sovereign Chess</span>");
   expect(rulesHtml).toContain('data-header-mode="global"');
 });
 
@@ -72,6 +87,13 @@ test("board pages render the expected compact header modes", async () => {
     request: new Request("https://playsovereignchess.com/editor"),
   });
 
+  expect(playHtml).toContain("<title>Play | Play Sovereign Chess</title>");
+  expect(analysisHtml).toContain(
+    "<title>Analysis | Play Sovereign Chess</title>",
+  );
+  expect(editorHtml).toContain(
+    "<title>Board editor | Play Sovereign Chess</title>",
+  );
   expect(playHtml).toContain('data-header-mode="gameplay"');
   expect(analysisHtml).toContain('data-header-mode="workspace"');
   expect(editorHtml).toContain('data-header-mode="workspace"');

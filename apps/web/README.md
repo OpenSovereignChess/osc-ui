@@ -1,6 +1,6 @@
 # Web App
 
-Astro + Solid frontend for Open Sovereign Chess.
+Astro + Solid frontend for Play Sovereign Chess.
 
 ## Commands
 
