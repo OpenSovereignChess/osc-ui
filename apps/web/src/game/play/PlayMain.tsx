@@ -9,6 +9,7 @@ import {
 import { GameProvider } from "../provider/GameProvider.tsx";
 import { useGameSession } from "../session/useGameSession.ts";
 import type { SessionAction } from "../session/types.ts";
+import Button from "../../app/components/Button.tsx";
 import Container from "../ui/container/Container.tsx";
 import {
   createRoomEndpoint,
@@ -162,14 +163,13 @@ export default function PlayMain() {
             <p class="eyebrow">Online play</p>
             <h1>Play online</h1>
             <div class="play-room-actions">
-              <button
-                class="button primary"
+              <Button
+                variant="primary"
                 disabled={createDisabled()}
                 onClick={createRoom}
-                type="button"
               >
                 Create game
-              </button>
+              </Button>
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
@@ -185,13 +185,9 @@ export default function PlayMain() {
                     onInput={(event) => setEntryCode(event.currentTarget.value)}
                     value={entryCode()}
                   />
-                  <button
-                    class="button"
-                    disabled={joinDisabled()}
-                    type="submit"
-                  >
+                  <Button disabled={joinDisabled()} type="submit">
                     Join
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -201,14 +197,13 @@ export default function PlayMain() {
             <div class="play-room-invitation">
               <p class="eyebrow">Game invitation</p>
               <h1>Join room {roomInfo().code}</h1>
-              <button
-                class="button primary"
+              <Button
+                variant="primary"
                 disabled={status() === "connecting"}
                 onClick={() => connect(roomInfo().code)}
-                type="button"
               >
                 Join game
-              </button>
+              </Button>
             </div>
           </Show>
 
@@ -327,13 +322,9 @@ function RoomDetails(props: { info: RoomInfo }) {
       <div class="play-room-share">
         <label for="share-url">Invite link</label>
         <input id="share-url" readOnly value={shareUrl()} />
-        <button
-          class="button"
-          onClick={() => navigator.clipboard?.writeText(shareUrl())}
-          type="button"
-        >
+        <Button onClick={() => navigator.clipboard?.writeText(shareUrl())}>
           Copy link
-        </button>
+        </Button>
       </div>
     </div>
   );

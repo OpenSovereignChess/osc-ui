@@ -1,5 +1,6 @@
 ---
 import Layout from "./_Layout.astro";
+import Button from "../app/components/Button.tsx";
 import ColorMatrix from "../app/components/ColorMatrix.astro";
 import TacticalDock from "../app/components/TacticalDock.astro";
 
@@ -39,9 +40,9 @@ const features = [
           persistent tactical telemetry.
         </p>
         <div class="button-row">
-          <a class="button primary" href="/play">Enter play shell</a>
-          <a class="button" href="/editor">Open board editor</a>
-          <a class="button" href="/rules">Learn rules</a>
+          <Button variant="primary" href="/play">Enter play shell</Button>
+          <Button href="/editor">Open board editor</Button>
+          <Button href="/rules">Learn rules</Button>
         </div>
       </div>
       <div

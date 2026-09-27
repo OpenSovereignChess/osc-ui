@@ -50,6 +50,15 @@
   font: inherit;
 }
 
+.color-control-matrix__cell:hover,
+.color-control-matrix__cell:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.color-control-matrix__cell:active {
+  transform: translateY(1px);
+}
+
 .color-control-matrix__cell[aria-pressed="true"] {
   box-shadow:
     inset 0 0 0 2px var(--swatch-border),

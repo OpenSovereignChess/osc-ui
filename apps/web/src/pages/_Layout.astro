@@ -144,18 +144,45 @@ const bodyClass = `header-mode-${headerMode}`;
     padding: 0 14px;
     background: var(--card);
     color: var(--ink);
+    cursor: pointer;
     font-size: 14px;
     font-weight: 800;
     text-decoration: none;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      box-shadow 120ms ease,
+      color 120ms ease,
+      transform 80ms ease;
+  }
+
+  .button:hover:not(.disabled):not([aria-disabled="true"]),
+  .button:focus-visible:not(.disabled):not([aria-disabled="true"]) {
+    border-color: var(--ink);
+    background: var(--panel);
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+
+  .button:active:not(.disabled):not([aria-disabled="true"]) {
+    transform: translateY(1px);
+    box-shadow: inset 0 1px 2px rgba(28, 27, 26, 0.18);
   }
 
   .button.primary {
     background: var(--ink);
     color: #ffffff;
   }
-  .button.disabled {
+  .button.primary:hover:not(.disabled):not([aria-disabled="true"]),
+  .button.primary:focus-visible:not(.disabled):not([aria-disabled="true"]) {
+    background: var(--primary-strong);
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px #ffffff;
+  }
+  .button.disabled,
+  .button[aria-disabled="true"] {
     color: var(--muted);
     cursor: not-allowed;
+    opacity: 0.55;
   }
 
   .ui-panel {

@@ -1,0 +1,94 @@
+.osc-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  padding: 0 14px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease,
+    transform 80ms ease;
+}
+
+.osc-button:hover:not(:disabled):not([aria-disabled="true"]),
+.osc-button:focus-visible:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--ink);
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.osc-button:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 2px rgba(28, 27, 26, 0.18);
+}
+
+.osc-button--primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.osc-button--primary:hover:not(:disabled):not([aria-disabled="true"]),
+.osc-button--primary:focus-visible:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--primary-strong, #000000);
+  background: var(--primary-strong, #000000);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px #ffffff;
+}
+
+.osc-button--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.osc-button--ghost:hover:not(:disabled):not([aria-disabled="true"]),
+.osc-button--ghost:focus-visible:not(:disabled):not([aria-disabled="true"]) {
+  border-color: var(--ink);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.osc-button--sm {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.osc-button--icon {
+  width: 40px;
+  padding: 0;
+}
+
+.osc-button--sm.osc-button--icon {
+  width: 34px;
+}
+
+.osc-button:disabled,
+.osc-button[aria-disabled="true"] {
+  color: var(--muted);
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-contrast: high) {
+  .osc-button {
+    border-color: var(--ink);
+  }
+}

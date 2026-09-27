@@ -6,6 +6,7 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
+import Button from "./Button.tsx";
 import {
   sovereignColorById,
   swatchStyle,
@@ -187,16 +188,17 @@ export default function Header(props: HeaderProps) {
               >
                 Account
               </a>
-              <button
+              <Button
                 aria-controls="osc-global-menu"
                 aria-expanded={isNavOpen()}
                 aria-haspopup="true"
                 class="osc-header__menu-trigger"
                 onClick={() => setIsNavOpen((open) => !open)}
-                type="button"
+                size="sm"
+                variant="ghost"
               >
                 MENU
-              </button>
+              </Button>
             </div>
 
             <Show when={isNavOpen()}>
@@ -232,16 +234,17 @@ export default function Header(props: HeaderProps) {
       >
         <>
           <div class="osc-header__game-left">
-            <button
+            <Button
               aria-controls="osc-compact-nav"
               aria-expanded={isNavOpen()}
               aria-haspopup="true"
               class="osc-header__compact-trigger"
               onClick={() => setIsNavOpen((open) => !open)}
-              type="button"
+              size="sm"
+              variant="ghost"
             >
               [SC ▾]
-            </button>
+            </Button>
             <Show when={isNavOpen()}>
               <nav
                 aria-label="Compact navigation"
@@ -325,51 +328,56 @@ export default function Header(props: HeaderProps) {
             when={mode() === "gameplay"}
             fallback={
               <div class="osc-header__workspace-actions">
-                <button
+                <Button
                   aria-label="Flip board"
                   class="osc-header__icon-button"
+                  icon
                   onClick={dispatchFlipBoard}
-                  type="button"
+                  size="sm"
+                  variant="ghost"
                 >
                   ⇄
-                </button>
-                <button
+                </Button>
+                <Button
                   aria-controls="osc-workspace-menu"
                   aria-expanded={isActionMenuOpen()}
                   aria-haspopup="true"
                   class="osc-header__workspace-menu-trigger"
                   onClick={() => setIsActionMenuOpen((open) => !open)}
-                  type="button"
+                  size="sm"
+                  variant="ghost"
                 >
                   Workspace Menu ▾
-                </button>
-                <button
+                </Button>
+                <Button
                   aria-controls="osc-workspace-menu"
                   aria-expanded={isActionMenuOpen()}
                   aria-haspopup="true"
                   class="osc-header__workspace-menu-mobile"
                   onClick={() => setIsActionMenuOpen((open) => !open)}
-                  type="button"
+                  size="sm"
+                  variant="ghost"
                 >
                   MENU ▾
-                </button>
+                </Button>
                 <Show when={isActionMenuOpen()}>
                   <div
                     class="osc-header__game-menu osc-header__workspace-menu"
                     id="osc-workspace-menu"
                     role="menu"
                   >
-                    <button
+                    <Button
                       class="osc-header__menu-action"
                       onClick={() => {
                         dispatchFlipBoard();
                         closeMenus();
                       }}
                       role="menuitem"
-                      type="button"
+                      size="sm"
+                      variant="ghost"
                     >
                       Flip board
-                    </button>
+                    </Button>
                     <For each={workspaceLinks}>
                       {(link) => {
                         const active = isActivePath(currentPath(), link.href);
@@ -392,60 +400,65 @@ export default function Header(props: HeaderProps) {
             }
           >
             <div class="osc-header__game-actions">
-              <button
+              <Button
                 aria-label="Flip board"
                 class="osc-header__icon-button"
+                icon
                 onClick={dispatchFlipBoard}
-                type="button"
+                size="sm"
+                variant="ghost"
               >
                 ⇄
-              </button>
-              <button
+              </Button>
+              <Button
                 aria-controls="osc-game-menu"
                 aria-expanded={isActionMenuOpen()}
                 aria-haspopup="true"
                 class="osc-header__game-menu-trigger"
                 onClick={() => setIsActionMenuOpen((open) => !open)}
-                type="button"
+                size="sm"
+                variant="ghost"
               >
                 Game Menu ▾
-              </button>
-              <button
+              </Button>
+              <Button
                 aria-controls="osc-game-menu"
                 aria-expanded={isActionMenuOpen()}
                 aria-haspopup="true"
                 class="osc-header__game-menu-mobile"
                 onClick={() => setIsActionMenuOpen((open) => !open)}
-                type="button"
+                size="sm"
+                variant="ghost"
               >
                 MENU ▾
-              </button>
+              </Button>
               <Show when={isActionMenuOpen()}>
                 <div
                   class="osc-header__game-menu"
                   id="osc-game-menu"
                   role="menu"
                 >
-                  <button
+                  <Button
                     class="osc-header__menu-action osc-header__menu-action--mobile"
                     onClick={() => {
                       dispatchFlipBoard();
                       closeMenus();
                     }}
                     role="menuitem"
-                    type="button"
+                    size="sm"
+                    variant="ghost"
                   >
                     Flip board
-                  </button>
+                  </Button>
                   <a href="/analysis" onClick={closeMenus} role="menuitem">
                     Engine Analysis
                   </a>
-                  <button disabled role="menuitem" type="button">
+                  <Button disabled role="menuitem" size="sm" variant="ghost">
                     Draw
-                  </button>
-                  <button disabled role="menuitem" type="button">
+                  </Button>
+                  <Button disabled role="menuitem" size="sm" variant="ghost">
                     Resign
-                  </button>
+                  </Button>
                 </div>
               </Show>
             </div>

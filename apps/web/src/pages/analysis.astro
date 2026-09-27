@@ -1,5 +1,6 @@
 ---
 import Layout from "./_Layout.astro";
+import Button from "../app/components/Button.tsx";
 import AnalysisBoard from "../game/analysis/AnalysisBoard.tsx";
 import TacticalDock from "../app/components/TacticalDock.astro";
 ---
@@ -17,8 +18,8 @@ import TacticalDock from "../app/components/TacticalDock.astro";
           <h1>Board analysis</h1>
         </div>
         <div class="button-row">
-          <a class="button" href="/editor">Set up board</a>
-          <a class="button disabled" aria-disabled="true">Import PGN</a>
+          <Button href="/editor">Set up board</Button>
+          <Button disabled>Import PGN</Button>
         </div>
       </div>
       <div class="analysis-board">

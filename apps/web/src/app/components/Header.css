@@ -384,7 +384,8 @@
   gap: 4px;
 }
 
-.osc-header__icon-button {
+.osc-header__icon-button,
+.osc-header__icon-button.osc-button--icon {
   width: 28px;
   padding: 0;
   font-size: 15px;

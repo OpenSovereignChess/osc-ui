@@ -23,6 +23,7 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
+import Button from "../../app/components/Button.tsx";
 import { BOARD_SIZE } from "../rules/constants.ts";
 import { readSetup } from "../rules/fen.ts";
 import type * as types from "../rules/types.ts";
@@ -524,38 +525,38 @@ export default function AnalysisBoard() {
           </div>
 
           <div class="analysis-history-controls">
-            <button
+            <Button
               aria-label="Go to first move"
               disabled={currentIndex() === 0}
               onClick={goToFirst}
-              type="button"
+              size="sm"
             >
               &lt;&lt;
-            </button>
-            <button
+            </Button>
+            <Button
               aria-label="Go to previous move"
               disabled={currentIndex() === 0}
               onClick={goToPrevious}
-              type="button"
+              size="sm"
             >
               &lt;
-            </button>
-            <button
+            </Button>
+            <Button
               aria-label="Go to next move"
               disabled={isLatest()}
               onClick={goToNext}
-              type="button"
+              size="sm"
             >
               &gt;
-            </button>
-            <button
+            </Button>
+            <Button
               aria-label="Go to last move"
               disabled={isLatest()}
               onClick={goToLast}
-              type="button"
+              size="sm"
             >
               &gt;&gt;
-            </button>
+            </Button>
           </div>
 
           <ol class="analysis-history-list" ref={historyListEl}>
@@ -615,10 +616,12 @@ export default function AnalysisBoard() {
               value={currentFen()}
             />
             <div class="analysis-fen-actions">
-              <button onClick={copyFen} type="button">
+              <Button size="sm" onClick={copyFen}>
                 Copy FEN
-              </button>
-              <a href={editPositionHref()}>Edit position</a>
+              </Button>
+              <Button href={editPositionHref()} size="sm">
+                Edit position
+              </Button>
             </div>
             <label for="analysis-load-fen">Load FEN</label>
             <textarea
@@ -631,9 +634,9 @@ export default function AnalysisBoard() {
               rows="3"
               value={fenInput()}
             />
-            <button onClick={loadFen} type="button">
+            <Button size="sm" onClick={loadFen}>
               Load FEN
-            </button>
+            </Button>
             <Show when={fenError()}>
               {(message) => (
                 <p class="analysis-fen-message error">{message()}</p>

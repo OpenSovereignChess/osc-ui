@@ -17,6 +17,7 @@ import {
   type Role,
 } from "../rules/types.ts";
 import { read, readSetup, writeSetup } from "../rules/fen.ts";
+import Button from "../../app/components/Button.tsx";
 import { useGameSession } from "../session/useGameSession.ts";
 import Container from "../ui/container/Container.tsx";
 import {
@@ -266,23 +267,24 @@ export default function EditorShell() {
           the board.
         </p>
         <div class="editor-toolbar">
-          <button
-            class={`editor-tool${eraseModeActive() ? " active" : ""}`}
-            type="button"
+          <Button
+            class="editor-tool"
+            variant={eraseModeActive() ? "primary" : "secondary"}
+            size="sm"
             onClick={() => session.editor.toggleEraseMode()}
           >
             Erase
-          </button>
-          <button
+          </Button>
+          <Button
             class="editor-tool"
-            type="button"
+            size="sm"
             onClick={() => session.editor.stopDropMode()}
           >
             Stop placing
-          </button>
-          <button class="editor-tool" type="button" onClick={clearBoard}>
+          </Button>
+          <Button class="editor-tool" size="sm" onClick={clearBoard}>
             Clear board
-          </button>
+          </Button>
         </div>
         <div
           class="editor-color-strip"
@@ -347,10 +349,12 @@ export default function EditorShell() {
             value={currentFen()}
           />
           <div class="editor-fen-actions">
-            <button onClick={copyFen} type="button">
+            <Button size="sm" onClick={copyFen}>
               Copy FEN
-            </button>
-            <a href={analysisPositionHref()}>Analyze position</a>
+            </Button>
+            <Button href={analysisPositionHref()} size="sm">
+              Analyze position
+            </Button>
           </div>
           <label for="editor-load-fen">Load FEN</label>
           <textarea
@@ -363,9 +367,9 @@ export default function EditorShell() {
             rows="3"
             value={fenInput()}
           />
-          <button onClick={loadFen} type="button">
+          <Button size="sm" onClick={loadFen}>
             Load FEN
-          </button>
+          </Button>
           <Show when={fenError()}>
             {(message) => <p class="editor-fen-message error">{message()}</p>}
           </Show>

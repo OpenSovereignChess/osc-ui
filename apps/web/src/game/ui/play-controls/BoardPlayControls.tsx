@@ -1,5 +1,7 @@
 import { For, Show } from "solid-js";
 
+import Button from "../../../app/components/Button.tsx";
+
 import "./board-play-controls.css";
 
 export interface PlayControlAction {
@@ -25,20 +27,20 @@ export default function BoardPlayControls(props: BoardPlayControlsProps) {
           <Show
             when={hasCastleActions()}
             fallback={
-              <button disabled type="button">
+              <Button disabled size="sm">
                 No castle
-              </button>
+              </Button>
             }
           >
             <For each={props.castleActions}>
               {(action) => (
-                <button
+                <Button
                   disabled={action.disabled}
                   onClick={action.onClick}
-                  type="button"
+                  size="sm"
                 >
                   {action.label}
-                </button>
+                </Button>
               )}
             </For>
           </Show>
@@ -51,20 +53,20 @@ export default function BoardPlayControls(props: BoardPlayControlsProps) {
           <Show
             when={hasDefectActions()}
             fallback={
-              <button disabled type="button">
+              <Button disabled size="sm">
                 No defect
-              </button>
+              </Button>
             }
           >
             <For each={props.defectActions}>
               {(action) => (
-                <button
+                <Button
                   disabled={action.disabled}
                   onClick={action.onClick}
-                  type="button"
+                  size="sm"
                 >
                   {action.label}
-                </button>
+                </Button>
               )}
             </For>
           </Show>

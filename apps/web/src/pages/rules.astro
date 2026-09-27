@@ -1,5 +1,6 @@
 ---
 import Layout from "./_Layout.astro";
+import Button from "../app/components/Button.tsx";
 import ColorMatrix from "../app/components/ColorMatrix.astro";
 ---
 
@@ -15,10 +16,10 @@ import ColorMatrix from "../app/components/ColorMatrix.astro";
         contextual inspector in play and analysis shells.
       </p>
       <div class="button-row">
-        <a class="button primary" href="/play">Open play shell</a>
-        <a class="button" href="https://www.infinitepigames.com/sovereign-chess"
-          >Official game site</a
-        >
+        <Button variant="primary" href="/play">Open play shell</Button>
+        <Button href="https://www.infinitepigames.com/sovereign-chess">
+          Official game site
+        </Button>
       </div>
     </div>
   </section>

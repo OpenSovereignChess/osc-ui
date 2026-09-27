@@ -56,6 +56,10 @@
   outline: none;
 }
 
+.analysis-promotion-picker button:active {
+  box-shadow: inset 0 1px 2px rgba(28, 27, 26, 0.18);
+}
+
 .analysis-promotion-piece.piece {
   width: 100%;
   height: 100%;
