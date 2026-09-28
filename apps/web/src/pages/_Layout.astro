@@ -12,6 +12,7 @@ interface Props {
 
 const { title, showFooter = true, headerMode = "global" } = Astro.props;
 const bodyClass = `header-mode-${headerMode}`;
+const googleAnalyticsId = "G-MMHEH1M2E9";
 ---
 
 <html lang="en">
@@ -24,6 +25,24 @@ const bodyClass = `header-mode-${headerMode}`;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <link rel="canonical" href="https://playsovereignchess.com/" />
+    {
+      import.meta.env.PROD && (
+        <>
+          <script
+            is:inline
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
+          />
+          <script
+            is:inline
+            define:vars={{ googleAnalyticsId }}
+          >{`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("config", googleAnalyticsId);`}</script>
+        </>
+      )
+    }
   </head>
   <body class={bodyClass} data-header-mode={headerMode}>
     <Header mode={headerMode} currentPath={Astro.url.pathname} client:load />
