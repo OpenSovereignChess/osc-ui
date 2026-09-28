@@ -36,7 +36,12 @@ test("home page renders", async () => {
   expect(html).toContain('href="/rules"');
   expect(html).toContain("Visit official game site");
   expect(html).toContain("https://www.infinitepigames.com/sovereign-chess");
-  expect(html).toContain("Twelve colors, readable at a glance.");
+  expect(html).toContain('class="home-board-preview board"');
+  expect(html).toContain("home-hero-piece piece");
+  expect(html).not.toContain("stub-board");
+  expect(html).toContain("Questions or feedback?");
+  expect(html).toContain("support@playsovereignchess.com");
+  expect(html).toContain('href="mailto:support@playsovereignchess.com"');
   expect(html).toContain("Homepage tactical dock preview");
   expect(html).toContain("What works today");
   const removedCopy = [
