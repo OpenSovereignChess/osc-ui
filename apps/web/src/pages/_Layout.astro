@@ -2,7 +2,7 @@
 import Footer from "../app/components/Footer.astro";
 import Header from "../app/components/Header.tsx";
 
-type HeaderMode = "global" | "gameplay" | "workspace";
+type HeaderMode = "global" | "board";
 
 interface Props {
   title: string;
@@ -13,6 +13,10 @@ interface Props {
 const { title, showFooter = true, headerMode = "global" } = Astro.props;
 const bodyClass = `header-mode-${headerMode}`;
 const googleAnalyticsId = "G-MMHEH1M2E9";
+const googleAnalyticsScript = `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("config", "${googleAnalyticsId}");`;
 ---
 
 <html lang="en">
@@ -33,13 +37,7 @@ const googleAnalyticsId = "G-MMHEH1M2E9";
             async
             src={`https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`}
           />
-          <script
-            is:inline
-            define:vars={{ googleAnalyticsId }}
-          >{`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag("js", new Date());
-gtag("config", googleAnalyticsId);`}</script>
+          <script is:inline set:html={googleAnalyticsScript} />
         </>
       )
     }
@@ -111,8 +109,7 @@ gtag("config", googleAnalyticsId);`}</script>
     --osc-header-height: 48px;
   }
 
-  body.header-mode-gameplay,
-  body.header-mode-workspace {
+  body.header-mode-board {
     --osc-header-height: 32px;
   }
 
@@ -433,8 +430,7 @@ gtag("config", googleAnalyticsId);`}</script>
   }
 
   @media (max-width: 1023px) {
-    body.header-mode-gameplay,
-    body.header-mode-workspace {
+    body.header-mode-board {
       --osc-header-height: 36px;
     }
 

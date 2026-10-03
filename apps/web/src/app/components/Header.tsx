@@ -1,47 +1,13 @@
-import {
-  For,
-  Show,
-  createMemo,
-  createSignal,
-  onCleanup,
-  onMount,
-} from "solid-js";
+import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 import Button from "./Button.tsx";
-import {
-  sovereignColorById,
-  swatchStyle,
-  type SovereignColorId,
-} from "../design/color-system.ts";
 
 import "./Header.css";
 
-export type HeaderMode = "global" | "gameplay" | "workspace";
-
-export type HeaderTelemetry = {
-  playerOneClock: string;
-  playerTwoClock: string;
-  playerOneRegime: SovereignColorId;
-  playerTwoRegime: SovereignColorId;
-  activeRegime: SovereignColorId;
-  turn: number;
-  phase: string;
-};
+export type HeaderMode = "global" | "board";
 
 export type HeaderProps = {
   mode?: HeaderMode;
   currentPath?: string;
-  telemetry?: Partial<HeaderTelemetry>;
-  workspaceTitle?: string;
-};
-
-const defaultTelemetry: HeaderTelemetry = {
-  playerOneClock: "03:42",
-  playerTwoClock: "04:15",
-  playerOneRegime: "red",
-  playerTwoRegime: "cyan",
-  activeRegime: "red",
-  turn: 14,
-  phase: "WHITE REGIME",
 };
 
 const globalLinks = [
@@ -52,13 +18,6 @@ const globalLinks = [
   { href: "/rules", label: "Rules" },
 ];
 
-const workspaceLinks = [
-  { href: "/play", label: "Play game" },
-  { href: "/analysis", label: "Analysis board" },
-  { href: "/editor", label: "Board editor" },
-  { href: "/rules", label: "Rules" },
-];
-
 function isActivePath(currentPath: string, href: string): boolean {
   if (href === "/") {
     return currentPath === "/";
@@ -66,38 +25,13 @@ function isActivePath(currentPath: string, href: string): boolean {
   return currentPath === href || currentPath.startsWith(`${href}/`);
 }
 
-function dispatchFlipBoard(): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  window.dispatchEvent(new CustomEvent("osc:flip-board"));
-}
-
 export default function Header(props: HeaderProps) {
   const mode = () => props.mode ?? "global";
   const currentPath = () => props.currentPath ?? "/";
-  const telemetry = createMemo<HeaderTelemetry>(() => ({
-    ...defaultTelemetry,
-    ...props.telemetry,
-  }));
-  const workspaceTitle = createMemo(() => {
-    if (props.workspaceTitle?.trim()) {
-      return props.workspaceTitle.trim();
-    }
-    if (isActivePath(currentPath(), "/analysis")) {
-      return "ANALYSIS BOARD";
-    }
-    if (isActivePath(currentPath(), "/editor")) {
-      return "BOARD EDITOR";
-    }
-    return "BOARD WORKSPACE";
-  });
   const [isNavOpen, setIsNavOpen] = createSignal(false);
-  const [isActionMenuOpen, setIsActionMenuOpen] = createSignal(false);
 
   const closeMenus = (): void => {
     setIsNavOpen(false);
-    setIsActionMenuOpen(false);
   };
 
   onMount(() => {
@@ -125,34 +59,32 @@ export default function Header(props: HeaderProps) {
     );
   };
 
-  const renderRegimeBadge = (id: SovereignColorId, labelPrefix: string) => {
-    const spec = sovereignColorById[id];
+  const renderProfileLink = () => {
+    const active = isActivePath(currentPath(), "/profile");
     return (
-      <span
-        aria-label={`${labelPrefix}: ${spec.label}`}
-        class="osc-header__regime"
-        data-pattern={spec.pattern}
-        style={swatchStyle(spec)}
+      <a
+        aria-current={active ? "page" : undefined}
+        class="osc-header__profile"
+        classList={{ "osc-header__link--active": active }}
+        href="/profile"
+        onClick={closeMenus}
       >
-        {spec.code}
-      </span>
+        Profile
+      </a>
     );
   };
-
-  const activeSpec = () => sovereignColorById[telemetry().activeRegime];
 
   return (
     <header
       class="osc-header"
       classList={{
         "osc-header--global": mode() === "global",
-        "osc-header--gameplay": mode() === "gameplay",
-        "osc-header--workspace": mode() === "workspace",
+        "osc-header--board": mode() === "board",
       }}
       data-header-mode={mode()}
     >
       <Show
-        when={mode() !== "global"}
+        when={mode() === "board"}
         fallback={
           <>
             <div class="osc-header__brand-zone">
@@ -175,21 +107,7 @@ export default function Header(props: HeaderProps) {
             </nav>
 
             <div class="osc-header__actions">
-              <a
-                aria-current={
-                  isActivePath(currentPath(), "/profile") ? "page" : undefined
-                }
-                class="osc-header__account"
-                classList={{
-                  "osc-header__link--active": isActivePath(
-                    currentPath(),
-                    "/profile",
-                  ),
-                }}
-                href="/profile"
-              >
-                Account
-              </a>
+              {renderProfileLink()}
               <Button
                 aria-controls="osc-global-menu"
                 aria-expanded={isNavOpen()}
@@ -227,7 +145,7 @@ export default function Header(props: HeaderProps) {
                   }}
                 </For>
                 <a href="/profile" onClick={closeMenus} role="menuitem">
-                  Account
+                  Profile
                 </a>
               </nav>
             </Show>
@@ -235,7 +153,7 @@ export default function Header(props: HeaderProps) {
         }
       >
         <>
-          <div class="osc-header__game-left">
+          <div class="osc-header__board-left">
             <Button
               aria-controls="osc-compact-nav"
               aria-expanded={isNavOpen()}
@@ -274,197 +192,9 @@ export default function Header(props: HeaderProps) {
             </Show>
           </div>
 
-          <Show
-            when={mode() === "gameplay"}
-            fallback={
-              <div
-                aria-label="Workspace status"
-                class="osc-header__workspace-status"
-              >
-                <span class="osc-header__workspace-title">
-                  {workspaceTitle()}
-                </span>
-              </div>
-            }
-          >
-            <>
-              <div
-                aria-label="Game clock and turn status"
-                class="osc-header__telemetry"
-              >
-                <span class="osc-header__clock">
-                  {telemetry().playerOneClock}
-                </span>
-                {renderRegimeBadge(
-                  telemetry().playerOneRegime,
-                  "Player one regime",
-                )}
-                <span class="osc-header__turn">
-                  T{telemetry().turn} / {telemetry().phase}
-                </span>
-                {renderRegimeBadge(
-                  telemetry().playerTwoRegime,
-                  "Player two regime",
-                )}
-                <span class="osc-header__clock">
-                  {telemetry().playerTwoClock}
-                </span>
-              </div>
+          <div class="osc-header__board-spacer" aria-hidden="true" />
 
-              <div
-                aria-label="Compact game status"
-                class="osc-header__mobile-telemetry"
-              >
-                <span>T{telemetry().turn}</span>
-                <span aria-hidden="true">•</span>
-                {renderRegimeBadge(telemetry().activeRegime, "Active regime")}
-                <span>{activeSpec().label} active</span>
-                <span class="osc-header__clock">
-                  {telemetry().playerOneClock}
-                </span>
-              </div>
-            </>
-          </Show>
-
-          <Show
-            when={mode() === "gameplay"}
-            fallback={
-              <div class="osc-header__workspace-actions">
-                <Button
-                  aria-label="Flip board"
-                  class="osc-header__icon-button"
-                  icon
-                  onClick={dispatchFlipBoard}
-                  size="sm"
-                  variant="ghost"
-                >
-                  ⇄
-                </Button>
-                <Button
-                  aria-controls="osc-workspace-menu"
-                  aria-expanded={isActionMenuOpen()}
-                  aria-haspopup="true"
-                  class="osc-header__workspace-menu-trigger"
-                  onClick={() => setIsActionMenuOpen((open) => !open)}
-                  size="sm"
-                  variant="ghost"
-                >
-                  Workspace Menu ▾
-                </Button>
-                <Button
-                  aria-controls="osc-workspace-menu"
-                  aria-expanded={isActionMenuOpen()}
-                  aria-haspopup="true"
-                  class="osc-header__workspace-menu-mobile"
-                  onClick={() => setIsActionMenuOpen((open) => !open)}
-                  size="sm"
-                  variant="ghost"
-                >
-                  MENU ▾
-                </Button>
-                <Show when={isActionMenuOpen()}>
-                  <div
-                    class="osc-header__game-menu osc-header__workspace-menu"
-                    id="osc-workspace-menu"
-                    role="menu"
-                  >
-                    <Button
-                      class="osc-header__menu-action"
-                      onClick={() => {
-                        dispatchFlipBoard();
-                        closeMenus();
-                      }}
-                      role="menuitem"
-                      size="sm"
-                      variant="ghost"
-                    >
-                      Flip board
-                    </Button>
-                    <For each={workspaceLinks}>
-                      {(link) => {
-                        const active = isActivePath(currentPath(), link.href);
-                        return (
-                          <a
-                            aria-current={active ? "page" : undefined}
-                            classList={{ "osc-header__link--active": active }}
-                            href={link.href}
-                            onClick={closeMenus}
-                            role="menuitem"
-                          >
-                            {link.label}
-                          </a>
-                        );
-                      }}
-                    </For>
-                  </div>
-                </Show>
-              </div>
-            }
-          >
-            <div class="osc-header__game-actions">
-              <Button
-                aria-label="Flip board"
-                class="osc-header__icon-button"
-                icon
-                onClick={dispatchFlipBoard}
-                size="sm"
-                variant="ghost"
-              >
-                ⇄
-              </Button>
-              <Button
-                aria-controls="osc-game-menu"
-                aria-expanded={isActionMenuOpen()}
-                aria-haspopup="true"
-                class="osc-header__game-menu-trigger"
-                onClick={() => setIsActionMenuOpen((open) => !open)}
-                size="sm"
-                variant="ghost"
-              >
-                Game Menu ▾
-              </Button>
-              <Button
-                aria-controls="osc-game-menu"
-                aria-expanded={isActionMenuOpen()}
-                aria-haspopup="true"
-                class="osc-header__game-menu-mobile"
-                onClick={() => setIsActionMenuOpen((open) => !open)}
-                size="sm"
-                variant="ghost"
-              >
-                MENU ▾
-              </Button>
-              <Show when={isActionMenuOpen()}>
-                <div
-                  class="osc-header__game-menu"
-                  id="osc-game-menu"
-                  role="menu"
-                >
-                  <Button
-                    class="osc-header__menu-action osc-header__menu-action--mobile"
-                    onClick={() => {
-                      dispatchFlipBoard();
-                      closeMenus();
-                    }}
-                    role="menuitem"
-                    size="sm"
-                    variant="ghost"
-                  >
-                    Flip board
-                  </Button>
-                  <a href="/analysis" onClick={closeMenus} role="menuitem">
-                    Engine Analysis
-                  </a>
-                  <Button disabled role="menuitem" size="sm" variant="ghost">
-                    Draw
-                  </Button>
-                  <Button disabled role="menuitem" size="sm" variant="ghost">
-                    Resign
-                  </Button>
-                </div>
-              </Show>
-            </div>
-          </Show>
+          <div class="osc-header__board-actions">{renderProfileLink()}</div>
         </>
       </Show>
     </header>

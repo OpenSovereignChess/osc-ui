@@ -99,7 +99,7 @@ test("board pages render the expected compact header modes", async () => {
   expect(editorHtml).toContain(
     "<title>Board editor | Play Sovereign Chess</title>",
   );
-  expect(playHtml).toContain('data-header-mode="gameplay"');
-  expect(analysisHtml).toContain('data-header-mode="workspace"');
-  expect(editorHtml).toContain('data-header-mode="workspace"');
+  expect(playHtml).toContain('data-header-mode="board"');
+  expect(analysisHtml).toContain('data-header-mode="board"');
+  expect(editorHtml).toContain('data-header-mode="board"');
 });

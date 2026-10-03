@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 
 import Header from "./Header.tsx";
 
-test("global mode renders brand, nav, account, and active route", () => {
+test("global mode renders brand, nav, profile, and active route", () => {
   const html = renderToString(() => (
     <Header mode="global" currentPath="/rules" />
   ));
@@ -15,57 +15,35 @@ test("global mode renders brand, nav, account, and active route", () => {
   expect(html).toContain('href="/editor"');
   expect(html).toContain('href="/rules"');
   expect(html).toContain('href="/profile"');
+  expect(html).toContain("Profile");
   expect(html).toContain('aria-current="page"');
   expect(html).toContain("osc-header__link--active");
 });
 
-test("gameplay mode renders compact nav, telemetry, flip, and game menu trigger", () => {
+test("board mode renders compact nav, blank center, and profile only", () => {
   const html = renderToString(() => (
-    <Header mode="gameplay" currentPath="/play" />
+    <Header mode="board" currentPath="/play" />
   ));
 
+  expect(html).toContain('data-header-mode="board"');
   expect(html).toContain("[PSC ▾]");
-  expect(html).toContain("03:42");
-  expect(html).toContain("04:15");
-  expect(html).toContain("WHITE REGIME");
-  expect(html).toContain('aria-label="Flip board"');
-  expect(html).toContain("Game Menu ▾");
-  expect(html).toContain("MENU ▾");
+  expect(html).toContain('class="osc-header__board-spacer"');
+  expect(html).toContain('href="/profile"');
+  expect(html).toContain("Profile");
 });
 
-test("workspace mode renders compact nav, route status, flip, and workspace menu trigger", () => {
-  const html = renderToString(() => (
-    <Header mode="workspace" currentPath="/analysis" />
-  ));
-
-  expect(html).toContain("[PSC ▾]");
-  expect(html).toContain("ANALYSIS BOARD");
-  expect(html).toContain('aria-label="Flip board"');
-  expect(html).toContain("Workspace Menu ▾");
-  expect(html).toContain("MENU ▾");
-  expect(html).not.toContain("03:42");
-  expect(html).not.toContain("04:15");
-  expect(html).not.toContain("WHITE REGIME");
-});
-
-test("menu triggers expose ARIA popup state", () => {
+test("ARIA popup state is exposed only for global mobile menu and compact nav", () => {
   const globalHtml = renderToString(() => (
     <Header mode="global" currentPath="/" />
   ));
-  const gameplayHtml = renderToString(() => (
-    <Header mode="gameplay" currentPath="/play" />
-  ));
-  const workspaceHtml = renderToString(() => (
-    <Header mode="workspace" currentPath="/editor" />
+  const boardHtml = renderToString(() => (
+    <Header mode="board" currentPath="/play" />
   ));
 
   expect(globalHtml).toContain('aria-controls="osc-global-menu"');
   expect(globalHtml).toContain('aria-haspopup="true"');
   expect(globalHtml).toContain('aria-expanded="false"');
-  expect(gameplayHtml).toContain('aria-controls="osc-compact-nav"');
-  expect(gameplayHtml).toContain('aria-controls="osc-game-menu"');
-  expect(gameplayHtml).toContain('aria-haspopup="true"');
-  expect(workspaceHtml).toContain('aria-controls="osc-compact-nav"');
-  expect(workspaceHtml).toContain('aria-controls="osc-workspace-menu"');
-  expect(workspaceHtml).toContain('aria-haspopup="true"');
+  expect(boardHtml).toContain('aria-controls="osc-compact-nav"');
+  expect(boardHtml).toContain('aria-haspopup="true"');
+  expect(boardHtml).toContain('aria-expanded="false"');
 });

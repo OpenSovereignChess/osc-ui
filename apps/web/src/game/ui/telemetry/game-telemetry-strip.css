@@ -1,0 +1,143 @@
+.game-telemetry-strip {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.game-telemetry-strip__clock,
+.game-telemetry-strip__turn,
+.game-telemetry-strip__regime {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+
+.game-telemetry-strip__clock {
+  min-width: 56px;
+  background: var(--ink);
+  color: #ffffff;
+  font: 900 12px/1 var(--font-mono);
+}
+
+.game-telemetry-strip__turn {
+  background: var(--canvas);
+  padding: 0 8px;
+  color: var(--ink);
+  font: 900 11px/1 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.game-telemetry-strip__regime {
+  position: relative;
+  min-width: 30px;
+  overflow: hidden;
+  border-color: var(--swatch-border, var(--ink));
+  background: var(--swatch-bg);
+  color: var(--swatch-fg);
+  font: 900 10px/1 var(--font-mono);
+  isolation: isolate;
+}
+
+.game-telemetry-strip__regime::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.34;
+  pointer-events: none;
+}
+
+.game-telemetry-strip__regime[data-pattern="grid"]::after,
+.game-telemetry-strip__regime[data-pattern="cross"]::after {
+  background-image:
+    linear-gradient(currentColor 1px, transparent 1px),
+    linear-gradient(90deg, currentColor 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+.game-telemetry-strip__regime[data-pattern="vertical"]::after {
+  background-image: linear-gradient(90deg, currentColor 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+.game-telemetry-strip__regime[data-pattern="dots"]::after {
+  background-image: radial-gradient(currentColor 1px, transparent 1px);
+  background-size: 5px 5px;
+}
+
+.game-telemetry-strip__regime[data-pattern="diagonal"]::after {
+  background-image: repeating-linear-gradient(
+    45deg,
+    currentColor 0 1px,
+    transparent 1px 6px
+  );
+}
+
+.game-telemetry-strip__regime[data-pattern="reverse-diagonal"]::after {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    currentColor 0 1px,
+    transparent 1px 6px
+  );
+}
+
+.game-telemetry-strip__regime[data-pattern="checker"]::after {
+  background-image:
+    linear-gradient(
+      45deg,
+      currentColor 25%,
+      transparent 25%,
+      transparent 75%,
+      currentColor 75%
+    ),
+    linear-gradient(
+      45deg,
+      currentColor 25%,
+      transparent 25%,
+      transparent 75%,
+      currentColor 75%
+    );
+  background-position:
+    0 0,
+    4px 4px;
+  background-size: 8px 8px;
+}
+
+.game-telemetry-strip__regime[data-pattern="rings"]::after {
+  background-image: radial-gradient(
+    circle,
+    transparent 0 2px,
+    currentColor 2px 3px,
+    transparent 3px
+  );
+  background-size: 9px 9px;
+}
+
+.game-telemetry-strip__regime[data-pattern="bricks"]::after,
+.game-telemetry-strip__regime[data-pattern="plus"]::after {
+  background-image:
+    linear-gradient(currentColor 1px, transparent 1px),
+    linear-gradient(90deg, currentColor 1px, transparent 1px);
+  background-size: 7px 7px;
+}
+
+.game-telemetry-strip__regime[data-pattern="chevron"]::after {
+  background-image:
+    repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 6px);
+}
+
+@media (max-width: 520px) {
+  .game-telemetry-strip__clock {
+    min-width: 48px;
+  }
+}
