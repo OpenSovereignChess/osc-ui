@@ -64,6 +64,9 @@ export default function BoardView(props: BoardViewProps) {
   const canDrag = (key: BoardKey, piece: BoardPiece): boolean =>
     props.canDragPiece?.(key, piece) ?? true;
 
+  const pointerBounds = (): DOMRectReadOnly | undefined =>
+    boardEl?.getBoundingClientRect() ?? props.bounds;
+
   const beginDrag = (
     key: BoardKey,
     piece: BoardPiece,
@@ -80,12 +83,13 @@ export default function BoardView(props: BoardViewProps) {
   };
 
   const setDropTargetFromPosition = (pos: NumberPair) => {
-    if (!props.bounds) {
+    const bounds = pointerBounds();
+    if (!bounds) {
       setDropTargetKey(undefined);
       return;
     }
 
-    setDropTargetKey(getKeyAtDomPos(pos, props.orientation, props.bounds));
+    setDropTargetKey(getKeyAtDomPos(pos, props.orientation, bounds));
   };
 
   const clearDragState = () => {
@@ -96,7 +100,8 @@ export default function BoardView(props: BoardViewProps) {
   };
 
   const onStart = (e: BoardPointerEvent) => {
-    if (props.viewOnly || !props.bounds) {
+    const bounds = pointerBounds();
+    if (props.viewOnly || !bounds) {
       return;
     }
     if (!e.isTrusted || isRightButton(e) || e.shiftKey) {
@@ -114,7 +119,7 @@ export default function BoardView(props: BoardViewProps) {
       return;
     }
 
-    const key = getKeyAtDomPos(pos, props.orientation, props.bounds);
+    const key = getKeyAtDomPos(pos, props.orientation, bounds);
     if (!key) {
       return;
     }
@@ -164,12 +169,13 @@ export default function BoardView(props: BoardViewProps) {
       cleanup();
       const current = draggingPiece();
       const pos = eventPosition(e) ?? changedTouchPosition(e) ?? current?.pos;
-      if (!current || !pos || !props.bounds) {
+      const bounds = pointerBounds();
+      if (!current || !pos || !bounds) {
         clearDragState();
         return;
       }
 
-      const dest = getKeyAtDomPos(pos, props.orientation, props.bounds);
+      const dest = getKeyAtDomPos(pos, props.orientation, bounds);
       if (
         shouldApplyDragDrop(
           current.key,

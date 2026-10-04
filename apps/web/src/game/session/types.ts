@@ -5,6 +5,7 @@ import type { State } from "../state/state.ts";
 import type * as types from "../rules/types.ts";
 import type { PieceColor, Role } from "@osc/rules";
 import type { PromotionRequest } from "../analysis/promotion.ts";
+import type { BoardTelemetry } from "./boardTelemetry.ts";
 
 type Orientation = Extract<types.Color, "white" | "black">;
 
@@ -69,6 +70,7 @@ export interface LocalGameSession {
   getCastleActions: Accessor<readonly SessionActionOption[]>;
   getDefectActions: Accessor<readonly SessionActionOption[]>;
   getHistoryTurns: Accessor<readonly SessionHistoryTurn[]>;
+  getBoardTelemetry: Accessor<BoardTelemetry>;
   getInteraction: Accessor<InteractionSnapshot>;
   getSnapshot: Accessor<GameSnapshot>;
   getState: Accessor<State>;

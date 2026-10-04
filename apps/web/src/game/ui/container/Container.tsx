@@ -16,6 +16,8 @@ import Board from "../board/Board.tsx";
 import Coords from "../coords/Coords.tsx";
 import BoardPlayControls from "../play-controls/BoardPlayControls.tsx";
 import ColorControlMatrix from "../tactical-dock/ColorControlMatrix.tsx";
+import GameTelemetryStrip from "../telemetry/GameTelemetryStrip.tsx";
+import { clockTextForPlayer } from "../../session/boardTelemetry.ts";
 
 import "../tactical-dock/tactical-dock.css";
 import "./container.css";
@@ -25,7 +27,6 @@ function updateBounds(
   containerEl: HTMLElement,
 ): DOMRectReadOnly {
   const edgeSize = Math.min(bounds.width, bounds.height);
-  console.log("Updating container bounds size:", edgeSize);
   const width =
     (Math.floor((edgeSize * window.devicePixelRatio) / BOARD_SIZE) *
       BOARD_SIZE) /
@@ -37,6 +38,7 @@ function updateBounds(
 }
 
 type ContainerProps = {
+  showBoardTelemetry?: boolean;
   showControls?: boolean;
 };
 
@@ -46,8 +48,15 @@ export default function Container(props: ContainerProps) {
   const [boardEl, setBoardEl] = createSignal<HTMLElement>();
   const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
   const [domRegistered, setDomRegistered] = createSignal<boolean>(false);
+  const [clockNow, setClockNow] = createSignal(Date.now());
   const session = useGameSession();
   const showControls = () => props.showControls ?? true;
+  const showBoardTelemetry = () => props.showBoardTelemetry ?? false;
+  const boardTelemetry = createMemo(() => session.getBoardTelemetry());
+  const telemetryStripStyle = createMemo(() => {
+    const boardBounds = bounds();
+    return boardBounds ? { width: `${boardBounds.width}px` } : undefined;
+  });
   const promotionPickerStyle = createMemo(() => {
     const pending = session.getPendingPromotion();
     const boardBounds = bounds();
@@ -76,39 +85,31 @@ export default function Container(props: ContainerProps) {
 
   // TODO: We need to update bounds on state.dom.bounds when we call updateBounds
   createEffect(() => {
-    if (!wrapEl() || !containerEl()) {
+    const wrap = wrapEl();
+    const container = containerEl();
+    if (!wrap || !container) {
       return;
     }
 
-    // Set board element size
-    const bounds = wrapEl()!.getBoundingClientRect();
-    console.log(
-      "Initial container bounds:",
-      containerEl()!.getBoundingClientRect(),
-    );
-    updateBounds(bounds, containerEl()!);
+    const refreshBounds = (sourceBounds = wrap.getBoundingClientRect()) => {
+      setBounds(updateBounds(sourceBounds, container));
+    };
 
-    console.log(
-      "Resulting container bounds:",
-      containerEl()!.getBoundingClientRect(),
-    );
-    // Set bounds for Board and children components
-    setBounds(containerEl()!.getBoundingClientRect());
+    refreshBounds();
+    const animationFrame = window.requestAnimationFrame(() => refreshBounds());
 
-    // Bind resize event handler
+    let resizeObserver: ResizeObserver | undefined;
     if ("ResizeObserver" in window) {
-      new ResizeObserver((entries) => {
-        if (entries.length > 0) {
-          const newBounds = entries[0].contentRect;
-          console.log("ResizeObserver detected size change: ", newBounds);
-          const updatedContainerBounds = updateBounds(
-            newBounds,
-            containerEl()!,
-          );
-          setBounds(updatedContainerBounds);
-        }
-      }).observe(wrapEl()!);
+      resizeObserver = new ResizeObserver((entries) => {
+        refreshBounds(entries[0]?.contentRect);
+      });
+      resizeObserver.observe(wrap);
     }
+
+    onCleanup(() => {
+      window.cancelAnimationFrame(animationFrame);
+      resizeObserver?.disconnect();
+    });
   });
 
   createEffect(() => {
@@ -132,62 +133,88 @@ export default function Container(props: ContainerProps) {
   onMount(() => {
     const onFlipBoard = (): void => session.flipOrientation();
     window.addEventListener("osc:flip-board", onFlipBoard);
-    onCleanup(() => window.removeEventListener("osc:flip-board", onFlipBoard));
+    const clockInterval = showBoardTelemetry()
+      ? window.setInterval(() => setClockNow(Date.now()), 1000)
+      : undefined;
+    onCleanup(() => {
+      if (clockInterval !== undefined) {
+        window.clearInterval(clockInterval);
+      }
+      window.removeEventListener("osc:flip-board", onFlipBoard);
+    });
   });
 
-  createEffect(() => {
-    const gameState = session.getState();
-    console.log(
-      "Dom updated:",
-      gameState.layout.dom,
-      gameState.layout.dom?.elements.board,
-    );
-  });
+  const clockFor = (side: "player1" | "player2") =>
+    clockTextForPlayer(boardTelemetry(), side, clockNow());
+
+  const BoardSurface = () => (
+    <div class="wrap" ref={setWrapEl}>
+      <div class="sc-container" ref={setContainerEl}>
+        <Board ref={setBoardEl} bounds={bounds()} />
+        <Show when={session.getPendingPromotion() && promotionPickerStyle()}>
+          {(style) => (
+            <div
+              aria-label="Choose promotion piece"
+              class="play-promotion-picker"
+              role="dialog"
+              style={style()}
+            >
+              <For each={session.getPendingPromotion()!.roles}>
+                {(role) => (
+                  <button
+                    aria-label={`Promote to ${role}`}
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      session.promote(role);
+                    }}
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class={`play-promotion-piece piece ${role} ${
+                        session.getPendingPromotion()!.piece.color
+                      }`}
+                    />
+                  </button>
+                )}
+              </For>
+            </div>
+          )}
+        </Show>
+        <Coords />
+      </div>
+    </div>
+  );
 
   return (
     <>
       <div
         class={`game-board-shell${showControls() ? "" : " game-board-shell--board-only"}`}
       >
-        <div class="wrap" ref={setWrapEl}>
-          <div class="sc-container" ref={setContainerEl}>
-            <Board ref={setBoardEl} bounds={bounds()} />
-            <Show
-              when={session.getPendingPromotion() && promotionPickerStyle()}
-            >
-              {(style) => (
-                <div
-                  aria-label="Choose promotion piece"
-                  class="play-promotion-picker"
-                  role="dialog"
-                  style={style()}
-                >
-                  <For each={session.getPendingPromotion()!.roles}>
-                    {(role) => (
-                      <button
-                        aria-label={`Promote to ${role}`}
-                        onPointerDown={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          session.promote(role);
-                        }}
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class={`play-promotion-piece piece ${role} ${
-                            session.getPendingPromotion()!.piece.color
-                          }`}
-                        />
-                      </button>
-                    )}
-                  </For>
-                </div>
-              )}
-            </Show>
-            <Coords />
+        {showBoardTelemetry() ? (
+          <div class="game-board-stack">
+            <div class="game-board-telemetry-row" style={telemetryStripStyle()}>
+              <GameTelemetryStrip
+                active={boardTelemetry().top.side === boardTelemetry().turn}
+                ariaLabel="Opponent board telemetry"
+                clock={clockFor(boardTelemetry().top.side)}
+                player={boardTelemetry().top}
+              />
+            </div>
+            <BoardSurface />
+            <div class="game-board-telemetry-row" style={telemetryStripStyle()}>
+              <GameTelemetryStrip
+                active={boardTelemetry().bottom.side === boardTelemetry().turn}
+                ariaLabel="Current player board telemetry"
+                clock={clockFor(boardTelemetry().bottom.side)}
+                player={boardTelemetry().bottom}
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <BoardSurface />
+        )}
         <Show when={showControls()}>
           <aside
             class="game-board-controls game-tactical-dock"

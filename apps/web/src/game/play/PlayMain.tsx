@@ -222,7 +222,7 @@ export default function PlayMain() {
         </aside>
         <Show when={boardVisible()}>
           <div class="tool-stage play-stage">
-            <Container />
+            <Container showBoardTelemetry />
           </div>
         </Show>
       </section>

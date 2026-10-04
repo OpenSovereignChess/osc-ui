@@ -3,24 +3,30 @@ import { expect, test } from "vitest";
 
 import GameTelemetryStrip from "./GameTelemetryStrip.tsx";
 
-test("renders board-area game telemetry without defaults", () => {
+test("renders board-area player telemetry without placeholder metadata", () => {
   const html = renderToString(() => (
     <GameTelemetryStrip
-      playerOneClock="09:58"
-      playerTwoClock="10:00"
-      playerOneRegime="red"
-      playerTwoRegime="cyan"
-      turn={3}
-      phase="RED REGIME"
+      active
+      clock="1:05"
+      player={{
+        side: "player1",
+        label: "Player 1",
+        currentRegime: "red",
+        controlledRegimes: ["cyan"],
+        capturedPieces: [{ color: "black", role: "pawn" }],
+      }}
     />
   ));
 
   expect(html).toContain("game-telemetry-strip");
-  expect(html).toContain("09:58");
-  expect(html).toContain("10:00");
-  expect(html).toContain("T3 / RED REGIME");
-  expect(html).toContain('aria-label="Player one regime: Red"');
-  expect(html).toContain('aria-label="Player two regime: Cyan"');
+  expect(html).toContain("Player 1");
+  expect(html).toContain("1:05");
+  expect(html).toContain('aria-label="Player 1 current regime: Red"');
+  expect(html).toContain('aria-label="Player 1 controls: Cyan"');
   expect(html).toContain('data-pattern="diagonal"');
   expect(html).toContain('data-pattern="checker"');
+  expect(html).toContain("captured-piece piece pawn black");
+  expect(html).not.toContain("Avatar");
+  expect(html).not.toContain("Rating");
+  expect(html).not.toContain("Material");
 });

@@ -1,6 +1,12 @@
 import { createMemo, createSignal } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-import { squareFromName, type Role } from "@osc/rules";
+import {
+  squareFromName,
+  type Piece,
+  type Position,
+  type Role,
+  type Side,
+} from "@osc/rules";
 import { createBoardActions } from "../input/board.ts";
 import { createEditorActions } from "../input/editor.ts";
 import type { State } from "../state/state.ts";
@@ -27,23 +33,39 @@ import {
   legalDestsForSeat,
   piecesFromRulesPosition,
 } from "./rulesPosition.ts";
+import { buildBoardTelemetry } from "./boardTelemetry.ts";
 
 export function createLocalGameSession(
   state: State,
   setState: SetStoreFunction<State>,
-  options: { onLocalMove?: (move: SessionAction) => void } = {},
+  options: {
+    initialRulesPosition?: () => Position;
+    now?: () => number;
+    onLocalMove?: (move: SessionAction) => void;
+  } = {},
 ): LocalGameSession {
   const board = createBoardActions(setState);
   const editor = createEditorActions(state, setState);
-  let rulesPosition = initialRulesPosition();
+  const createInitialRulesPosition =
+    options.initialRulesPosition ?? initialRulesPosition;
+  let rulesPosition = createInitialRulesPosition();
+  let capturedPieces: Record<Side, Piece[]> = { player1: [], player2: [] };
+  const now = options.now ?? Date.now;
+  let currentTurnStartedAt = now();
   const [history, setHistory] = createSignal<SessionHistoryMove[]>([]);
   const [rulesVersion, setRulesVersion] = createSignal(0);
+  const [turnStartedAtVersion, setTurnStartedAtVersion] = createSignal(0);
   let onlineSeat: OnlineSeat | undefined;
   const [pendingPromotion, setPendingPromotion] =
     createSignal<PromotionRequest>();
 
   function markRulesChanged(): void {
     setRulesVersion((version) => version + 1);
+  }
+
+  function resetTurnStartedAt(): void {
+    currentTurnStartedAt = now();
+    setTurnStartedAtVersion((version) => version + 1);
   }
 
   function syncRulesState(lastMove?: types.Key[]): void {
@@ -61,35 +83,64 @@ export function createLocalGameSession(
   }
 
   function applyRulesMove(move: SessionAction): boolean {
+    let lastMove: types.Key[] | undefined;
     try {
-      const result = applyRulesAction(rulesPosition, move);
-      rulesPosition = result.position;
-      setHistory((current) => [...current, { san: result.san }]);
-      markRulesChanged();
+      lastMove = applyAcceptedRulesAction(move);
+      resetTurnStartedAt();
     } catch {
       return false;
     }
-    syncRulesState("orig" in move ? [move.orig, move.dest] : undefined);
+    syncRulesState(lastMove);
     return true;
+  }
+
+  function applyAcceptedRulesAction(
+    move: SessionAction,
+  ): types.Key[] | undefined {
+    const movingSide = rulesPosition.turn;
+    const capturedPiece = capturedPieceForAction(rulesPosition, move);
+    const result = applyRulesAction(rulesPosition, move);
+    rulesPosition = result.position;
+    setHistory((current) => [...current, { san: result.san }]);
+    if (capturedPiece) {
+      capturedPieces = {
+        ...capturedPieces,
+        [movingSide]: [...capturedPieces[movingSide], capturedPiece],
+      };
+    }
+    markRulesChanged();
+    return "orig" in move ? [move.orig, move.dest] : undefined;
+  }
+
+  function capturedPieceForAction(
+    position: Position,
+    action: SessionAction,
+  ): Piece | undefined {
+    if (action.kind === "castle" || action.kind === "defect") {
+      return undefined;
+    }
+    return position.board.pieceAt(squareFromName(action.dest));
   }
 
   function submitAction(action: SessionAction): boolean {
     if (!canAct(rulesPosition, onlineSeat)) {
-      setPendingPromotion(undefined);
-      setState("interaction", { selected: undefined });
+      clearPendingInteraction();
       return false;
     }
 
-    setPendingPromotion(undefined);
-    setState("interaction", { selected: undefined });
+    clearPendingInteraction();
     options.onLocalMove?.(action);
     return true;
   }
 
+  function clearPendingInteraction(): void {
+    setPendingPromotion(undefined);
+    setState("interaction", { selected: undefined });
+  }
+
   function submitMove(orig: types.Key, dest: types.Key): boolean {
     if (!canAct(rulesPosition, onlineSeat)) {
-      setPendingPromotion(undefined);
-      setState("interaction", { selected: undefined });
+      clearPendingInteraction();
       return false;
     }
     if (
@@ -97,8 +148,7 @@ export function createLocalGameSession(
         .legalMovesOf(squareFromName(orig))
         .has(squareFromName(dest))
     ) {
-      setPendingPromotion(undefined);
-      setState("interaction", { selected: undefined });
+      clearPendingInteraction();
       return false;
     }
 
@@ -149,25 +199,21 @@ export function createLocalGameSession(
   return {
     applyServerMove: applyRulesMove,
     applyServerMoves: (moves: readonly SessionAction[]) => {
-      rulesPosition = initialRulesPosition();
+      rulesPosition = createInitialRulesPosition();
+      capturedPieces = { player1: [], player2: [] };
       setHistory([]);
       markRulesChanged();
+      let lastMove: types.Key[] | undefined;
       for (const move of moves) {
         try {
-          const result = applyRulesAction(rulesPosition, move);
-          rulesPosition = result.position;
-          setHistory((current) => [...current, { san: result.san }]);
-          markRulesChanged();
+          lastMove = applyAcceptedRulesAction(move);
         } catch {
           break;
         }
       }
-      const lastMove = moves.at(-1);
-      syncRulesState(
-        lastMove && "orig" in lastMove
-          ? [lastMove.orig, lastMove.dest]
-          : undefined,
-      );
+      resetTurnStartedAt();
+      markRulesChanged();
+      syncRulesState(lastMove);
     },
     board,
     editor,
@@ -185,6 +231,13 @@ export function createLocalGameSession(
       () => (rulesVersion(), defectActionsForSeat(rulesPosition, onlineSeat)),
     ),
     getHistoryTurns: createMemo(() => historyTurns(history())),
+    getBoardTelemetry: () =>
+      buildBoardTelemetry(
+        (rulesVersion(), rulesPosition),
+        onlineSeat,
+        (turnStartedAtVersion(), currentTurnStartedAt),
+        capturedPieces,
+      ),
     getInteraction,
     getPendingPromotion: pendingPromotion,
     getSnapshot,
