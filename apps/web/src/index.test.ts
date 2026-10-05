@@ -6,7 +6,6 @@ import AnalysisPage from "./pages/analysis.astro";
 import EditorPage from "./pages/editor.astro";
 import IndexPage from "./pages/index.astro";
 import PlayPage from "./pages/play.astro";
-import RulesPage from "./pages/rules.astro";
 
 async function createContainer(): Promise<AstroContainer> {
   const container = await AstroContainer.create();
@@ -33,7 +32,6 @@ test("home page renders", async () => {
   expect(html).toContain('href="/play"');
   expect(html).toContain('href="/analysis"');
   expect(html).toContain('href="/editor"');
-  expect(html).toContain('href="/rules"');
   expect(html).toContain("Visit official game site");
   expect(html).toContain("https://www.infinitepigames.com/sovereign-chess");
   expect(html).toContain('class="home-board-preview board"');
@@ -65,15 +63,9 @@ test("global pages render the global header mode", async () => {
     partial: false,
     request: new Request("https://playsovereignchess.com/"),
   });
-  const rulesHtml = await container.renderToString(RulesPage, {
-    partial: false,
-    request: new Request("https://playsovereignchess.com/rules"),
-  });
-
   expect(homeHtml).toContain('data-header-mode="global"');
   expect(homeHtml).toContain('aria-label="Play Sovereign Chess home"');
   expect(homeHtml).toContain("Play Sovereign Chess</span>");
-  expect(rulesHtml).toContain('data-header-mode="global"');
 });
 
 test("board pages render the expected compact header modes", async () => {
