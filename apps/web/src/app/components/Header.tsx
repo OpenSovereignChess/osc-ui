@@ -15,7 +15,6 @@ const globalLinks = [
   { href: "/play", label: "Play" },
   { href: "/analysis", label: "Analyze" },
   { href: "/editor", label: "Board Editor" },
-  { href: "/rules", label: "Rules" },
 ];
 
 function isActivePath(currentPath: string, href: string): boolean {

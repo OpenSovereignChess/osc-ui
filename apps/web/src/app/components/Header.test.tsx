@@ -4,16 +4,13 @@ import { expect, test } from "vitest";
 import Header from "./Header.tsx";
 
 test("global mode renders brand, nav, profile, and active route", () => {
-  const html = renderToString(() => (
-    <Header mode="global" currentPath="/rules" />
-  ));
+  const html = renderToString(() => <Header mode="global" currentPath="/" />);
 
   expect(html).toContain("PLAY SOVEREIGN CHESS");
   expect(html).toContain('aria-label="Play Sovereign Chess home"');
   expect(html).toContain('href="/play"');
   expect(html).toContain('href="/analysis"');
   expect(html).toContain('href="/editor"');
-  expect(html).toContain('href="/rules"');
   expect(html).toContain('href="/profile"');
   expect(html).toContain("Profile");
   expect(html).toContain('aria-current="page"');
