@@ -41,6 +41,34 @@
    - Responsive layouts may collapse secondary information.
    - Required play controls must remain reachable.
 
+## Spacing
+
+Use a **4px base spacing unit**, with **8px as the default layout rhythm**. The UI should feel compact, gridded, and board-first rather than spacious or decorative.
+
+| Step | Value | Typical use |
+| --- | ---: | --- |
+| `0` | `0` | Flush edges and reset spacing. |
+| `px` | `1px` | Borders, dividers, hairlines, and grid separators. |
+| `0.5` | `2px` | Micro gaps, compact icon spacing, and dense visual patterns. |
+| `1` | `4px` | Tight internal gaps and close label/control relationships. |
+| `2` | `8px` | Default app-shell padding, grid gaps, board-adjacent gutters, and dense component spacing. |
+| `3` | `12px` | Compact panel padding and stacked control groups. |
+| `4` | `16px` | Standard panel/card padding and medium group spacing. |
+| `6` | `24px` | Larger group separation inside content areas. |
+| `8` | `32px` | Standard page-section vertical padding. |
+| `12` | `48px` | Large page or hero spacing. |
+| `14` | `56px` | Maximum standard page gutter. |
+| `18` | `72px` | Hero/marketing spacing only. |
+
+Guidelines:
+
+- Prefer `4px`, `8px`, `12px`, and `16px` in game, tool, and panel UI.
+- Use `8px` for default shell gaps and board-adjacent layout gutters.
+- Use `12px` for compact panels and `16px` for standard panels/cards.
+- Use `32px` vertical spacing for page sections, with responsive horizontal gutters like `clamp(16px, 4vw, 56px)`.
+- Reserve `40px+` spacing for marketing/hero surfaces, not dense game tools.
+- Avoid arbitrary spacing values unless needed for optical alignment, hit targets, or fixed board math.
+
 ## Source of truth
 
 - Global tokens and shared utility styles: `apps/web/src/pages/_Layout.astro`
