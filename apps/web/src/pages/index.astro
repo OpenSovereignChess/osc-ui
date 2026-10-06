@@ -1,7 +1,6 @@
 ---
 import Layout from "./_Layout.astro";
 import Button from "../app/components/Button.tsx";
-import TacticalDock from "../app/components/TacticalDock.astro";
 import { read as readBoardFen } from "../game/rules/fen.ts";
 import "../game/ui/board/board.css";
 import "../../../../packages/board-solid/src/styles/piece.css";
@@ -19,62 +18,19 @@ const heroPieces = Array.from(readBoardFen().entries()).map(([key, piece]) => {
     y: 16 - rank,
   };
 });
-
-const features = [
-  {
-    kicker: "Play online",
-    title: "Create or join a room",
-    text: "Start a browser game and keep the large Sovereign Chess board clear while you play.",
-    href: "/play",
-  },
-  {
-    kicker: "Learn",
-    title: "Understand the rules",
-    text: "Review the board, colors, and core mechanics with explanations written for new players.",
-    href: "/rules",
-  },
-  {
-    kicker: "Set up",
-    title: "Build positions",
-    text: "Use the editor to arrange pieces, test ideas, and prepare positions before or after a game.",
-    href: "/editor",
-  },
-  {
-    kicker: "Study",
-    title: "Analyze games",
-    text: "Open a dedicated board for exploring positions and following how color control changes the plan.",
-    href: "/analysis",
-  },
-];
-
-const statusItems = [
-  "Online room creation and join flow is available.",
-  "Board editor is available for setting up positions.",
-  "Analysis board is available for studying positions.",
-  "Rules content is being expanded for newer players.",
-  "Some advanced import and persistence features may still be evolving.",
-];
 ---
 
 <Layout title="Play Sovereign Chess">
-  <section class="home-hero">
+  <section class="home-hero landing-section--solid">
     <div class="site-inner home-hero__grid">
       <div class="home-hero__copy">
         <p class="eyebrow">Sovereign Chess online</p>
-        <h1>Play Sovereign Chess on a board built for it.</h1>
+        <h1>Play Sovereign Chess online with a friend.</h1>
         <p>
-          Explore the 16×16 chess variant with a readable digital board,
-          color-control aids, and tools for play, rules, analysis, and position
-          setup.
+        Create a game, share the invite link, and play Sovereign Chess with a friend in your browser. No sign-ups or downloads required.
         </p>
         <div class="button-row">
-          <Button variant="primary" href="/play">Start playing</Button>
-          <Button
-            href="https://www.infinitepigames.com/sc-rules"
-            target="_blank"
-            rel="noopener">Learn the rules</Button
-          >
-          <Button href="/editor">Set up a board</Button>
+          <Button variant="primary" href="/play">Start a match</Button>
         </div>
       </div>
       <div
@@ -82,8 +38,8 @@ const statusItems = [
         aria-label="16 by 16 Sovereign Chess board preview"
       >
         <div class="home-board-meta">
-          <span>16×16 board</span>
-          <span>Colored regimes</span>
+          <span>Sovereign chess board</span>
+          <span>Initial setup</span>
         </div>
         <div
           class="home-board-preview board"
@@ -105,122 +61,27 @@ const statusItems = [
     </div>
   </section>
 
-  <section class="site-section intro-band">
-    <div class="site-inner split-section">
+  <section class="landing-band landing-band--pattern">
+    <div class="site-inner landing-cta">
       <div>
-        <p class="eyebrow">What is Sovereign Chess?</p>
-        <h2>If you know chess, you have a head start.</h2>
-      </div>
-      <p>
-        Sovereign Chess keeps the familiar foundation of chess, then expands the
-        battlefield with more pieces, a larger 16×16 board, and colored regimes
-        that create new strategic possibilities.
-      </p>
-    </div>
-  </section>
-
-  <section class="site-section help-band">
-    <div class="site-inner">
-      <div class="section-heading">
-        <p class="eyebrow">Why it helps</p>
-        <h2>A clearer way to play, learn, and study.</h2>
-      </div>
-      <div class="benefit-grid">
-        <article class="ui-panel benefit-card">
-          <h3>Read the board clearly</h3>
-          <p>
-            Use a layout made for a large board instead of squeezing the game
-            into a standard chess view.
-          </p>
-        </article>
-        <article class="ui-panel benefit-card">
-          <h3>Track color control</h3>
-          <p>
-            Follow regimes with labels, patterns, and visible state so you do
-            not have to memorize everything.
-          </p>
-        </article>
-        <article class="ui-panel benefit-card">
-          <h3>Explore positions</h3>
-          <p>
-            Set up ideas before a game or review critical moments after one.
-          </p>
-        </article>
-        <article class="ui-panel benefit-card">
-          <h3>Learn in context</h3>
-          <p>
-            Keep rules and position details close to the board while you build
-            confidence.
-          </p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="site-section">
-    <div class="site-inner feature-grid">
-      {
-        features.map((feature) => (
-          <a class="feature-card ui-panel" href={feature.href}>
-            <span>{feature.kicker}</span>
-            <h3>{feature.title}</h3>
-            <p>{feature.text}</p>
-          </a>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="site-section rules-band">
-    <div class="site-inner rules-band__grid">
-      <div>
-        <p class="eyebrow">Game-state clarity</p>
-        <h2>The side panel keeps important state visible while you play.</h2>
+        <p class="eyebrow">Official game</p>
+        <h2>Visit the official Sovereign Chess site.</h2>
         <p>
-          Turn details, notation, color control, and position context stay close
-          to the board, so you can focus on the game instead of searching for
-          status.
+          Learn more about the board game from Infinite Pi Games, the creators
+          of Sovereign Chess.
         </p>
       </div>
-      <TacticalDock title="Homepage tactical dock preview" />
-    </div>
-  </section>
-
-  <section class="site-section attribution-band">
-    <div class="site-inner attribution-card ui-panel">
-      <div>
-        <p class="eyebrow">Official game attribution</p>
-        <h2>A digital companion for the official game.</h2>
-        <p>
-          Sovereign Chess is the official board game from Infinite Pi Games.
-          Play Sovereign Chess is an online companion for playing, learning,
-          setting up positions, and studying the game.
-        </p>
-      </div>
-      <Button href="https://www.infinitepigames.com/sovereign-chess">
+      <Button href="https://www.infinitepigames.com/sovereign-chess" target="_blank" rel="noopener">
         Visit official game site
       </Button>
     </div>
   </section>
 
-  <section class="site-section status-band">
-    <div class="site-inner status-card">
+  <section id="contact" class="contact-band">
+    <div class="site-inner landing-cta">
       <div>
-        <p class="eyebrow">Current status</p>
-        <h2>What works today</h2>
-      </div>
-      <ul>
-        {statusItems.map((item) => <li>{item}</li>)}
-      </ul>
-    </div>
-  </section>
-
-  <section id="contact" class="site-section contact-band">
-    <div class="site-inner contact-card ui-panel">
-      <div>
-        <p class="eyebrow">Contact</p>
-        <h2>Questions or feedback?</h2>
         <p>
+          Questions or feedback?
           Email us at
           <a href="mailto:support@playsovereignchess.com">
             support@playsovereignchess.com</a
@@ -234,8 +95,26 @@ const statusItems = [
 <style>
   .home-hero {
     border-bottom: 1px solid var(--line);
-    background: var(--panel);
+    background-color: var(--panel);
     padding: clamp(28px, 6vw, 72px) clamp(16px, 4vw, 56px);
+  }
+
+  .landing-band {
+    width: 100%;
+    border-bottom: 1px solid var(--line);
+    padding: clamp(40px, 7vw, 84px) clamp(16px, 4vw, 56px);
+  }
+
+  .landing-band--solid {
+    background-color: var(--panel);
+    background-image: none;
+  }
+
+  .landing-band--pattern {
+    background:
+      radial-gradient(rgba(28, 27, 26, 0.12) 0.7px, transparent 0.8px) 0 0 / 8px
+        8px,
+      var(--canvas);
   }
 
   .home-hero__grid {
@@ -254,11 +133,7 @@ const statusItems = [
   }
 
   .home-hero__copy p:not(.eyebrow),
-  .split-section p,
-  .section-heading + p,
-  .rules-band p,
-  .attribution-card p,
-  .contact-card p {
+  .landing-cta p:not(.eyebrow) {
     max-width: 680px;
     margin: 16px 0 24px;
     color: var(--muted);
@@ -305,29 +180,14 @@ const statusItems = [
     text-transform: uppercase;
   }
 
-  .split-section,
-  .rules-band__grid,
-  .attribution-card,
-  .status-card,
-  .contact-card {
+  .landing-cta {
     display: grid;
-    align-items: start;
+    align-items: center;
     gap: 24px;
-    grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .intro-band,
-  .rules-band,
-  .status-band {
-    background: var(--panel);
-  }
-
-  .split-section h2,
-  .section-heading h2,
-  .rules-band h2,
-  .attribution-card h2,
-  .status-card h2,
-  .contact-card h2 {
+  .landing-cta h2 {
     max-width: 760px;
     margin: 0;
     font-size: clamp(28px, 4vw, 48px);
@@ -335,142 +195,32 @@ const statusItems = [
     letter-spacing: -0.04em;
   }
 
-  .split-section p {
-    margin-top: 0;
-  }
-
-  .section-heading {
-    max-width: 760px;
-    margin-bottom: 18px;
-  }
-
-  .benefit-grid {
-    display: grid;
-    gap: 8px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .benefit-card {
-    padding: 16px;
-  }
-
-  .benefit-card h3 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    letter-spacing: -0.02em;
-  }
-
-  .benefit-card p,
-  .feature-card p,
-  .status-card li {
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .benefit-card p {
-    margin: 0;
-  }
-
-  .feature-grid {
-    display: grid;
-    gap: 8px;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .feature-card {
-    min-height: 224px;
-    padding: 18px;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .feature-card:hover,
-  .feature-card:focus-visible {
-    background: var(--card);
-  }
-
-  .feature-card span {
-    color: var(--muted);
-    font: 800 12px/1 var(--font-mono);
-    text-transform: uppercase;
-  }
-
-  .feature-card h3 {
-    margin: 44px 0 10px;
-    font-size: 24px;
-    letter-spacing: -0.03em;
-  }
-
-  .attribution-card,
-  .contact-card {
-    align-items: center;
-    padding: clamp(18px, 3vw, 28px);
-  }
-
-  .attribution-card p,
-  .contact-card p {
+  .landing-cta p:not(.eyebrow) {
     margin-bottom: 0;
   }
 
-  .contact-card a {
+  .landing-cta .osc-button {
+    justify-self: end;
+  }
+
+  .contact-band {
+    padding: clamp(18px, 4vw, 48px);
+  }
+
+  .contact-band a:not(.osc-button) {
     color: var(--ink);
     font-weight: 800;
   }
 
-  .attribution-card .osc-button {
-    justify-self: end;
-  }
-
-  .status-card ul {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-    padding-left: 20px;
-  }
-
-  .status-card li {
-    padding-left: 4px;
-  }
-
-  @media (max-width: 1020px) {
-    .benefit-grid,
-    .feature-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
   @media (max-width: 900px) {
     .home-hero__grid,
-    .split-section,
-    .rules-band__grid,
-    .attribution-card,
-    .status-card,
-    .contact-card {
+    .landing-cta {
       grid-template-columns: 1fr;
-    }
-
-    .split-section p {
-      margin-top: 16px;
     }
 
     .home-board-card,
-    .attribution-card .osc-button {
+    .landing-cta .osc-button {
       justify-self: start;
-    }
-  }
-
-  @media (max-width: 620px) {
-    .benefit-grid,
-    .feature-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .feature-card {
-      min-height: 0;
-    }
-
-    .feature-card h3 {
-      margin-top: 28px;
     }
   }
 </style>

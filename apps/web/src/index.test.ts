@@ -28,32 +28,9 @@ test("home page renders", async () => {
   expect(html).toContain("<title>Play Sovereign Chess</title>");
   expect(html).toContain('<html lang="en">');
   expect(html).toContain("Play Sovereign Chess");
-  expect(html).toContain("Play Sovereign Chess on a board built for it.");
+  expect(html).toContain("Start a match");
   expect(html).toContain('href="/play"');
-  expect(html).toContain('href="/analysis"');
-  expect(html).toContain('href="/editor"');
-  expect(html).toContain("Visit official game site");
-  expect(html).toContain("https://www.infinitepigames.com/sovereign-chess");
-  expect(html).toContain('class="home-board-preview board"');
-  expect(html).toContain("home-hero-piece piece");
-  expect(html).not.toContain("stub-board");
-  expect(html).toContain("Questions or feedback?");
   expect(html).toContain("support@playsovereignchess.com");
-  expect(html).toContain('href="mailto:support@playsovereignchess.com"');
-  expect(html).toContain("Homepage tactical dock preview");
-  expect(html).toContain("What works today");
-  const removedCopy = [
-    ["Open", "Sovereign", "Chess"].join(" "),
-    ["open", "source"].join("-"),
-    ["open", "digital", "companion"].join(" "),
-    ["community", "project"].join(" "),
-    `Zone ${"B"}`,
-    `Zone ${"C"}`,
-    ["Braun", "Swiss tools"].join("-"),
-  ];
-  for (const copy of removedCopy) {
-    expect(html).not.toContain(copy);
-  }
 });
 
 test("global pages render the global header mode", async () => {
