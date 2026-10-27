@@ -64,6 +64,8 @@ export default function BoardView(props: BoardViewProps) {
   const canDrag = (key: BoardKey, piece: BoardPiece): boolean =>
     props.canDragPiece?.(key, piece) ?? true;
 
+  // Hit testing and drag rendering need current viewport bounds, not the layout
+  // snapshot in props.bounds, which may predate scrolling or layout shifts.
   const pointerBounds = (): DOMRectReadOnly | undefined =>
     boardEl?.getBoundingClientRect() ?? props.bounds;
 
@@ -240,7 +242,7 @@ export default function BoardView(props: BoardViewProps) {
       <For each={[...props.pieces]} fallback={props.fallback}>
         {([key, piece]) => (
           <PieceSprite
-            bounds={props.bounds}
+            bounds={draggingPiece()?.key === key ? pointerBounds() : props.bounds}
             dragPosition={
               draggingPiece()?.key === key ? draggingPiece()?.pos : undefined
             }

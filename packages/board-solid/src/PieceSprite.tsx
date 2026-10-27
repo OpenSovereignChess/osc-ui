@@ -1,5 +1,5 @@
 import { createMemo } from "solid-js";
-import { key2pos, posToTranslate } from "@osc/board-core";
+import { BOARD_SIZE, key2pos, posToTranslate } from "@osc/board-core";
 import type {
   BoardKey,
   BoardOrientation,
@@ -26,10 +26,13 @@ export default function PieceSprite(props: PieceSpriteProps) {
     }
 
     if (props.dragPosition) {
-      const squareSize = props.bounds.width / 16;
       return [
-        props.dragPosition[0] - props.bounds.left - squareSize / 2,
-        props.dragPosition[1] - props.bounds.top - squareSize / 2,
+        props.dragPosition[0] -
+          props.bounds.left -
+          props.bounds.width / BOARD_SIZE / 2,
+        props.dragPosition[1] -
+          props.bounds.top -
+          props.bounds.height / BOARD_SIZE / 2,
       ];
     }
 
