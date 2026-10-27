@@ -2,7 +2,6 @@
 import Layout from "./_Layout.astro";
 import Button from "../app/components/Button.tsx";
 import AnalysisBoard from "../game/analysis/AnalysisBoard.tsx";
-import TacticalDock from "../app/components/TacticalDock.astro";
 ---
 
 <Layout
@@ -26,14 +25,20 @@ import TacticalDock from "../app/components/TacticalDock.astro";
         <AnalysisBoard client:only="solid-js" />
       </div>
     </div>
-    <TacticalDock title="Analysis dock and telemetry" />
   </section>
 </Layout>
 
 <style>
+  .analysis-workbench {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .analysis-canvas {
     position: relative;
-    align-content: stretch;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    align-items: start;
+    gap: 8px;
     padding: 8px;
   }
 
@@ -54,17 +59,10 @@ import TacticalDock from "../app/components/TacticalDock.astro";
 
   .analysis-board {
     width: 100%;
-    min-width: 280px;
-    height: calc(100svh - var(--osc-header-height) - 70px);
-    min-height: 520px;
+    min-width: 0;
   }
 
   @media (max-width: 1023px) {
-    .analysis-board {
-      height: auto;
-      min-height: 0;
-    }
-
     .analysis-toolbar {
       align-items: flex-start;
       flex-direction: column;

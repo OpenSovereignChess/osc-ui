@@ -30,6 +30,7 @@ import type * as types from "../rules/types.ts";
 import BoardPlayControls, {
   type PlayControlAction,
 } from "../ui/play-controls/BoardPlayControls.tsx";
+import GamePanel from "../ui/game-panel/GamePanel.tsx";
 import { promotionRolesForMove, type PromotionRequest } from "./promotion.ts";
 
 import "../ui/container/container.css";
@@ -305,29 +306,32 @@ export default function AnalysisBoard() {
     onCleanup(() => window.removeEventListener("osc:flip-board", onFlipBoard));
   });
 
-  createEffect(() => {
+  const scrollActiveMoveIntoView = (): void => {
     const index = currentIndex();
     const moveCount = moves().length;
-
-    if (!historyListEl || index === 0 || index > moveCount) {
+    const viewport = historyListEl?.closest<HTMLElement>(".game-panel__body");
+    if (!historyListEl || !viewport || viewport.hidden) return;
+    if (index === 0) {
+      viewport.scrollTop = 0;
       return;
     }
+    if (index > moveCount) return;
 
     const activeMove = historyListEl.querySelector<HTMLElement>(
       `[data-history-index="${index}"]`,
     );
-    if (!activeMove) {
-      return;
-    }
+    if (!activeMove) return;
 
-    const listRect = historyListEl.getBoundingClientRect();
+    const viewportRect = viewport.getBoundingClientRect();
     const activeRect = activeMove.getBoundingClientRect();
-    if (activeRect.top < listRect.top) {
-      historyListEl.scrollTop -= listRect.top - activeRect.top;
-    } else if (activeRect.bottom > listRect.bottom) {
-      historyListEl.scrollTop += activeRect.bottom - listRect.bottom;
+    if (activeRect.top < viewportRect.top) {
+      viewport.scrollTop -= viewportRect.top - activeRect.top;
+    } else if (activeRect.bottom > viewportRect.bottom) {
+      viewport.scrollTop += activeRect.bottom - viewportRect.bottom;
     }
-  });
+  };
+
+  createEffect(() => scrollActiveMoveIntoView());
 
   createEffect(() => {
     if (!pendingPromotion()) {
@@ -518,135 +522,164 @@ export default function AnalysisBoard() {
           </div>
         </div>
 
-        <aside class="analysis-history" aria-label="Move history">
-          <div class="analysis-history-header">
-            <h2>Move history</h2>
-            <span>{moves().length} moves</span>
-          </div>
+        <GamePanel
+          label="Analysis moves, actions, and position"
+          initialTabId="moves"
+          tabs={[
+            {
+              id: "moves",
+              label: "Moves",
+              onActivate: scrollActiveMoveIntoView,
+              content: () => (
+                <>
+                  <div class="analysis-history-header">
+                    <h2>Move history</h2>
+                    <span>
+                      {moves().length} {moves().length === 1 ? "move" : "moves"}
+                    </span>
+                  </div>
 
-          <div class="analysis-history-controls">
-            <Button
-              aria-label="Go to first move"
-              disabled={currentIndex() === 0}
-              onClick={goToFirst}
-              size="sm"
-            >
-              &lt;&lt;
-            </Button>
-            <Button
-              aria-label="Go to previous move"
-              disabled={currentIndex() === 0}
-              onClick={goToPrevious}
-              size="sm"
-            >
-              &lt;
-            </Button>
-            <Button
-              aria-label="Go to next move"
-              disabled={isLatest()}
-              onClick={goToNext}
-              size="sm"
-            >
-              &gt;
-            </Button>
-            <Button
-              aria-label="Go to last move"
-              disabled={isLatest()}
-              onClick={goToLast}
-              size="sm"
-            >
-              &gt;&gt;
-            </Button>
-          </div>
-
-          <ol class="analysis-history-list" ref={historyListEl}>
-            <For each={historyTurns()}>
-              {(turn) => (
-                <li>
-                  <span class="analysis-history-turn">{turn.number}.</span>
-                  {turn.first && (
-                    <button
-                      classList={{
-                        active: currentIndex() === turn.number * 2 - 1,
-                        future: currentIndex() < turn.number * 2 - 1,
-                      }}
-                      onClick={() => setCurrentIndex(turn.number * 2 - 1)}
-                      data-history-index={turn.number * 2 - 1}
-                      type="button"
+                  <div class="analysis-history-controls">
+                    <Button
+                      aria-label="Go to first move"
+                      disabled={currentIndex() === 0}
+                      onClick={goToFirst}
+                      size="sm"
                     >
-                      {turn.first.san}
-                    </button>
-                  )}
-                  {turn.second && (
-                    <button
-                      classList={{
-                        active: currentIndex() === turn.number * 2,
-                        future: currentIndex() < turn.number * 2,
-                      }}
-                      onClick={() => setCurrentIndex(turn.number * 2)}
-                      data-history-index={turn.number * 2}
-                      type="button"
+                      &lt;&lt;
+                    </Button>
+                    <Button
+                      aria-label="Go to previous move"
+                      disabled={currentIndex() === 0}
+                      onClick={goToPrevious}
+                      size="sm"
                     >
-                      {turn.second.san}
-                    </button>
+                      &lt;
+                    </Button>
+                    <Button
+                      aria-label="Go to next move"
+                      disabled={isLatest()}
+                      onClick={goToNext}
+                      size="sm"
+                    >
+                      &gt;
+                    </Button>
+                    <Button
+                      aria-label="Go to last move"
+                      disabled={isLatest()}
+                      onClick={goToLast}
+                      size="sm"
+                    >
+                      &gt;&gt;
+                    </Button>
+                  </div>
+
+                  <ol class="analysis-history-list" ref={historyListEl}>
+                    <For each={historyTurns()}>
+                      {(turn) => (
+                        <li>
+                          <span class="analysis-history-turn">
+                            {turn.number}.
+                          </span>
+                          {turn.first && (
+                            <button
+                              classList={{
+                                active: currentIndex() === turn.number * 2 - 1,
+                                future: currentIndex() < turn.number * 2 - 1,
+                              }}
+                              onClick={() =>
+                                setCurrentIndex(turn.number * 2 - 1)
+                              }
+                              data-history-index={turn.number * 2 - 1}
+                              type="button"
+                            >
+                              {turn.first.san}
+                            </button>
+                          )}
+                          {turn.second && (
+                            <button
+                              classList={{
+                                active: currentIndex() === turn.number * 2,
+                                future: currentIndex() < turn.number * 2,
+                              }}
+                              onClick={() => setCurrentIndex(turn.number * 2)}
+                              data-history-index={turn.number * 2}
+                              type="button"
+                            >
+                              {turn.second.san}
+                            </button>
+                          )}
+                        </li>
+                      )}
+                    </For>
+                  </ol>
+
+                  {moves().length === 0 && (
+                    <p class="analysis-history-empty">No moves yet.</p>
                   )}
-                </li>
-              )}
-            </For>
-          </ol>
-
-          {moves().length === 0 && (
-            <p class="analysis-history-empty">No moves yet.</p>
-          )}
-
-          <div class="analysis-play-controls-panel">
-            <BoardPlayControls
-              castleActions={castleActions()}
-              defectActions={defectActions()}
-            />
-          </div>
-
-          <div class="analysis-fen-panel" aria-label="Position FEN">
-            <label for="analysis-current-fen">Current FEN</label>
-            <textarea
-              id="analysis-current-fen"
-              readOnly
-              ref={fenOutputEl}
-              rows="3"
-              value={currentFen()}
-            />
-            <div class="analysis-fen-actions">
-              <Button size="sm" onClick={copyFen}>
-                Copy FEN
-              </Button>
-              <Button href={editPositionHref()} size="sm">
-                Edit position
-              </Button>
-            </div>
-            <label for="analysis-load-fen">Load FEN</label>
-            <textarea
-              id="analysis-load-fen"
-              onInput={(event) => {
-                setFenInput(event.currentTarget.value);
-                setFenError(undefined);
-                setFenStatus(undefined);
-              }}
-              rows="3"
-              value={fenInput()}
-            />
-            <Button size="sm" onClick={loadFen}>
-              Load FEN
-            </Button>
-            <Show when={fenError()}>
-              {(message) => (
-                <p class="analysis-fen-message error">{message()}</p>
-              )}
-            </Show>
-            <Show when={fenStatus()}>
-              {(message) => <p class="analysis-fen-message">{message()}</p>}
-            </Show>
-          </div>
-        </aside>
+                </>
+              ),
+            },
+            {
+              id: "actions",
+              label: "Actions",
+              content: () => (
+                <BoardPlayControls
+                  castleActions={castleActions()}
+                  defectActions={defectActions()}
+                />
+              ),
+            },
+            {
+              id: "position",
+              label: "Position",
+              content: () => (
+                <div class="analysis-fen-panel" aria-label="Position FEN">
+                  <label for="analysis-current-fen">Current FEN</label>
+                  <textarea
+                    id="analysis-current-fen"
+                    readOnly
+                    ref={fenOutputEl}
+                    rows="3"
+                    value={currentFen()}
+                  />
+                  <div class="analysis-fen-actions">
+                    <Button size="sm" onClick={copyFen}>
+                      Copy FEN
+                    </Button>
+                    <Button href={editPositionHref()} size="sm">
+                      Edit position
+                    </Button>
+                  </div>
+                  <label for="analysis-load-fen">Load FEN</label>
+                  <textarea
+                    id="analysis-load-fen"
+                    onInput={(event) => {
+                      setFenInput(event.currentTarget.value);
+                      setFenError(undefined);
+                      setFenStatus(undefined);
+                    }}
+                    rows="3"
+                    value={fenInput()}
+                  />
+                  <Button size="sm" onClick={loadFen}>
+                    Load FEN
+                  </Button>
+                  <Show when={fenError()}>
+                    {(message) => (
+                      <p class="analysis-fen-message error">{message()}</p>
+                    )}
+                  </Show>
+                  <Show when={fenStatus()}>
+                    {(message) => (
+                      <p class="analysis-fen-message">{message()}</p>
+                    )}
+                  </Show>
+                </div>
+              ),
+            },
+          ]}
+        />
       </div>
     </div>
   );

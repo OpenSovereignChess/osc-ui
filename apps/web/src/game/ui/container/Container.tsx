@@ -15,11 +15,10 @@ import * as util from "../../rules/util.ts";
 import Board from "../board/Board.tsx";
 import Coords from "../coords/Coords.tsx";
 import BoardPlayControls from "../play-controls/BoardPlayControls.tsx";
-import ColorControlMatrix from "../tactical-dock/ColorControlMatrix.tsx";
+import GamePanel from "../game-panel/GamePanel.tsx";
 import GameTelemetryStrip from "../telemetry/GameTelemetryStrip.tsx";
 import { clockTextForPlayer } from "../../session/boardTelemetry.ts";
 
-import "../tactical-dock/tactical-dock.css";
 import "./container.css";
 
 function updateBounds(
@@ -216,86 +215,52 @@ export default function Container(props: ContainerProps) {
           <BoardSurface />
         )}
         <Show when={showControls()}>
-          <aside
-            class="game-board-controls game-tactical-dock"
-            aria-label="Dock and telemetry"
-          >
-            <section
-              class="game-tactical-dock__panel"
-              aria-label="Color control matrix"
-            >
-              <div class="game-tactical-dock__heading">
-                <div>
-                  <p class="eyebrow">Color control</p>
-                  <h2>12-regime matrix</h2>
-                </div>
-              </div>
-              <ColorControlMatrix />
-            </section>
-            <section
-              class="game-tactical-dock__panel"
-              aria-label="Move actions"
-            >
-              <div class="game-tactical-dock__heading">
-                <div>
-                  <p class="eyebrow">Move controls</p>
-                  <h2>Special actions</h2>
-                </div>
-              </div>
-              <BoardPlayControls
-                castleActions={session.getCastleActions().map((option) => ({
-                  label: option.label,
-                  onClick: () => session.submitAction(option.action),
-                }))}
-                defectActions={session.getDefectActions().map((option) => ({
-                  label: option.label,
-                  onClick: () => session.submitAction(option.action),
-                }))}
-              />
-            </section>
-            <section
-              class="game-tactical-dock__panel play-history"
-              aria-label="Move history"
-            >
-              <div class="game-tactical-dock__heading play-history-header">
-                <div>
-                  <p class="eyebrow">Notation</p>
-                  <h2>Move log</h2>
-                </div>
-              </div>
-              <ol class="play-history-list">
-                <For each={session.getHistoryTurns()}>
-                  {(turn) => (
-                    <li>
-                      <span class="play-history-turn">{turn.number}.</span>
-                      <span>{turn.first?.san}</span>
-                      <span>{turn.second?.san}</span>
-                    </li>
-                  )}
-                </For>
-              </ol>
-              <Show when={session.getHistoryTurns().length === 0}>
-                <p class="play-history-empty">No moves yet.</p>
-              </Show>
-            </section>
-            {/*
-          <section
-            class="game-tactical-dock__panel"
-            aria-label="Contextual inspector"
-          >
-            <div class="game-tactical-dock__heading">
-              <div>
-                <p class="eyebrow">Inspector</p>
-                <h2>Rule helper</h2>
-              </div>
-            </div>
-            <p class="game-inspector-card">
-              Select a square or control to inspect legal mechanics. Regimes use
-              color, pattern, and two-letter codes.
-            </p>
-          </section>
-          */}
-          </aside>
+          <GamePanel
+            label="Game moves and actions"
+            initialTabId="moves"
+            tabs={[
+              {
+                id: "moves",
+                label: "Moves",
+                content: () => (
+                  <section class="play-history" aria-label="Move history">
+                    <ol class="play-history-list">
+                      <For each={session.getHistoryTurns()}>
+                        {(turn) => (
+                          <li>
+                            <span class="play-history-turn">
+                              {turn.number}.
+                            </span>
+                            <span>{turn.first?.san}</span>
+                            <span>{turn.second?.san}</span>
+                          </li>
+                        )}
+                      </For>
+                    </ol>
+                    <Show when={session.getHistoryTurns().length === 0}>
+                      <p class="play-history-empty">No moves yet.</p>
+                    </Show>
+                  </section>
+                ),
+              },
+              {
+                id: "actions",
+                label: "Actions",
+                content: () => (
+                  <BoardPlayControls
+                    castleActions={session.getCastleActions().map((option) => ({
+                      label: option.label,
+                      onClick: () => session.submitAction(option.action),
+                    }))}
+                    defectActions={session.getDefectActions().map((option) => ({
+                      label: option.label,
+                      onClick: () => session.submitAction(option.action),
+                    }))}
+                  />
+                ),
+              },
+            ]}
+          />
         </Show>
       </div>
     </>
