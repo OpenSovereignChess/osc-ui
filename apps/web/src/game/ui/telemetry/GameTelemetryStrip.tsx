@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js";
+import ColorSwatch from "../../../app/components/ColorSwatch.tsx";
 import {
   sovereignColorById,
-  swatchStyle,
   type SovereignColorId,
 } from "../../../app/design/color-system.ts";
 import type { BoardPlayerTelemetry } from "../../session/boardTelemetry.ts";
@@ -22,15 +22,12 @@ function RegimeSwatch(props: {
 }) {
   const spec = () => sovereignColorById[props.id];
   return (
-    <span
-      aria-label={`${props.labelPrefix}: ${spec().label}`}
-      class="game-telemetry-strip__regime osc-swatch"
+    <ColorSwatch
+      color={props.id}
+      label={`${props.labelPrefix}: ${spec().label}`}
+      class="game-telemetry-strip__regime"
       classList={{ "game-telemetry-strip__regime--compact": props.compact }}
-      data-pattern={spec().pattern}
-      style={swatchStyle(spec())}
-    >
-      <span class="osc-swatch__code">{spec().code}</span>
-    </span>
+    />
   );
 }
 

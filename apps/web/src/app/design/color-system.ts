@@ -13,26 +13,11 @@ export type SovereignColorId =
   | "violet";
 
 export type SovereignOwner = "Player 1" | "Player 2" | "Neutral";
-export type SwatchPattern =
-  | "solid"
-  | "grid"
-  | "vertical"
-  | "cross"
-  | "dots"
-  | "diagonal"
-  | "reverse-diagonal"
-  | "rings"
-  | "bricks"
-  | "checker"
-  | "chevron"
-  | "plus";
-
 export interface SovereignColorSpec {
   readonly id: SovereignColorId;
   readonly label: string;
   readonly code: string;
   readonly fill: string;
-  readonly pattern: SwatchPattern;
   readonly owner: SovereignOwner;
 }
 
@@ -42,7 +27,6 @@ export const sovereignColorSpecs = [
     label: "White",
     code: "WT",
     fill: "#FFFFFF",
-    pattern: "solid",
     owner: "Player 1",
   },
   {
@@ -50,7 +34,6 @@ export const sovereignColorSpecs = [
     label: "Ash",
     code: "AS",
     fill: "#C7C9C8",
-    pattern: "grid",
     owner: "Neutral",
   },
   {
@@ -58,7 +41,6 @@ export const sovereignColorSpecs = [
     label: "Slate",
     code: "SL",
     fill: "#586E75",
-    pattern: "vertical",
     owner: "Player 2",
   },
   {
@@ -66,7 +48,6 @@ export const sovereignColorSpecs = [
     label: "Black",
     code: "BK",
     fill: "#121212",
-    pattern: "cross",
     owner: "Player 2",
   },
   {
@@ -74,7 +55,6 @@ export const sovereignColorSpecs = [
     label: "Pink",
     code: "PK",
     fill: "#FFAFD2",
-    pattern: "dots",
     owner: "Neutral",
   },
   {
@@ -82,7 +62,6 @@ export const sovereignColorSpecs = [
     label: "Red",
     code: "RD",
     fill: "#DC050C",
-    pattern: "diagonal",
     owner: "Player 1",
   },
   {
@@ -90,7 +69,6 @@ export const sovereignColorSpecs = [
     label: "Orange",
     code: "OR",
     fill: "#F4A736",
-    pattern: "reverse-diagonal",
     owner: "Neutral",
   },
   {
@@ -98,7 +76,6 @@ export const sovereignColorSpecs = [
     label: "Yellow",
     code: "YW",
     fill: "#F7F056",
-    pattern: "rings",
     owner: "Neutral",
   },
   {
@@ -106,7 +83,6 @@ export const sovereignColorSpecs = [
     label: "Green",
     code: "GN",
     fill: "#4EB265",
-    pattern: "bricks",
     owner: "Neutral",
   },
   {
@@ -114,7 +90,6 @@ export const sovereignColorSpecs = [
     label: "Cyan",
     code: "CY",
     fill: "#7BAFDE",
-    pattern: "checker",
     owner: "Neutral",
   },
   {
@@ -122,7 +97,6 @@ export const sovereignColorSpecs = [
     label: "Navy",
     code: "NV",
     fill: "#1965B0",
-    pattern: "chevron",
     owner: "Player 2",
   },
   {
@@ -130,7 +104,6 @@ export const sovereignColorSpecs = [
     label: "Violet",
     code: "VT",
     fill: "#882E72",
-    pattern: "plus",
     owner: "Player 1",
   },
 ] as const satisfies readonly SovereignColorSpec[];
@@ -155,7 +128,10 @@ export function luminance(hex: string): number {
 
 export function swatchForeground(fill: string): "#1C1B1A" | "#FFFFFF" {
   const surfaceLuminance = luminance(fill);
-  const darkContrast = (surfaceLuminance + 0.05) / 0.05;
+  const darkLuminance = luminance("#1C1B1A");
+  const darkContrast =
+    (Math.max(surfaceLuminance, darkLuminance) + 0.05) /
+    (Math.min(surfaceLuminance, darkLuminance) + 0.05);
   const lightContrast = 1.05 / (surfaceLuminance + 0.05);
   return darkContrast >= lightContrast ? "#1C1B1A" : "#FFFFFF";
 }

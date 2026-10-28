@@ -18,12 +18,10 @@ import {
 } from "../rules/types.ts";
 import { read, readSetup, writeSetup } from "../rules/fen.ts";
 import Button from "../../app/components/Button.tsx";
+import ColorSwatch from "../../app/components/ColorSwatch.tsx";
 import { useGameSession } from "../session/useGameSession.ts";
 import Container from "../ui/container/Container.tsx";
-import {
-  sovereignColorById,
-  swatchStyle,
-} from "../../app/design/color-system.ts";
+import { sovereignColorById } from "../../app/design/color-system.ts";
 
 import "../../../../../packages/board-solid/src/styles/piece.generated.css";
 import "./editor.css";
@@ -293,20 +291,14 @@ export default function EditorShell() {
         >
           <For each={colors}>
             {(color) => (
-              <button
-                aria-label={`${colorLabels[color]} (${sovereignColorById[color].code})`}
-                class={`editor-color-swatch osc-swatch${paletteColor() === color ? " active" : ""}`}
-                data-color={color}
-                data-pattern={sovereignColorById[color].pattern}
-                role="tab"
-                style={swatchStyle(sovereignColorById[color])}
-                type="button"
+              <ColorSwatch
+                color={color}
+                label={`${colorLabels[color]} (${sovereignColorById[color].code})`}
+                class="editor-color-swatch"
+                classList={{ active: paletteColor() === color }}
+                selected={paletteColor() === color}
                 onClick={() => setPaletteColor(color)}
-              >
-                <span class="osc-swatch__code">
-                  {sovereignColorById[color].code}
-                </span>
-              </button>
+              />
             )}
           </For>
         </div>

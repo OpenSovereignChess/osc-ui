@@ -22,7 +22,8 @@
    - Avoid modal interruptions unless the user must make a blocking decision.
 
 4. **Color is never the only signal**
-   - Regimes must be represented by color, pattern, and short code.
+   - Regimes use solid color fills and legible, high-contrast short codes; patterned backgrounds are not needed.
+   - Swatches expose full color names through accessible labels and hover/focus tooltips.
    - Interactive state must also use shape, border, text, or position.
 
 5. **Functional before decorative**

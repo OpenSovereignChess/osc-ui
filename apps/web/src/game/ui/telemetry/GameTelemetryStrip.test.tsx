@@ -23,8 +23,11 @@ test("renders board-area player telemetry without placeholder metadata", () => {
   expect(html).toContain("1:05");
   expect(html).toContain('aria-label="Player 1 current regime: Red"');
   expect(html).toContain('aria-label="Player 1 controls: Cyan"');
-  expect(html).toContain('data-pattern="diagonal"');
-  expect(html).toContain('data-pattern="checker"');
+  expect(html).toContain(">RD</span>");
+  expect(html).toContain(">CY</span>");
+  expect(html).toContain('role="img"');
+  expect(html).toContain('tabindex="0"');
+  expect(html).not.toContain("data-pattern");
   expect(html).toContain("captured-piece piece pawn black");
   expect(html).not.toContain("Avatar");
   expect(html).not.toContain("Rating");
