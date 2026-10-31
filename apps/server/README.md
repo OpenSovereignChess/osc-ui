@@ -19,6 +19,19 @@ turn ownership, and move sequence numbers, but it will not initially perform
 full Sovereign Chess move validation. Treat this mode as casual/untrusted until
 a Go rules implementation validates moves against the shared fixtures.
 
+## Profile game list
+
+`GET /api/me/games` returns active-game summaries for the current `osc_session`
+identity. Games are included when the user owns a player seat or created the
+room, even if the initial connection failed before claiming a seat. Watching a
+game alone does not add it to the list. Claimed seats are durable, not online
+presence counts.
+
+Responses use `Cache-Control: private, no-store`. Missing, invalid, or expired
+cookies return `{"games":[]}` without creating a session. The endpoint exposes
+no opponent user IDs or move histories. Profile history remains a UI placeholder;
+completion detection and results are not implemented yet.
+
 ## Later responsibilities
 
 - completed match views and retention/cleanup policies

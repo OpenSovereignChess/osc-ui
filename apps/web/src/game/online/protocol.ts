@@ -3,6 +3,20 @@ import type { PieceColor, Role } from "@osc/rules";
 
 export type Seat = "player1" | "player2" | "observer";
 
+export interface ActiveGameSummary {
+  roomCode: string;
+  yourSeat: "player1" | "player2" | null;
+  turn: "player1" | "player2";
+  claimedSeats: number;
+  seq: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MyGamesResponse {
+  games: ActiveGameSummary[];
+}
+
 export interface Player {
   id: string;
   seat: Seat;
@@ -95,13 +109,15 @@ export function roomCodeFromLocation(location: Location): string {
   return normalizeRoomCode(new URL(location.href).searchParams.get("room"));
 }
 
+export function playRoomPath(roomCode: string): string {
+  return `/play?${new URLSearchParams({ room: normalizeRoomCode(roomCode) })}`;
+}
+
 export function playRoomUrl(
   roomCode: string,
   origin = window.location.origin,
 ): string {
-  const url = new URL("/play", origin);
-  url.searchParams.set("room", normalizeRoomCode(roomCode));
-  return url.toString();
+  return new URL(playRoomPath(roomCode), origin).toString();
 }
 
 export function serverHttpOrigin(): string {
@@ -120,6 +136,10 @@ export function serverHttpOrigin(): string {
 
 export function createRoomEndpoint(origin = serverHttpOrigin()): string {
   return new URL("/api/rooms", origin).toString();
+}
+
+export function myGamesEndpoint(origin = serverHttpOrigin()): string {
+  return new URL("/api/me/games", origin).toString();
 }
 
 export function roomWebsocketUrl(

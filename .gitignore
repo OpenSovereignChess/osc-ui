@@ -1,7 +1,7 @@
 # build output
 dist/
 apps/*/dist/
-server
+/server
 # generated types
 .astro/
 apps/*/.astro/

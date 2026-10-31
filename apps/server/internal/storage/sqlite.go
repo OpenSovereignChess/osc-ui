@@ -165,6 +165,36 @@ func (s *SQLite) CreateGame(ctx context.Context, roomCode string, createdByUserI
 	return &rooms.Room{Code: code}, nil
 }
 
+func (s *SQLite) ListActiveGames(ctx context.Context, userID string) ([]protocol.ActiveGameSummary, error) {
+	rows, err := s.db.QueryContext(ctx, `
+		SELECT g.room_code, mine.seat, g.turn_seat,
+			(SELECT COUNT(*) FROM game_seats WHERE game_id = g.id),
+			g.seq, g.created_at, g.updated_at
+		FROM games g
+		LEFT JOIN game_seats mine ON mine.game_id = g.id AND mine.user_id = ?
+		WHERE g.status = 'active' AND (mine.seat IS NOT NULL OR g.created_by_user_id = ?)
+	`, userID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	games := []protocol.ActiveGameSummary{}
+	for rows.Next() {
+		var game protocol.ActiveGameSummary
+		var seat sql.NullString
+		if err := rows.Scan(&game.RoomCode, &seat, &game.Turn, &game.ClaimedSeats, &game.Seq, &game.CreatedAt, &game.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if seat.Valid {
+			ownedSeat := protocol.Seat(seat.String)
+			game.YourSeat = &ownedSeat
+		}
+		games = append(games, game)
+	}
+	return games, rows.Err()
+}
+
 func (s *SQLite) Exists(ctx context.Context, roomCode string) (bool, error) {
 	var exists int
 	err := s.db.QueryRowContext(ctx, `SELECT 1 FROM games WHERE room_code = ?`, normalizeCode(roomCode)).Scan(&exists)

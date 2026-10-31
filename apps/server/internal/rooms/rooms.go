@@ -19,6 +19,7 @@ var (
 )
 
 type Repository interface {
+	ListActiveGames(ctx context.Context, userID string) ([]protocol.ActiveGameSummary, error)
 	CreateGame(ctx context.Context, roomCode string, createdByUserID string) (*Room, error)
 	Exists(ctx context.Context, roomCode string) (bool, error)
 	ClaimSeat(ctx context.Context, roomCode string, userID string) (protocol.Seat, bool, error)
@@ -67,6 +68,10 @@ func (s *Store) Create(userID string) (*Room, error) {
 		}
 		return room, nil
 	}
+}
+
+func (s *Store) ListActiveGames(ctx context.Context, userID string) ([]protocol.ActiveGameSummary, error) {
+	return s.repo.ListActiveGames(ctx, userID)
 }
 
 func (s *Store) Exists(code string) bool {

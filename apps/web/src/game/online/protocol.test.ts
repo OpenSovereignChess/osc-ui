@@ -3,6 +3,8 @@ import {
   createRoomEndpoint,
   makeMoveMessage,
   normalizeRoomCode,
+  myGamesEndpoint,
+  playRoomPath,
   playRoomUrl,
   roomWebsocketUrl,
 } from "./protocol.ts";
@@ -19,7 +21,15 @@ describe("online protocol helpers", () => {
     );
   });
 
+  test("builds browser-independent relative room links and encodes codes", () => {
+    expect(playRoomPath(" abcd1234 ")).toBe("/play?room=ABCD1234");
+    expect(playRoomPath("a&b#c")).toBe("/play?room=A%26B%23C");
+  });
+
   test("builds API and websocket URLs from a server origin", () => {
+    expect(myGamesEndpoint("http://localhost:8080")).toBe(
+      "http://localhost:8080/api/me/games",
+    );
     expect(createRoomEndpoint("http://localhost:8080")).toBe(
       "http://localhost:8080/api/rooms",
     );

@@ -53,6 +53,8 @@ func NewHandlerWithRoomsAndSessions(roomStore *rooms.Store, sessions sessionStor
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", handleRoot)
 	mux.HandleFunc("GET /healthz", handleHealth)
+	mux.HandleFunc("GET /api/me/games", handler.handleMyGames)
+	mux.HandleFunc("OPTIONS /api/me/games", handleOptions)
 	mux.HandleFunc("POST /api/rooms", handler.handleCreateRoom)
 	mux.HandleFunc("OPTIONS /api/rooms", handleOptions)
 	mux.HandleFunc("GET /api/rooms/{roomCode}/ws", handler.handleRoomWebsocket)
@@ -71,6 +73,34 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 
 func handleOptions(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *Handler) handleMyGames(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "private, no-store")
+	response := protocol.MyGamesResponse{Games: []protocol.ActiveGameSummary{}}
+	cookie, err := r.Cookie(sessionCookieName)
+	if err != nil || cookie.Value == "" {
+		writeJSON(w, http.StatusOK, response)
+		return
+	}
+	userID, ok, err := h.sessions.UserByTokenHash(r.Context(), tokenHash(cookie.Value))
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, protocol.Error{Message: "could not load games"})
+		return
+	}
+	if !ok {
+		writeJSON(w, http.StatusOK, response)
+		return
+	}
+	games, err := h.rooms.ListActiveGames(r.Context(), userID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, protocol.Error{Message: "could not load games"})
+		return
+	}
+	if games != nil {
+		response.Games = games
+	}
+	writeJSON(w, http.StatusOK, response)
 }
 
 func (h *Handler) handleCreateRoom(w http.ResponseWriter, r *http.Request) {

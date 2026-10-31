@@ -66,6 +66,22 @@ type RoomState struct {
 	Moves    []Move   `json:"moves"`
 }
 
+// ActiveGameSummary contains only the information needed by a player's profile.
+// A nil YourSeat represents a creator who has not claimed a player seat.
+type ActiveGameSummary struct {
+	RoomCode     string `json:"roomCode"`
+	YourSeat     *Seat  `json:"yourSeat"`
+	Turn         Seat   `json:"turn"`
+	ClaimedSeats int    `json:"claimedSeats"`
+	Seq          int    `json:"seq"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
+}
+
+type MyGamesResponse struct {
+	Games []ActiveGameSummary `json:"games"`
+}
+
 type PlayerEvent struct {
 	Player Player `json:"player"`
 }

@@ -3,6 +3,7 @@ package rooms
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/protocol"
 )
@@ -13,12 +14,14 @@ type MemoryRepository struct {
 }
 
 type memoryGame struct {
-	code    string
-	turn    protocol.Seat
-	seq     int
-	moves   []protocol.Move
-	seats   map[protocol.Seat]string
-	created string
+	code      string
+	turn      protocol.Seat
+	seq       int
+	moves     []protocol.Move
+	seats     map[protocol.Seat]string
+	created   string
+	createdAt string
+	updatedAt string
 }
 
 func NewMemoryRepository() *MemoryRepository {
@@ -33,13 +36,41 @@ func (r *MemoryRepository) CreateGame(_ context.Context, roomCode string, create
 	if _, ok := r.games[code]; ok {
 		return nil, ErrBadSequence
 	}
+	now := time.Now().UTC().Format(time.RFC3339Nano)
 	r.games[code] = &memoryGame{
-		code:    code,
-		turn:    protocol.SeatPlayer1,
-		seats:   make(map[protocol.Seat]string),
-		created: createdByUserID,
+		code:      code,
+		turn:      protocol.SeatPlayer1,
+		seats:     make(map[protocol.Seat]string),
+		created:   createdByUserID,
+		createdAt: now,
+		updatedAt: now,
 	}
 	return &Room{Code: code}, nil
+}
+
+func (r *MemoryRepository) ListActiveGames(_ context.Context, userID string) ([]protocol.ActiveGameSummary, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	games := []protocol.ActiveGameSummary{}
+	for _, game := range r.games {
+		var yourSeat *protocol.Seat
+		for seat, owner := range game.seats {
+			if owner == userID {
+				ownedSeat := seat
+				yourSeat = &ownedSeat
+			}
+		}
+		if yourSeat == nil && game.created != userID {
+			continue
+		}
+		games = append(games, protocol.ActiveGameSummary{
+			RoomCode: game.code, YourSeat: yourSeat, Turn: game.turn,
+			ClaimedSeats: len(game.seats), Seq: game.seq,
+			CreatedAt: game.createdAt, UpdatedAt: game.updatedAt,
+		})
+	}
+	return games, nil
 }
 
 func (r *MemoryRepository) Exists(_ context.Context, roomCode string) (bool, error) {
@@ -146,6 +177,7 @@ func (r *MemoryRepository) ApplyMove(_ context.Context, roomCode string, userID 
 	game.seq = move.Seq
 	game.moves = append(game.moves, applied)
 	game.turn = oppositeSeat(game.turn)
+	game.updatedAt = time.Now().UTC().Format(time.RFC3339Nano)
 	return applied, nil
 }
 

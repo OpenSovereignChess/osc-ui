@@ -1,17 +1,15 @@
 ---
 import Layout from "./_Layout.astro";
+import ProfileGames from "../app/profile/ProfileGames.tsx";
 ---
 
 <Layout title="Profile | Play Sovereign Chess">
-  <section class="page-header site-section">
-    <div class="site-inner">
-      <h1>Profile page coming soon</h1>
-    </div>
-  </section>
+  <div class="profile-page site-inner">
+    <h1>Profile</h1>
+    <p class="profile-page__identity">
+      Your games are linked to this browser. Switching devices or clearing site
+      data may prevent you from returning to your seat.
+    </p>
+    <ProfileGames client:load />
+  </div>
 </Layout>
-
-<style>
-  .page-header .button-row {
-    margin-top: 24px;
-  }
-</style>
