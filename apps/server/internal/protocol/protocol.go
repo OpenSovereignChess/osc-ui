@@ -78,6 +78,13 @@ type ActiveGameSummary struct {
 	UpdatedAt    string `json:"updatedAt"`
 }
 
+// RoomEntry describes whether a visit can connect without claiming a new seat.
+type RoomEntry struct {
+	RoomCode     string `json:"roomCode"`
+	YourSeat     *Seat  `json:"yourSeat"`
+	ClaimedSeats int    `json:"claimedSeats"`
+}
+
 type MyGamesResponse struct {
 	Games []ActiveGameSummary `json:"games"`
 }

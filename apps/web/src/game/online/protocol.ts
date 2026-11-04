@@ -13,6 +13,12 @@ export interface ActiveGameSummary {
   updatedAt: string;
 }
 
+export interface RoomEntry {
+  roomCode: string;
+  yourSeat: "player1" | "player2" | null;
+  claimedSeats: number;
+}
+
 export interface MyGamesResponse {
   games: ActiveGameSummary[];
 }
@@ -140,6 +146,16 @@ export function createRoomEndpoint(origin = serverHttpOrigin()): string {
 
 export function myGamesEndpoint(origin = serverHttpOrigin()): string {
   return new URL("/api/me/games", origin).toString();
+}
+
+export function roomEntryEndpoint(
+  roomCode: string,
+  origin = serverHttpOrigin(),
+): string {
+  return new URL(
+    `/api/rooms/${normalizeRoomCode(roomCode)}`,
+    origin,
+  ).toString();
 }
 
 export function roomWebsocketUrl(

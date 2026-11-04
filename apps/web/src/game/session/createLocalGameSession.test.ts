@@ -6,6 +6,8 @@ import { defaults } from "../state/state.ts";
 import { createLocalGameSession } from "./createLocalGameSession.ts";
 import { initialRulesPosition } from "./rulesPosition.ts";
 import type { LocalGameSession, SessionAction, SessionMove } from "./types.ts";
+import { handleServerMessage, type RoomInfo } from "../play/PlayMain.tsx";
+import type { RoomMove, Seat } from "../online/protocol.ts";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -100,6 +102,66 @@ test("player 2 can submit a legal move after player 1 moves", () => {
     (move) => sentMoves.push(move),
   );
 });
+
+for (const seat of ["player1", "player2", "observer"] as const) {
+  test(`restored room state configures ${seat} orientation and move permissions`, () => {
+    const sentMoves: SessionAction[] = [];
+    withSession(
+      (session) => {
+        const move = {
+          ...firstLegalMove(initialRulesPosition()),
+          seq: 1,
+          seat: "player1",
+        } as RoomMove;
+        let info: RoomInfo = { code: "", seq: 0, turn: "player1", players: 0 };
+        handleServerMessage(
+          {
+            type: "room_state",
+            payload: {
+              roomCode: "ABCD1234",
+              you: { id: "viewer", seat },
+              players: [
+                { id: "first", seat: "player1" },
+                { id: "second", seat: "player2" },
+              ],
+              turn: "player2",
+              seq: 1,
+              moves: [move],
+            },
+          },
+          {
+            applyMove: session.applyServerMove,
+            applyMoves: session.applyServerMoves,
+            setError: () => undefined,
+            setInfo: (next) => {
+              info = typeof next === "function" ? next(info) : next;
+            },
+            setSeat: (next: Seat) => session.setOnlineSeat(next),
+          },
+        );
+        expect(info.role).toBe(seat);
+        expect(info.seq).toBe(1);
+        expect(session.getState().position.orientation).toBe(
+          seat === "player2" ? "black" : "white",
+        );
+        expect(session.getState().interaction.viewOnly).toBe(
+          seat === "observer",
+        );
+        if (seat === "player2") {
+          const next = firstLegalMoveForSession(session);
+          expect(session.submitMove(next.orig, next.dest)).toBe(true);
+          expect(sentMoves).toEqual([next]);
+        } else {
+          expect(session.submitMove("a2", "a3")).toBe(false);
+          expect(sentMoves).toEqual([]);
+        }
+      },
+      undefined,
+      undefined,
+      (move) => sentMoves.push(move),
+    );
+  });
+}
 
 function withSession<T>(
   run: (session: LocalGameSession) => T,

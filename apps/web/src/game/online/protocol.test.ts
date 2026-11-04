@@ -6,6 +6,7 @@ import {
   myGamesEndpoint,
   playRoomPath,
   playRoomUrl,
+  roomEntryEndpoint,
   roomWebsocketUrl,
 } from "./protocol.ts";
 
@@ -32,6 +33,9 @@ describe("online protocol helpers", () => {
     );
     expect(createRoomEndpoint("http://localhost:8080")).toBe(
       "http://localhost:8080/api/rooms",
+    );
+    expect(roomEntryEndpoint(" abcd1234 ", "http://localhost:8080")).toBe(
+      "http://localhost:8080/api/rooms/ABCD1234",
     );
     expect(roomWebsocketUrl("abcd1234", "http://localhost:8080")).toBe(
       "ws://localhost:8080/api/rooms/ABCD1234/ws",

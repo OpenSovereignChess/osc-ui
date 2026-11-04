@@ -178,7 +178,7 @@ test("connecting room copy shows optimistic player1 details immediately", () => 
 
   expect(statusLabel("connecting", info)).toBe("Joining as Player 1");
   expect(statusSummary("connecting", info)).toBe(
-    "Room ABCD1234 was created. Opening the live connection.",
+    "Opening the live connection to room ABCD1234.",
   );
 });
 
@@ -225,6 +225,17 @@ test("room links show an invitation until the user joins", () => {
   expect(statusLabel("idle", invitation)).toBe("Game invitation");
   expect(statusSummary("idle", invitation)).toBe(
     "Join to enter the game. If both player seats are taken, you will watch as an observer.",
+  );
+  expect(isInvitationVisible(invitation, "checking")).toBe(false);
+  expect(isInvitationVisible(invitation, "connecting")).toBe(false);
+  expect(isInvitationVisible(invitation, "connected")).toBe(false);
+  expect(isInvitationVisible(invitation, "error")).toBe(true);
+  expect(statusLabel("checking", invitation)).toBe("Checking room");
+  expect(statusSummary("checking", invitation)).toBe(
+    "Checking your seat and whether the game is full.",
+  );
+  expect(statusSummary("connecting", invitation)).toBe(
+    "Opening the live connection to room ABCD1234.",
   );
   expect(isInvitationVisible(joined)).toBe(false);
   expect(isBoardVisible(joined)).toBe(true);

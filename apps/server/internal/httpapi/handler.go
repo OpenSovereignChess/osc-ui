@@ -57,6 +57,8 @@ func NewHandlerWithRoomsAndSessions(roomStore *rooms.Store, sessions sessionStor
 	mux.HandleFunc("OPTIONS /api/me/games", handleOptions)
 	mux.HandleFunc("POST /api/rooms", handler.handleCreateRoom)
 	mux.HandleFunc("OPTIONS /api/rooms", handleOptions)
+	mux.HandleFunc("GET /api/rooms/{roomCode}", handler.handleRoomEntry)
+	mux.HandleFunc("OPTIONS /api/rooms/{roomCode}", handleOptions)
 	mux.HandleFunc("GET /api/rooms/{roomCode}/ws", handler.handleRoomWebsocket)
 	return withCORS(mux)
 }
@@ -99,6 +101,36 @@ func (h *Handler) handleMyGames(w http.ResponseWriter, r *http.Request) {
 	}
 	if games != nil {
 		response.Games = games
+	}
+	writeJSON(w, http.StatusOK, response)
+}
+
+func (h *Handler) handleRoomEntry(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "private, no-store")
+	// Unlike userID, this lookup must never create a session or claim a seat.
+	userID := ""
+	if cookie, err := r.Cookie(sessionCookieName); err == nil && cookie.Value != "" {
+		id, ok, err := h.sessions.UserByTokenHash(r.Context(), tokenHash(cookie.Value))
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, protocol.Error{Message: "could not load room"})
+			return
+		}
+		if ok {
+			userID = id
+		}
+	}
+	state, err := h.rooms.Snapshot(r.PathValue("roomCode"), userID)
+	if errors.Is(err, rooms.ErrRoomNotFound) {
+		writeJSON(w, http.StatusNotFound, protocol.Error{Message: "room not found"})
+		return
+	}
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, protocol.Error{Message: "could not load room"})
+		return
+	}
+	response := protocol.RoomEntry{RoomCode: state.RoomCode, ClaimedSeats: len(state.Players)}
+	if userID != "" && (state.You.Seat == protocol.SeatPlayer1 || state.You.Seat == protocol.SeatPlayer2) {
+		response.YourSeat = &state.You.Seat
 	}
 	writeJSON(w, http.StatusOK, response)
 }

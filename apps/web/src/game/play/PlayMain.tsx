@@ -3,6 +3,7 @@ import {
   createEffect,
   createSignal,
   onCleanup,
+  onMount,
   Show,
   type Setter,
 } from "solid-js";
@@ -24,11 +25,15 @@ import {
   type ServerMessage,
 } from "../online/protocol.ts";
 
+import { createRoomEntryLookup, fetchRoomEntry } from "./roomEntry.ts";
+import { watchRoomSocket } from "./roomConnection.ts";
+
 import "./play-main.css";
 
 type ConnectionState =
   | "idle"
   | "creating"
+  | "checking"
   | "connecting"
   | "connected"
   | "error";
@@ -63,7 +68,9 @@ export default function PlayMain() {
     });
   const [entryCode, setEntryCode] = createSignal(initialRoomCode);
   const [socket, setSocket] = createSignal<WebSocket>();
-  const [status, setStatus] = createSignal<ConnectionState>("idle");
+  const [status, setStatus] = createSignal<ConnectionState>(
+    initialRoomCode ? "checking" : "idle",
+  );
   const [error, setError] = createSignal<string>();
   const [roomInfo, setRoomInfo] = createSignal<RoomInfo>({
     code: initialRoomCode,
@@ -74,7 +81,7 @@ export default function PlayMain() {
   const createDisabled = () => isCreateDisabled(status(), roomInfo());
   const joinDisabled = () => isJoinDisabled(roomInfo());
   const boardVisible = () => isBoardVisible(roomInfo());
-  const invitationVisible = () => isInvitationVisible(roomInfo());
+  const invitationVisible = () => isInvitationVisible(roomInfo(), status());
 
   const updateUrl = (code: string) => {
     const url = playRoomUrl(code);
@@ -82,6 +89,7 @@ export default function PlayMain() {
   };
 
   const connect = (code: string, options: ConnectOptions = {}) => {
+    entryLookup.cancel();
     const normalized = normalizeRoomCode(code);
     if (!normalized) {
       setError("Enter a room code.");
@@ -104,6 +112,24 @@ export default function PlayMain() {
     });
     updateUrl(normalized);
   };
+
+  const entryLookup = createRoomEntryLookup({
+    load: fetchRoomEntry,
+    checking: () => {
+      setError(undefined);
+      setStatus("checking");
+    },
+    invitation: () => setStatus("idle"),
+    connect,
+    error: (message) => {
+      setError(message);
+      setStatus("error");
+    },
+  });
+  onMount(() => {
+    if (initialRoomCode) void entryLookup.check(initialRoomCode);
+  });
+  onCleanup(() => entryLookup.dispose());
 
   const createRoom = async () => {
     setStatus("creating");
@@ -254,43 +280,29 @@ function PlayRoomConnection(props: {
     const ws = new WebSocket(roomWebsocketUrl(code));
     props.setSocket(ws);
 
-    ws.addEventListener("open", () => {
-      props.setStatus("connected");
-    });
-    ws.addEventListener("message", (event) => {
-      try {
-        const message = JSON.parse(event.data) as ServerMessage;
-        handleServerMessage(message, {
-          applyMove: (move) => session.applyServerMove(move),
-          applyMoves: (moves) => session.applyServerMoves(moves),
-          setError: props.setError,
-          setInfo: props.setRoomInfo,
-          setSeat: (seat) => session.setOnlineSeat(seat),
-        });
-        if (message.type === "error") {
+    onCleanup(
+      watchRoomSocket(ws, {
+        open: () => props.setStatus("connected"),
+        message: (message) => {
+          handleServerMessage(message, {
+            applyMove: (move) => session.applyServerMove(move),
+            applyMoves: (moves) => session.applyServerMoves(moves),
+            setError: props.setError,
+            setInfo: props.setRoomInfo,
+            setSeat: (seat) => session.setOnlineSeat(seat),
+          });
+          if (message.type === "error") props.setStatus("error");
+        },
+        close: () => {
+          props.setSocket(undefined);
+          props.setStatus(props.error() ? "error" : "idle");
+        },
+        error: (message) => {
+          props.setError(message);
           props.setStatus("error");
-        }
-      } catch {
-        props.setError("Received an invalid server message.");
-        props.setStatus("error");
-      }
-    });
-    ws.addEventListener("close", () => {
-      props.setSocket(undefined);
-      if (props.error()) {
-        props.setStatus("error");
-      } else {
-        props.setStatus("idle");
-      }
-    });
-    ws.addEventListener("error", () => {
-      props.setError("Connection failed.");
-      props.setStatus("error");
-    });
-
-    onCleanup(() => {
-      ws.close();
-    });
+        },
+      }),
+    );
   });
 
   return null;
@@ -400,6 +412,8 @@ export function statusLabel(status: ConnectionState, info: RoomInfo): string {
   switch (status) {
     case "creating":
       return "Creating room";
+    case "checking":
+      return "Checking room";
     case "connecting":
       return info.role ? `Joining as ${seatLabel(info.role)}` : "Joining room";
     case "connected":
@@ -417,11 +431,14 @@ export function statusSummary(status: ConnectionState, info: RoomInfo): string {
       ? "Asking the server for a new invite room."
       : "Create or join a room to play online.";
   }
+  if (status === "checking") {
+    return "Checking your seat and whether the game is full.";
+  }
+  if (status === "connecting" || (status === "connected" && !info.role)) {
+    return `Opening the live connection to room ${info.code}.`;
+  }
   if (!info.role) {
     return "Join to enter the game. If both player seats are taken, you will watch as an observer.";
-  }
-  if (status === "connecting") {
-    return `Room ${info.code} was created. Opening the live connection.`;
   }
   if (info.role === "observer") {
     return `Room ${info.code} is full. You are watching the game.`;
@@ -447,8 +464,17 @@ export function isBoardVisible(info: RoomInfo): boolean {
   return info.role !== undefined;
 }
 
-export function isInvitationVisible(info: RoomInfo): boolean {
-  return info.code !== "" && info.role === undefined;
+export function isInvitationVisible(
+  info: RoomInfo,
+  status: ConnectionState = "idle",
+): boolean {
+  return (
+    info.code !== "" &&
+    info.role === undefined &&
+    status !== "checking" &&
+    status !== "connecting" &&
+    status !== "connected"
+  );
 }
 
 function seatLabel(seat?: Seat): string {
