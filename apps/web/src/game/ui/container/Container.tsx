@@ -7,9 +7,9 @@ import {
   onCleanup,
   onMount,
 } from "solid-js";
-import { key2pos, posToTranslate } from "@osc/board-solid";
+import { createBoardBounds } from "../board/createBoardBounds.ts";
+import PromotionPicker from "../promotion/PromotionPicker.tsx";
 import { useGameSession } from "../../session/useGameSession.ts";
-import { BOARD_SIZE } from "../../rules/constants.ts";
 import * as types from "../../rules/types.ts";
 import * as util from "../../rules/util.ts";
 import Board from "../board/Board.tsx";
@@ -21,21 +21,6 @@ import { clockTextForPlayer } from "../../session/boardTelemetry.ts";
 
 import "./container.css";
 
-function updateBounds(
-  bounds: DOMRectReadOnly,
-  containerEl: HTMLElement,
-): DOMRectReadOnly {
-  const edgeSize = Math.min(bounds.width, bounds.height);
-  const width =
-    (Math.floor((edgeSize * window.devicePixelRatio) / BOARD_SIZE) *
-      BOARD_SIZE) /
-    window.devicePixelRatio;
-  const height = width;
-  containerEl.style.width = `${width}px`;
-  containerEl.style.height = `${height}px`;
-  return containerEl.getBoundingClientRect();
-}
-
 type ContainerProps = {
   showBoardTelemetry?: boolean;
   showControls?: boolean;
@@ -45,7 +30,7 @@ export default function Container(props: ContainerProps) {
   const [wrapEl, setWrapEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
   const [boardEl, setBoardEl] = createSignal<HTMLElement>();
-  const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
+  const bounds = createBoardBounds(wrapEl, containerEl);
   const [domRegistered, setDomRegistered] = createSignal<boolean>(false);
   const [clockNow, setClockNow] = createSignal(Date.now());
   const session = useGameSession();
@@ -56,61 +41,6 @@ export default function Container(props: ContainerProps) {
     const boardBounds = bounds();
     return boardBounds ? { width: `${boardBounds.width}px` } : undefined;
   });
-  const promotionPickerStyle = createMemo(() => {
-    const pending = session.getPendingPromotion();
-    const boardBounds = bounds();
-    if (!pending || !boardBounds) {
-      return undefined;
-    }
-
-    const squareSize = boardBounds.width / BOARD_SIZE;
-    const [x, y] = posToTranslate(boardBounds)(
-      key2pos(pending.dest),
-      session.getSnapshot().orientation,
-    );
-    const width = pending.roles.length * squareSize;
-    const left = Math.min(
-      Math.max(0, x - (width - squareSize) / 2),
-      boardBounds.width - width,
-    );
-    const top = Math.min(Math.max(0, y), boardBounds.height - squareSize);
-
-    return {
-      "--promotion-square-size": `${squareSize}px`,
-      left: `${left}px`,
-      top: `${top}px`,
-    };
-  });
-
-  // TODO: We need to update bounds on state.dom.bounds when we call updateBounds
-  createEffect(() => {
-    const wrap = wrapEl();
-    const container = containerEl();
-    if (!wrap || !container) {
-      return;
-    }
-
-    const refreshBounds = (sourceBounds = wrap.getBoundingClientRect()) => {
-      setBounds(updateBounds(sourceBounds, container));
-    };
-
-    refreshBounds();
-    const animationFrame = window.requestAnimationFrame(() => refreshBounds());
-
-    let resizeObserver: ResizeObserver | undefined;
-    if ("ResizeObserver" in window) {
-      resizeObserver = new ResizeObserver((entries) => {
-        refreshBounds(entries[0]?.contentRect);
-      });
-      resizeObserver.observe(wrap);
-    }
-
-    onCleanup(() => {
-      window.cancelAnimationFrame(animationFrame);
-      resizeObserver?.disconnect();
-    });
-  });
-
   createEffect(() => {
     if (domRegistered() || !wrapEl() || !containerEl() || !boardEl()) {
       return;
@@ -122,6 +52,7 @@ export default function Container(props: ContainerProps) {
         container: containerEl()!,
         wrap: wrapEl()!,
       },
+      // TODO: Invalidate cached DOM bounds when the board resizes.
       bounds: util.memo(() => bounds()!),
     };
 
@@ -150,37 +81,12 @@ export default function Container(props: ContainerProps) {
     <div class="wrap" ref={setWrapEl}>
       <div class="sc-container" ref={setContainerEl}>
         <Board ref={setBoardEl} bounds={bounds()} />
-        <Show when={session.getPendingPromotion() && promotionPickerStyle()}>
-          {(style) => (
-            <div
-              aria-label="Choose promotion piece"
-              class="play-promotion-picker"
-              role="dialog"
-              style={style()}
-            >
-              <For each={session.getPendingPromotion()!.roles}>
-                {(role) => (
-                  <button
-                    aria-label={`Promote to ${role}`}
-                    onPointerDown={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      session.promote(role);
-                    }}
-                    type="button"
-                  >
-                    <span
-                      aria-hidden="true"
-                      class={`play-promotion-piece piece ${role} ${
-                        session.getPendingPromotion()!.piece.color
-                      }`}
-                    />
-                  </button>
-                )}
-              </For>
-            </div>
-          )}
-        </Show>
+        <PromotionPicker
+          bounds={bounds()}
+          orientation={session.getSnapshot().orientation}
+          request={session.getPendingPromotion()}
+          onPromote={session.promote}
+        />
         <Coords />
       </div>
     </div>

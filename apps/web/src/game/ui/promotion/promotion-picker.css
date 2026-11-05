@@ -1,0 +1,48 @@
+.promotion-picker {
+  position: absolute;
+  z-index: 8;
+  display: grid;
+  grid-auto-columns: var(--promotion-square-size);
+  grid-auto-flow: column;
+  width: max-content;
+  height: var(--promotion-square-size);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  pointer-events: auto;
+}
+
+.promotion-picker button {
+  position: relative;
+  display: grid;
+  width: var(--promotion-square-size);
+  height: var(--promotion-square-size);
+  padding: 0;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.promotion-picker button:last-child {
+  border-right: 0;
+}
+
+.promotion-picker button:hover,
+.promotion-picker button:focus-visible {
+  background: var(--panel-strong);
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+.promotion-picker button:active {
+  box-shadow: inset 0 1px 2px rgba(28, 27, 26, 0.18);
+}
+
+.promotion-piece.piece {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

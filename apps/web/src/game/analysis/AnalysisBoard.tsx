@@ -1,4 +1,4 @@
-import { BoardView, key2pos, posToTranslate } from "@osc/board-solid";
+import { BoardView } from "@osc/board-solid";
 import {
   castleSan,
   defectionSan,
@@ -24,7 +24,8 @@ import {
   onMount,
 } from "solid-js";
 import Button from "../../app/components/Button.tsx";
-import { BOARD_SIZE } from "../rules/constants.ts";
+import { createBoardBounds } from "../ui/board/createBoardBounds.ts";
+import PromotionPicker from "../ui/promotion/PromotionPicker.tsx";
 import { readSetup } from "../rules/fen.ts";
 import type * as types from "../rules/types.ts";
 import BoardPlayControls, {
@@ -91,21 +92,6 @@ function piecesFromPosition(position: Position): types.Pieces {
   return pieces;
 }
 
-function updateBounds(
-  bounds: DOMRectReadOnly,
-  containerEl: HTMLElement,
-): DOMRectReadOnly {
-  const edgeSize = Math.min(bounds.width, bounds.height);
-  const width =
-    (Math.floor((edgeSize * window.devicePixelRatio) / BOARD_SIZE) *
-      BOARD_SIZE) /
-    window.devicePixelRatio;
-
-  containerEl.style.width = `${width}px`;
-  containerEl.style.height = `${width}px`;
-  return containerEl.getBoundingClientRect();
-}
-
 interface HistoryMove {
   readonly san: string;
 }
@@ -122,7 +108,7 @@ export default function AnalysisBoard() {
   let historyListEl: HTMLOListElement | undefined;
   const [stageEl, setStageEl] = createSignal<HTMLElement>();
   const [containerEl, setContainerEl] = createSignal<HTMLElement>();
-  const [bounds, setBounds] = createSignal<DOMRectReadOnly>();
+  const bounds = createBoardBounds(stageEl, containerEl);
   const rootPosition = initialPositionFromUrl();
   const [positions, setPositions] = createSignal<Position[]>([rootPosition]);
   const [moves, setMoves] = createSignal<HistoryMove[]>([]);
@@ -363,59 +349,6 @@ export default function AnalysisBoard() {
     });
   });
 
-  const promotionPickerStyle = createMemo(() => {
-    const pending = pendingPromotion();
-    const boardBounds = bounds();
-    if (!pending || !boardBounds) {
-      return undefined;
-    }
-
-    const squareSize = boardBounds.width / BOARD_SIZE;
-    const [x, y] = posToTranslate(boardBounds)(
-      key2pos(pending.dest),
-      orientation(),
-    );
-    const width = pending.roles.length * squareSize;
-    const left = Math.min(
-      Math.max(0, x - (width - squareSize) / 2),
-      boardBounds.width - width,
-    );
-    const top = Math.min(Math.max(0, y), boardBounds.height - squareSize);
-
-    return {
-      "--promotion-square-size": `${squareSize}px`,
-      left: `${left}px`,
-      top: `${top}px`,
-    };
-  });
-
-  createEffect(() => {
-    const stage = stageEl();
-    const container = containerEl();
-    if (!stage || !container) {
-      return;
-    }
-
-    const resize = (bounds: DOMRectReadOnly) => {
-      setBounds(updateBounds(bounds, container));
-    };
-
-    resize(stage.getBoundingClientRect());
-
-    if (!("ResizeObserver" in window)) {
-      return;
-    }
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry) {
-        resize(entry.contentRect);
-      }
-    });
-    observer.observe(stage);
-    onCleanup(() => observer.disconnect());
-  });
-
   const goToFirst = () => setCurrentIndex(0);
   const goToPrevious = () => setCurrentIndex((index) => Math.max(0, index - 1));
   const goToNext = () =>
@@ -481,43 +414,13 @@ export default function AnalysisBoard() {
               pieces={pieces()}
               selectedKey={selectedKey()}
             >
-              <Show when={pendingPromotion() && promotionPickerStyle()}>
-                {(style) => (
-                  <div
-                    aria-label="Choose promotion piece"
-                    class="analysis-promotion-picker"
-                    onClick={(event) => event.stopPropagation()}
-                    onMouseDown={(event) => event.stopPropagation()}
-                    onPointerDown={(event) => event.stopPropagation()}
-                    onTouchStart={(event) => event.stopPropagation()}
-                    ref={promotionPickerEl}
-                    role="dialog"
-                    style={style()}
-                  >
-                    <For each={pendingPromotion()!.roles}>
-                      {(role) => (
-                        <button
-                          aria-label={`Promote to ${role}`}
-                          onClick={(event) => event.stopPropagation()}
-                          onPointerDown={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            promote(role);
-                          }}
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class={`analysis-promotion-piece piece ${role} ${
-                              pendingPromotion()!.piece.color
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </For>
-                  </div>
-                )}
-              </Show>
+              <PromotionPicker
+                bounds={bounds()}
+                orientation={orientation()}
+                request={pendingPromotion()}
+                onPromote={promote}
+                ref={(element) => (promotionPickerEl = element)}
+              />
             </BoardView>
           </div>
         </div>
