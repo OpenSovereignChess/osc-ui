@@ -1,12 +1,6 @@
 import { type SetStoreFunction } from "solid-js/store";
 import { type State } from "../state/state.ts";
 import * as types from "../rules/types.ts";
-import * as util from "../rules/util.ts";
-
-export interface MoveResult {
-  orig: types.Key;
-  dest: types.Key;
-}
 
 function isMovable(state: State, orig: types.Key): boolean {
   const piece = state.position.pieces.get(orig);
@@ -21,16 +15,9 @@ function isMovable(state: State, orig: types.Key): boolean {
   );
 }
 
-function tryAutoCastle(): boolean {
-  // TODO: Implement
-  return false;
-}
-
+// Interaction checks and selection only. Gameplay moves belong to the session;
+// free board edits belong to the editor actions.
 export function createBoardActions(setState: SetStoreFunction<State>) {
-  function setSelected(key: types.Key): void {
-    setState("interaction", { selected: key });
-  }
-
   function unselect(): void {
     setState("interaction", { selected: undefined });
   }
@@ -41,108 +28,20 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
     (state.position.movable.free ||
       !!state.position.movable.dests?.get(orig)?.includes(dest));
 
-  function baseMove(
-    state: State,
-    orig: types.Key,
-    dest: types.Key,
-  ): types.Piece | boolean {
-    const origPiece = state.position.pieces.get(orig);
-    const destPiece = state.position.pieces.get(dest);
-    if (orig === dest || !origPiece) {
-      return false;
-    }
-    // TODO: Convet to SC rules
-    const captured =
-      destPiece && destPiece.color !== origPiece.color ? destPiece : undefined;
-    if (dest === state.interaction.selected) {
-      unselect();
-    }
-    if (!tryAutoCastle()) {
-      setState("position", "pieces", (pieces) => {
-        const newPieces = new Map(pieces);
-        newPieces.set(dest, origPiece);
-        newPieces.delete(orig);
-        return newPieces;
-      });
-    }
-    setState("position", {
-      check: undefined,
-      lastMove: [orig, dest],
-    });
-    return captured || true;
-  }
-
-  function baseUserMove(
-    state: State,
-    orig: types.Key,
-    dest: types.Key,
-  ): types.Piece | boolean {
-    const result = baseMove(state, orig, dest);
-    if (result) {
-      setState("position", "movable", { dests: undefined });
-      setState(
-        "position",
-        "turnColor",
-        util.opposite(state.position.turnColor),
-      );
-      setState("interaction", "animation", { current: undefined });
-    }
-    return result;
-  }
-
-  function userMove(state: State, orig: types.Key, dest: types.Key): boolean {
-    if (canMove(state, orig, dest)) {
-      const result = baseUserMove(state, orig, dest);
-      if (result) {
-        unselect();
-        return true;
-      }
-    }
-    unselect();
-    return false;
-  }
-
-  function applyMove(state: State, orig: types.Key, dest: types.Key): boolean {
-    const result = baseUserMove(state, orig, dest);
-    if (result) {
-      unselect();
-      return true;
-    }
-    return false;
-  }
-
-  function movePiece(state: State, orig: types.Key, dest: types.Key): boolean {
-    const moved = userMove(state, orig, dest);
-    setState("interaction", "stats", { dragged: moved });
-    return moved;
-  }
-
-  function cancelDrag(): void {
-    unselect();
-    setState("interaction", "stats", { dragged: false });
-  }
-
-  function selectSquare(
-    state: State,
-    key: types.Key,
-    force?: boolean,
-  ): MoveResult | undefined {
+  function selectSquare(state: State, key: types.Key): void {
     if (state.interaction.selected) {
       if (
         state.interaction.selected === key &&
         !state.interaction.draggable.enabled
       ) {
         unselect();
-        return undefined;
-      } else if (
-        (state.interaction.selectable.enabled || force) &&
+        return;
+      }
+      if (
+        state.interaction.selectable.enabled &&
         state.interaction.selected !== key
       ) {
-        const orig = state.interaction.selected;
-        if (userMove(state, orig, key)) {
-          setState("interaction", "stats", { dragged: false });
-          return { orig, dest: key };
-        }
+        unselect();
       }
     }
     if (
@@ -150,18 +49,14 @@ export function createBoardActions(setState: SetStoreFunction<State>) {
         state.interaction.draggable.enabled) &&
       isMovable(state, key)
     ) {
-      setSelected(key);
-      state.interaction.hold.start();
+      setState("interaction", { selected: key });
     }
-    return undefined;
   }
 
   return {
-    applyMove,
-    cancelDrag,
+    cancelDrag: unselect,
     canMove,
     canSelect: isMovable,
-    movePiece,
     selectSquare,
   };
 }

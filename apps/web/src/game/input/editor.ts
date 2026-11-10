@@ -92,6 +92,23 @@ export function createEditorActions(
     });
   }
 
+  function movePiece(orig: types.Key, dest: types.Key): boolean {
+    const piece = state.position.pieces.get(orig);
+    if (orig === dest || !piece || state.interaction.dropmode.active) {
+      return false;
+    }
+
+    setState("position", "pieces", (pieces) => {
+      const next = new Map(pieces);
+      next.delete(orig);
+      next.set(dest, piece);
+      return next;
+    });
+    setState("position", { check: undefined, lastMove: undefined });
+    setState("interaction", { selected: undefined });
+    return true;
+  }
+
   function applyDrop(key: types.Key): void {
     if (!state.interaction.dropmode.active) {
       return;
@@ -103,12 +120,7 @@ export function createEditorActions(
       clearSquare(key);
     }
 
-    setState("interaction", {
-      selected: undefined,
-      stats: {
-        dragged: false,
-      },
-    });
+    setState("interaction", { selected: undefined });
   }
 
   function replacePieces(pieces: types.Pieces): void {
@@ -134,6 +146,7 @@ export function createEditorActions(
     applyDrop,
     clearBoard,
     clearSquare,
+    movePiece,
     placePiece,
     replacePieces,
     setDropPiece,

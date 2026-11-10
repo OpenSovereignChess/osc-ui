@@ -39,6 +39,7 @@ export function createLocalGameSession(
   state: State,
   setState: SetStoreFunction<State>,
   options: {
+    mode?: "play" | "editor";
     initialRulesPosition?: () => Position;
     now?: () => number;
     onLocalMove?: (move: SessionAction) => void;
@@ -75,9 +76,12 @@ export function createLocalGameSession(
       check: undefined,
       lastMove,
       movable: {
-        free: false,
+        free: options.mode === "editor",
         color: "both",
-        dests: legalDestsForSeat(rulesPosition, onlineSeat),
+        dests:
+          options.mode === "editor"
+            ? undefined
+            : legalDestsForSeat(rulesPosition, onlineSeat),
       },
     });
   }

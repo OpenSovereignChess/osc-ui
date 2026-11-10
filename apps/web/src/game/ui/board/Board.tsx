@@ -20,6 +20,14 @@ export default function Board(props: BoardProps) {
     return session.getState().position.movable.dests?.get(selected) ?? [];
   });
 
+  const movePiece = (orig: types.Key, dest: types.Key): void => {
+    if (session.getState().position.movable.free) {
+      session.editor.movePiece(orig, dest);
+    } else {
+      session.submitMove(orig, dest);
+    }
+  };
+
   return (
     <BoardView
       boardRef={props.ref}
@@ -43,7 +51,7 @@ export default function Board(props: BoardProps) {
         session.board.cancelDrag();
       }}
       onMovePiece={(orig, dest) => {
-        session.submitMove(orig as types.Key, dest as types.Key);
+        movePiece(orig as types.Key, dest as types.Key);
       }}
       onSelectSquare={(key) => {
         if (interaction().dropmodeActive) {
@@ -56,7 +64,7 @@ export default function Board(props: BoardProps) {
           selected !== key &&
           session.board.canMove(session.getState(), selected, key as types.Key)
         ) {
-          session.submitMove(selected, key as types.Key);
+          movePiece(selected, key as types.Key);
           return;
         }
         session.board.selectSquare(session.getState(), key as types.Key);

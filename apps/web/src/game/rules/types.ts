@@ -101,10 +101,4 @@ export interface Memo<A> {
   clear: () => void;
 }
 
-export interface Timer {
-  start: () => void;
-  cancel: () => void;
-  stop: () => number;
-}
-
 export type SquareClasses = Map<Key, string>;

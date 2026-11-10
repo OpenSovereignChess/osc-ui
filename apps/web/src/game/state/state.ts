@@ -2,7 +2,6 @@ import { type AnimCurrent } from "../input/anim.ts";
 import { type Drawable } from "../input/draw.ts";
 import * as fen from "../rules/fen.ts";
 import * as types from "../rules/types.ts";
-import { timer } from "../rules/util.ts";
 
 type Orientation = Extract<types.Color, "white" | "black">;
 
@@ -39,14 +38,7 @@ export interface InteractionState {
     // Disable to enforce dragging over click-click move
     enabled: boolean;
   };
-  stats: {
-    // Was last piece dragged or clicked?
-    // Needs default to false for touch
-    dragged: boolean;
-    ctrlKey?: boolean;
-  };
   drawable: Drawable;
-  hold: types.Timer;
 }
 
 export interface LayoutState {
@@ -94,11 +86,6 @@ export function defaultInteractionState(): InteractionState {
     selectable: {
       enabled: true,
     },
-    stats: {
-      // On touchscreen, default to "tap-tap" moves instead of drag
-      dragged: !("ontouchstart" in window),
-    },
-    hold: timer(),
   };
 }
 

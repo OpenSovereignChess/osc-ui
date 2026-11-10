@@ -3,7 +3,7 @@ import EditorShell from "./EditorShell.tsx";
 
 export default function EditorMain() {
   return (
-    <GameProvider>
+    <GameProvider mode="editor">
       <EditorShell />
     </GameProvider>
   );
