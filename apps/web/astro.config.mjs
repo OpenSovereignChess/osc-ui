@@ -40,9 +40,9 @@ export default defineConfig({
         scope: "/",
         icons: [
           {
-            src: "/favicon.svg",
+            src: "/favicon.png",
             sizes: "any",
-            type: "image/svg+xml",
+            type: "image/png",
             purpose: "any maskable",
           },
         ],
