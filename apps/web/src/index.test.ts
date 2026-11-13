@@ -31,6 +31,8 @@ test("home page renders", async () => {
   expect(html).toContain("Start a match");
   expect(html).toContain('href="/play"');
   expect(html).toContain("support@playsovereignchess.com");
+  expect(html).toContain('href="https://legacy.playsovereignchess.com/"');
+  expect(html).toMatch(/<footer[\s\S]*>Legacy site<\/a>/);
 });
 
 test("global pages render the global header mode", async () => {

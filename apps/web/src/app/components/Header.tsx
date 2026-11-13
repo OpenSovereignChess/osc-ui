@@ -187,6 +187,13 @@ export default function Header(props: HeaderProps) {
                     );
                   }}
                 </For>
+                <a
+                  href="https://legacy.playsovereignchess.com/"
+                  onClick={closeMenus}
+                  role="menuitem"
+                >
+                  Legacy site
+                </a>
               </nav>
             </Show>
           </div>
