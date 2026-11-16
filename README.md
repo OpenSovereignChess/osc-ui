@@ -59,7 +59,9 @@ The web app can compose those packages, but package dependencies should stay one
 - Shared packages should not import from `apps/*`.
 - `packages/rules` and `packages/board-core` should stay independent of UI frameworks.
 
-Se [docs/architecture/monorepo.md](docs/architecture/monorepo.md) for package boundaries and placement guidance.
+See [docs/architecture/monorepo.md](docs/architecture/monorepo.md) for package boundaries and placement guidance.
+
+See [docs/game-rules.md](docs/game-rules.md) for game rules.
 
 ## Deployment
 
