@@ -17,7 +17,7 @@ The web client will use the existing TypeScript rules engine for the first
 playable version. The server should validate message shape, room membership,
 turn ownership, and move sequence numbers, but it will not initially perform
 full Sovereign Chess move validation. Treat this mode as casual/untrusted until
-a Go rules implementation validates moves against the shared fixtures.
+a Go rules implementation performs full move validation.
 
 ## Profile game list
 
@@ -35,7 +35,7 @@ completion detection and results are not implemented yet.
 ## Later responsibilities
 
 - completed match views and retention/cleanup policies
-- authoritative Go move validation using `packages/rules-fixtures`
+- authoritative Go move validation
 - clocks
 - basic matchmaking, if invite-only rooms are not enough
 - accounts only when they unlock a concrete product need
