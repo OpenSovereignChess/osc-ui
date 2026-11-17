@@ -45,11 +45,7 @@ type Client struct {
 	Send         chan []byte
 }
 
-func NewStore() *Store {
-	return NewStoreWithRepository(NewMemoryRepository())
-}
-
-func NewStoreWithRepository(repo Repository) *Store {
+func NewStore(repo Repository) *Store {
 	return &Store{
 		repo:    repo,
 		clients: make(map[string]map[string]*Client),
@@ -174,13 +170,6 @@ func (s *Store) Send(code string, clientID string, message []byte) {
 	case client.Send <- message:
 	default:
 	}
-}
-
-func oppositeSeat(seat protocol.Seat) protocol.Seat {
-	if seat == protocol.SeatPlayer1 {
-		return protocol.SeatPlayer2
-	}
-	return protocol.SeatPlayer1
 }
 
 func normalizeCode(code string) string {

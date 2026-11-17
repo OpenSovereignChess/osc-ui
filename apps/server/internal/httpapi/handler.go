@@ -15,7 +15,6 @@ import (
 
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/protocol"
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/rooms"
-	"github.com/opensovereignchess/osc-ui/apps/server/internal/storage"
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/ws"
 )
 
@@ -40,15 +39,7 @@ type createRoomResponse struct {
 	RoomURL  string `json:"roomUrl"`
 }
 
-func NewHandler() http.Handler {
-	return NewHandlerWithRooms(rooms.NewStore())
-}
-
-func NewHandlerWithRooms(roomStore *rooms.Store) http.Handler {
-	return NewHandlerWithRoomsAndSessions(roomStore, storage.NewMemorySessions())
-}
-
-func NewHandlerWithRoomsAndSessions(roomStore *rooms.Store, sessions sessionStore) http.Handler {
+func NewHandler(roomStore *rooms.Store, sessions sessionStore) http.Handler {
 	handler := &Handler{rooms: roomStore, sessions: sessions}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", handleRoot)

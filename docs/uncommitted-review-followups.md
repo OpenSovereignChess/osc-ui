@@ -71,9 +71,10 @@ Checklist from the review of the SQLite/session/room persistence changes.
 
 ## Separation of concerns / simplification
 
-- [ ] Reduce duplicated game-rule logic between memory and SQLite repositories.
-  - `MemoryRepository.ApplyMove` and `SQLite.ApplyMove` both enforce seat, turn, sequence, and move-shape validation.
-  - As validation grows, centralize domain rules in one service layer and keep repositories focused on atomic persistence.
+- [x] Remove duplicated acceptance logic between memory and SQLite repositories.
+  - Phase 1 of `docs/architecture/server-rules-plan.md` removes the memory game/session backends and implicit constructor defaults; durable behavior is tested against SQLite.
+  - `SQLite.ApplyMove` remains the single acceptance path for membership, turn, sequence, and unchanged action-shape checks.
+  - Full Sovereign Chess legality and a rules/service boundary remain future work (Phases 2–3), not part of this cleanup.
 
 - [ ] Clarify the responsibility of `rooms.Store`.
   - It currently mixes live websocket client management with repository-mediated game state.

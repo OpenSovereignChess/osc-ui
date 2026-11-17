@@ -30,7 +30,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:              *addr,
-		Handler:           httpapi.NewHandlerWithRoomsAndSessions(rooms.NewStoreWithRepository(db), db),
+		Handler:           httpapi.NewHandler(rooms.NewStore(db), db),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

@@ -13,7 +13,7 @@ import (
 
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/protocol"
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/rooms"
-	"github.com/opensovereignchess/osc-ui/apps/server/internal/storage"
+	"github.com/opensovereignchess/osc-ui/apps/server/internal/testutil"
 )
 
 type readOnlySessions struct{ sessionStore }
@@ -65,7 +65,7 @@ func assertRoomEntry(t *testing.T, response *httptest.ResponseRecorder, code str
 
 func TestRoomEntryDoesNotJoin(t *testing.T) {
 	ctx := context.Background()
-	sessions := storage.NewMemorySessions()
+	sessions := testutil.OpenSQLite(t)
 	users := []string{}
 	for _, token := range []string{"first", "second", "stranger"} {
 		user, err := sessions.CreateAnonymousSession(ctx, tokenHash(token))
@@ -75,8 +75,8 @@ func TestRoomEntryDoesNotJoin(t *testing.T) {
 		users = append(users, user)
 	}
 	for claimed := 0; claimed <= 2; claimed++ {
-		repo := rooms.NewMemoryRepository()
-		store := rooms.NewStoreWithRepository(readOnlyRooms{repo})
+		repo := sessions
+		store := rooms.NewStore(readOnlyRooms{repo})
 		room, err := store.Create(users[0])
 		if err != nil {
 			t.Fatal(err)
@@ -88,7 +88,7 @@ func TestRoomEntryDoesNotJoin(t *testing.T) {
 		}
 		// No WebSocket clients are present, even when both seats are claimed.
 		before, _ := store.Snapshot(room.Code, users[0])
-		handler := NewHandlerWithRoomsAndSessions(store, readOnlySessions{sessions})
+		handler := NewHandler(store, readOnlySessions{sessions})
 		for _, token := range []string{"", "invalid", "first", "second", "stranger"} {
 			seat := protocol.Seat("")
 			if token == "first" && claimed >= 1 {
@@ -99,7 +99,7 @@ func TestRoomEntryDoesNotJoin(t *testing.T) {
 			}
 			assertRoomEntry(t, roomEntryRequest(handler, strings.ToLower(room.Code), token), room.Code, claimed, seat)
 		}
-		expired := NewHandlerWithRoomsAndSessions(store, expiredSessions{})
+		expired := NewHandler(store, expiredSessions{})
 		assertRoomEntry(t, roomEntryRequest(expired, room.Code, "expired"), room.Code, claimed, "")
 		after, _ := store.Snapshot(room.Code, users[0])
 		if !reflect.DeepEqual(before, after) {
@@ -115,13 +115,14 @@ func (failingSnapshotRepository) Snapshot(context.Context, string, string) (prot
 }
 
 func TestRoomEntryErrorsAndCORS(t *testing.T) {
+	db := testutil.OpenSQLite(t)
 	for _, tc := range []struct {
 		handler http.Handler
 		status  int
 	}{
-		{NewHandlerWithRooms(rooms.NewStore()), http.StatusNotFound},
-		{NewHandlerWithRoomsAndSessions(rooms.NewStore(), failingSessions{}), http.StatusInternalServerError},
-		{NewHandlerWithRooms(rooms.NewStoreWithRepository(failingSnapshotRepository{})), http.StatusInternalServerError},
+		{NewHandler(rooms.NewStore(db), db), http.StatusNotFound},
+		{NewHandler(rooms.NewStore(db), failingSessions{db}), http.StatusInternalServerError},
+		{NewHandler(rooms.NewStore(failingSnapshotRepository{db}), db), http.StatusInternalServerError},
 	} {
 		response := roomEntryRequest(tc.handler, "MISSING", "token")
 		if response.Code != tc.status || strings.Contains(response.Body.String(), "private") {
@@ -143,10 +144,7 @@ func TestRoomEntryErrorsAndCORS(t *testing.T) {
 func TestRoomEntryAfterSQLiteReopen(t *testing.T) {
 	ctx := context.Background()
 	path := filepath.Join(t.TempDir(), "osc.db")
-	db, err := storage.OpenSQLite(path)
-	if err != nil {
-		t.Fatal(err)
-	}
+	db := testutil.OpenSQLiteAt(t, path)
 	for _, token := range []string{"first", "second"} {
 		user, err := db.CreateAnonymousSession(ctx, tokenHash(token))
 		if err != nil {
@@ -164,12 +162,8 @@ func TestRoomEntryAfterSQLiteReopen(t *testing.T) {
 	if err := db.Close(); err != nil {
 		t.Fatal(err)
 	}
-	db, err = storage.OpenSQLite(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer db.Close()
-	handler := NewHandlerWithRoomsAndSessions(rooms.NewStoreWithRepository(readOnlyRooms{db}), readOnlySessions{db})
+	db = testutil.OpenSQLiteAt(t, path)
+	handler := NewHandler(rooms.NewStore(readOnlyRooms{db}), readOnlySessions{db})
 	assertRoomEntry(t, roomEntryRequest(handler, "abcd1234", "first"), "ABCD1234", 2, protocol.SeatPlayer1)
 	assertRoomEntry(t, roomEntryRequest(handler, "ABCD1234", "second"), "ABCD1234", 2, protocol.SeatPlayer2)
 	assertRoomEntry(t, roomEntryRequest(handler, "ABCD1234", ""), "ABCD1234", 2, "")

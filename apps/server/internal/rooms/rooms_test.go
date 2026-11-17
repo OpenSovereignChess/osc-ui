@@ -1,28 +1,40 @@
-package rooms
+package rooms_test
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/protocol"
+	"github.com/opensovereignchess/osc-ui/apps/server/internal/rooms"
+	"github.com/opensovereignchess/osc-ui/apps/server/internal/testutil"
 )
 
+func newTestStore(t *testing.T) (store *rooms.Store, creator, user1, user2, user3 string) {
+	t.Helper()
+	db := testutil.OpenSQLite(t)
+	return rooms.NewStore(db),
+		testutil.CreateUser(t, db, "creator"),
+		testutil.CreateUser(t, db, "user1"),
+		testutil.CreateUser(t, db, "user2"),
+		testutil.CreateUser(t, db, "user3")
+}
+
 func TestJoinAutoSeatsPlayersThenObservers(t *testing.T) {
-	store := NewStore()
-	room, err := store.Create("creator")
+	store, creator, user1, user2, user3 := newTestStore(t)
+	room, err := store.Create(creator)
 	if err != nil {
 		t.Fatalf("create room: %v", err)
 	}
 
-	_, player1, err := store.Join(room.Code, "user1")
+	_, player1, err := store.Join(room.Code, user1)
 	if err != nil {
 		t.Fatalf("join player1: %v", err)
 	}
-	_, player2, err := store.Join(room.Code, "user2")
+	_, player2, err := store.Join(room.Code, user2)
 	if err != nil {
 		t.Fatalf("join player2: %v", err)
 	}
-	_, observer, err := store.Join(room.Code, "user3")
+	_, observer, err := store.Join(room.Code, user3)
 	if err != nil {
 		t.Fatalf("join observer: %v", err)
 	}
@@ -39,20 +51,20 @@ func TestJoinAutoSeatsPlayersThenObservers(t *testing.T) {
 }
 
 func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
-	store := NewStore()
-	room, err := store.Create("creator")
+	store, creator, user1, user2, _ := newTestStore(t)
+	room, err := store.Create(creator)
 	if err != nil {
 		t.Fatalf("create room: %v", err)
 	}
-	_, player1, _ := store.Join(room.Code, "user1")
-	_, player2, _ := store.Join(room.Code, "user2")
+	_, player1, _ := store.Join(room.Code, user1)
+	_, player2, _ := store.Join(room.Code, user2)
 
 	_, err = store.ApplyMove(
 		room.Code,
 		player2.UserID,
 		protocol.ClientMove{Seq: 1, Orig: "a2", Dest: "a3"},
 	)
-	if !errors.Is(err, ErrWrongTurn) {
+	if !errors.Is(err, rooms.ErrWrongTurn) {
 		t.Fatalf("expected wrong turn, got %v", err)
 	}
 
@@ -61,7 +73,7 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 		player1.UserID,
 		protocol.ClientMove{Seq: 2, Orig: "a2", Dest: "a3"},
 	)
-	if !errors.Is(err, ErrBadSequence) {
+	if !errors.Is(err, rooms.ErrBadSequence) {
 		t.Fatalf("expected bad sequence, got %v", err)
 	}
 
@@ -87,13 +99,13 @@ func TestApplyMoveValidatesTurnAndSequence(t *testing.T) {
 }
 
 func TestApplyMovePreservesTypedActions(t *testing.T) {
-	store := NewStore()
-	room, err := store.Create("creator")
+	store, creator, user1, user2, _ := newTestStore(t)
+	room, err := store.Create(creator)
 	if err != nil {
 		t.Fatalf("create room: %v", err)
 	}
-	_, player1, _ := store.Join(room.Code, "user1")
-	_, player2, _ := store.Join(room.Code, "user2")
+	_, player1, _ := store.Join(room.Code, user1)
+	_, player2, _ := store.Join(room.Code, user2)
 
 	castle, err := store.ApplyMove(
 		room.Code,
@@ -129,32 +141,32 @@ func TestApplyMovePreservesTypedActions(t *testing.T) {
 }
 
 func TestObserversCannotMove(t *testing.T) {
-	store := NewStore()
-	room, err := store.Create("creator")
+	store, creator, user1, user2, user3 := newTestStore(t)
+	room, err := store.Create(creator)
 	if err != nil {
 		t.Fatalf("create room: %v", err)
 	}
-	_, _, _ = store.Join(room.Code, "user1")
-	_, _, _ = store.Join(room.Code, "user2")
-	_, observer, _ := store.Join(room.Code, "user3")
+	_, _, _ = store.Join(room.Code, user1)
+	_, _, _ = store.Join(room.Code, user2)
+	_, observer, _ := store.Join(room.Code, user3)
 
 	_, err = store.ApplyMove(
 		room.Code,
 		observer.UserID,
 		protocol.ClientMove{Seq: 1, Orig: "a2", Dest: "a3"},
 	)
-	if !errors.Is(err, ErrNotPlayer) {
+	if !errors.Is(err, rooms.ErrNotPlayer) {
 		t.Fatalf("expected observer rejection, got %v", err)
 	}
 }
 
 func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
-	store := NewStore()
-	room, err := store.Create("creator")
+	store, creator, user1, _, _ := newTestStore(t)
+	room, err := store.Create(creator)
 	if err != nil {
 		t.Fatalf("create room: %v", err)
 	}
-	_, player, _ := store.Join(room.Code, "user1")
+	_, player, _ := store.Join(room.Code, user1)
 
 	left, shouldBroadcast := store.Leave(room.Code, player.ID)
 	if left == nil {
@@ -164,7 +176,7 @@ func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
 		t.Fatal("expected no broadcast for empty room")
 	}
 
-	_, joined, err := store.Join(room.Code, "user1")
+	_, joined, err := store.Join(room.Code, user1)
 	if err != nil {
 		t.Fatalf("expected room to remain joinable, got %v", err)
 	}
@@ -174,12 +186,12 @@ func TestLeaveKeepsEmptyRoomJoinable(t *testing.T) {
 }
 
 func TestSnapshotUsesEmptyMoveList(t *testing.T) {
-	store := NewStore()
-	room, err := store.Create("creator")
+	store, creator, user1, _, _ := newTestStore(t)
+	room, err := store.Create(creator)
 	if err != nil {
 		t.Fatalf("create room: %v", err)
 	}
-	_, player, _ := store.Join(room.Code, "user1")
+	_, player, _ := store.Join(room.Code, user1)
 
 	state, err := store.Snapshot(room.Code, player.UserID)
 	if err != nil {

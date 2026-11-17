@@ -57,7 +57,7 @@ needs them.
 
 ## Persistence
 
-The server uses SQLite by default. Configure the database location with either
+SQLite is used for game and anonymous-session persistence backend. Configure the database location with either
 `-db` or `OSC_DB_PATH`:
 
 ```sh
@@ -68,3 +68,14 @@ Anonymous users are durable browser/device users. The server stores users and
 session token hashes in SQLite, then sends an `HttpOnly` `osc_session` cookie.
 Seat ownership is stored in `game_seats`; disconnecting does not free a player
 seat, so reloading or reconnecting from the same browser restores the same seat.
+
+Database failures are errors; there is no in-memory fallback.
+
+Integration tests use temporary SQLite files and real anonymous users/sessions,
+including restart, identity/seat recovery, action ordering, and rejection checks.
+From the repository root:
+
+```sh
+go test ./apps/server/...
+go test -race ./apps/server/...
+```

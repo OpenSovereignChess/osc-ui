@@ -11,22 +11,25 @@ import (
 
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/protocol"
 	"github.com/opensovereignchess/osc-ui/apps/server/internal/rooms"
-	"github.com/opensovereignchess/osc-ui/apps/server/internal/storage"
+	"github.com/opensovereignchess/osc-ui/apps/server/internal/testutil"
 )
 
 func TestMyGamesSessionScope(t *testing.T) {
-	sessions := storage.NewMemorySessions()
+	sessions := testutil.OpenSQLite(t)
 	user, err := sessions.CreateAnonymousSession(context.Background(), tokenHash("valid-token"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	store := rooms.NewStore()
+	store := rooms.NewStore(sessions)
 	room, err := store.Create(user)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, _ = store.Create("another-user")
-	handler := NewHandlerWithRoomsAndSessions(store, sessions)
+	anotherUser := testutil.CreateUser(t, sessions, tokenHash("another-token"))
+	if _, err := store.Create(anotherUser); err != nil {
+		t.Fatal(err)
+	}
+	handler := NewHandler(store, sessions)
 	for _, token := range []string{"", "invalid-token", "valid-token"} {
 		t.Run(token, func(t *testing.T) {
 			request := httptest.NewRequest(http.MethodGet, "/api/me/games?userId=another-user", nil)
@@ -55,7 +58,7 @@ func TestMyGamesSessionScope(t *testing.T) {
 			} else if len(body.Games) != 0 {
 				t.Fatalf("unexpected games: %+v", body.Games)
 			}
-			for _, secret := range []string{user, "another-user", "valid-token", "tokenHash", "moves"} {
+			for _, secret := range []string{user, anotherUser, "another-user", "valid-token", "tokenHash", "moves"} {
 				if strings.Contains(response.Body.String(), secret) {
 					t.Fatalf("response contains private/unnecessary field %s", secret)
 				}
@@ -77,11 +80,11 @@ func (failingSessions) UserByTokenHash(context.Context, string) (string, bool, e
 }
 
 func TestMyGamesFailures(t *testing.T) {
-	sessions := storage.NewMemorySessions()
-	_, _ = sessions.CreateAnonymousSession(context.Background(), tokenHash("valid"))
+	sessions := testutil.OpenSQLite(t)
+	testutil.CreateUser(t, sessions, tokenHash("valid"))
 	for _, handler := range []http.Handler{
-		NewHandlerWithRoomsAndSessions(rooms.NewStoreWithRepository(failingListRepository{}), sessions),
-		NewHandlerWithRoomsAndSessions(rooms.NewStore(), failingSessions{}),
+		NewHandler(rooms.NewStore(failingListRepository{sessions}), sessions),
+		NewHandler(rooms.NewStore(sessions), failingSessions{sessions}),
 	} {
 		request := httptest.NewRequest(http.MethodGet, "/api/me/games", nil)
 		request.AddCookie(&http.Cookie{Name: sessionCookieName, Value: "valid"})
@@ -104,7 +107,7 @@ func (expiredSessions) UserByTokenHash(context.Context, string) (string, bool, e
 
 func TestMyGamesExpiredSession(t *testing.T) {
 	// The embedded nil sessionStore also ensures no new session is created.
-	handler := NewHandlerWithRoomsAndSessions(rooms.NewStore(), expiredSessions{})
+	handler := NewHandler(rooms.NewStore(testutil.OpenSQLite(t)), expiredSessions{})
 	request := httptest.NewRequest(http.MethodGet, "/api/me/games", nil)
 	request.AddCookie(&http.Cookie{Name: sessionCookieName, Value: "expired"})
 	response := httptest.NewRecorder()

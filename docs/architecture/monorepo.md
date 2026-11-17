@@ -36,14 +36,23 @@ package boundary instead of importing app files from packages.
 
 Go realtime server.
 
-Expected to own:
+Owns:
 
-- invite-only rooms, player presence, websocket transport, and process-local
-  live game sessions
-- SQLite persistence boundaries for rooms, move logs, completed matches, and
-  reconnect support once needed
-- server-side validation once the Go rule implementation exists
+- invite-only rooms, transient WebSocket clients/presence, and broadcasting
+- SQLite-only persistence for anonymous users/sessions, rooms, durable seats,
+  and ordered action history, including restart/reconnect recovery
+- membership, turn, sequence, and action-shape validation (full Go rules are future work)
 - transport endpoints compatible with the web client's message types
+
+`cmd/server/main.go` owns database opening/closing and explicitly wires
+`httpapi.NewHandler(rooms.NewStore(db), db)`. Constructors never open a database
+or fall back to an in-memory repository. `rooms.Store` keeps only live clients
+and channels in memory and delegates durable operations through its small
+repository interface. Disconnects do not release seats. Tests use temporary
+SQLite files and real anonymous identities; test-local wrappers cover failures.
+Keep `apps/server/internal` for Go's compiler-enforced import boundary.
+Completed matches/results and authoritative Go rule validation remain planned;
+see [the phased server rules plan](server-rules-plan.md).
 
 The first online milestone is casual/untrusted play: the TypeScript client uses
 `@osc/rules`, while the Go server validates room membership, turn/sequence
